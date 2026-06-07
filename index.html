@@ -3343,7 +3343,7 @@ function packState(){
       truckCost:TRUCK_COST
     },
     meta:{
-      appVersion:'v80-private-dashboard-panel-fix',
+      appVersion:'v81-hash-routing-fast-share',
       updatedAt:new Date().toISOString()
     }
   };
@@ -3405,9 +3405,6 @@ function getPublicUrl(){
 
   const origin=window.location.origin;
   let path=window.location.pathname||'/';
-
-  // Remove known app routes from the end of the URL.
-  path=path.replace(/\/(dashboard|parts|sponsors|decisions|milestones)\/?$/,'');
 
   // Remove file names from the end of the URL.
   path=path.replace(/\/(index\.html|public\.html)$/,'');
@@ -3476,14 +3473,6 @@ async function sharePublicBuild(){
   const url=getPublicUrl();
 
   try{
-    await savePublicState();
-  }catch(e){
-    console.warn('Public publish failed:',e);
-    setSaveInd('idle','Public publish failed');
-    return;
-  }
-
-  try{
     if(navigator.clipboard&&window.isSecureContext){
       await navigator.clipboard.writeText(url);
     }else{
@@ -3499,12 +3488,19 @@ async function sharePublicBuild(){
     }
 
     setSaveInd('saved','Public link copied');
-    setTimeout(()=>setSaveInd('idle','Cloud sync on'),2200);
+    setTimeout(()=>setSaveInd('idle','Publishing public page...'),1200);
   }catch(e){
     console.warn('Copy failed:',e);
     prompt('Copy public build link:',url);
-    setSaveInd('saved','Public link ready');
-    setTimeout(()=>setSaveInd('idle','Cloud sync on'),2200);
+  }
+
+  try{
+    await savePublicState();
+    setSaveInd('saved','Public page updated');
+    setTimeout(()=>setSaveInd('idle','Cloud sync on'),1800);
+  }catch(e){
+    console.warn('Public publish failed:',e);
+    setSaveInd('idle','Public publish failed');
   }
 }
 
@@ -3801,7 +3797,7 @@ function scheduleSave(){
   saveLocalStateNow();
   setSaveInd('saving',firebaseReady?'Syncing to cloud...':'Cloud offline, local backup only');
   clearTimeout(saveTimer);
-  saveTimer=setTimeout(doSave,300);
+  saveTimer=setTimeout(doSave,150);
 }
 
 async function doSave(){
@@ -4544,29 +4540,20 @@ const ROUTE_TO_PANEL={
   decisions:'decisions'
 };
 
-function getBasePath(){
-  const path=window.location.pathname;
-  const known=Object.values(ROUTES);
-  const parts=path.split('/').filter(Boolean);
-  if(parts.length && known.includes(parts[parts.length-1])){
-    parts.pop();
-  }
-  return '/'+parts.join('/');
-}
-
 function updateRoute(name,replace=false){
   const slug=ROUTES[name]||'dashboard';
-  const base=getBasePath().replace(/\/$/,'');
-  const next=(base?base:'')+'/'+slug;
-  const cleanNext=next.replace(/\/{2,}/g,'/');
-  if(window.location.pathname!==cleanNext){
-    const method=replace?'replaceState':'pushState';
-    history[method]({panel:name},'',cleanNext+window.location.search+window.location.hash);
+  const nextHash='#'+slug;
+  if(window.location.hash!==nextHash){
+    if(replace){
+      history.replaceState({panel:name},'',window.location.pathname+window.location.search+nextHash);
+    }else{
+      history.pushState({panel:name},'',window.location.pathname+window.location.search+nextHash);
+    }
   }
 }
 
 function panelFromRoute(){
-  const slug=window.location.pathname.split('/').filter(Boolean).pop()||'dashboard';
+  const slug=(window.location.hash||'#dashboard').replace('#','').trim()||'dashboard';
   return ROUTE_TO_PANEL[slug]||'dashboard';
 }
 
@@ -4643,9 +4630,8 @@ async function bootTracker(){
 }
 
 
-window.addEventListener('popstate',()=>{
-  showPanel(panelFromRoute(),false);
-});
+window.addEventListener('popstate',()=>showPanel(panelFromRoute(),false));
+window.addEventListener('hashchange',()=>showPanel(panelFromRoute(),false));
 
 if(document.readyState==='loading'){
   document.addEventListener('DOMContentLoaded',bootTracker);
