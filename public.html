@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b0b0c">
-<title>Gold Standard C10 Build Tracker Public Page v80</title>
+<title>Gold Standard C10 Build Tracker Public Page v81</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800;900&family=Oswald:wght@500;600;700&display=swap');
@@ -228,14 +228,22 @@ function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 function fmtDate(iso){try{return new Date(iso).toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'})}catch(e){return iso||''}}
 function sectionName(data,key){const s=(data.sections||[]).find(x=>x.key===key);return s?s.name:''}
 
-function showPublicPanel(name){
+function showPublicPanel(name,push=true){
+  if(!['dashboard','buildlist','milestones'].includes(name))name='dashboard';
   document.querySelectorAll('.public-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.public-tab').forEach(t=>t.classList.remove('active'));
   const panel=document.getElementById('public-'+name);
   const tab=document.querySelector(`[data-public-tab="${name}"]`);
   if(panel)panel.classList.add('active');
   if(tab)tab.classList.add('active');
+  if(push&&window.location.hash!=='#'+name)history.pushState({publicPanel:name},'',window.location.pathname+window.location.search+'#'+name);
 }
+function publicPanelFromHash(){
+  const h=(window.location.hash||'#dashboard').replace('#','').trim();
+  return ['dashboard','buildlist','milestones'].includes(h)?h:'dashboard';
+}
+window.addEventListener('popstate',()=>showPublicPanel(publicPanelFromHash(),false));
+window.addEventListener('hashchange',()=>showPublicPanel(publicPanelFromHash(),false));
 
 function togglePublicSection(btn){
   const card=btn.closest('.public-section-drop');
@@ -341,6 +349,7 @@ async function init(){
     },err=>{console.warn(err);showError('Could not load public build data.')})
   }catch(e){console.warn(e);showError('Public page failed to initialize.')}
 }
+showPublicPanel(publicPanelFromHash(),false);
 init();
 </script>
 </body>
