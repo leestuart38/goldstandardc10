@@ -293,7 +293,7 @@ function render(data){
     partsEl.innerHTML=sections.some(s=>(s.parts||[]).length)?sections.map((s,idx)=>{
       const parts=(s.parts||[]).slice().sort((a,b)=>priorityRank(a.priority)-priorityRank(b.priority)||String(a.name).localeCompare(String(b.name)));
       if(!parts.length)return '';
-      rreturn `<div class="public-section-drop">
+      return `<div class="public-section-drop">
         <button class="public-section-toggle" type="button" onclick="togglePublicSection(this)">
           <span class="public-section-toggle-title">${esc(s.name)}</span>
           <span class="public-section-toggle-meta">${parts.length} parts • ${parseInt(s.completion||0)||0}% complete</span>
