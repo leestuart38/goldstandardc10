@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b0b0c">
-<title>Gold Standard C10 Build Tracker Public Page v81</title>
+<title>Build Tracker — Public Page</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800;900&family=Oswald:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Oswald:wght@700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#070707;--panel:#131211;--cream:#f5f0e7;--muted:#b9b0a0;
@@ -28,13 +28,13 @@ body{
   padding:24px;box-shadow:0 28px 90px rgba(0,0,0,.42);overflow:hidden;position:relative;margin-bottom:16px;
 }
 .public-hero:before{
-  content:'BUILD STORY';position:absolute;right:22px;bottom:-8px;font-family:Oswald,Impact,sans-serif;font-size:82px;line-height:.85;
+  content:'BUILD STORY';position:absolute;right:22px;bottom:-8px;font-family:Oswald,sans-serif;font-size:82px;line-height:.85;
   letter-spacing:.08em;color:rgba(241,209,122,.055);pointer-events:none;
 }
 .public-logo-wrap{position:relative;z-index:2;margin-bottom:16px;display:flex;align-items:center;justify-content:flex-start}
 .public-logo{width:min(430px,100%);height:auto;display:block;filter:drop-shadow(0 16px 28px rgba(0,0,0,.46))}
 .hero-inner{position:relative;z-index:1;display:grid;grid-template-columns:1fr;gap:18px;align-items:center}
-.hero-title{font-family:Oswald,Impact,sans-serif;font-size:clamp(36px,6vw,68px);line-height:.92;letter-spacing:.035em;text-transform:uppercase}
+.hero-title{font-family:Oswald,sans-serif;font-size:clamp(36px,6vw,68px);line-height:.92;letter-spacing:.035em;text-transform:uppercase}
 .hero-sub{margin-top:10px;color:var(--muted);font-size:13px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
 .hero-updated{margin-top:14px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.06em;text-transform:uppercase}
 .hero-img{
@@ -49,7 +49,7 @@ body{
 .public-tab{
   min-height:56px;border-radius:18px;border:1px solid rgba(241,209,122,.22);
   background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
-  color:var(--cream);font-family:Oswald,Impact,sans-serif;font-size:20px;font-weight:700;
+  color:var(--cream);font-family:Oswald,sans-serif;font-size:20px;font-weight:700;
   letter-spacing:.045em;text-transform:uppercase;cursor:pointer;
 }
 .public-tab.active{
@@ -66,18 +66,18 @@ body{
 .kpi-label,.section-label{
   color:var(--muted);font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;
 }
-.kpi-value{font-family:Oswald,Impact,sans-serif;font-size:clamp(48px,7vw,82px);line-height:.9;color:var(--gold-light)}
+.kpi-value{font-family:Oswald,sans-serif;font-size:clamp(48px,7vw,82px);line-height:.9;color:var(--gold-light)}
 .progress-track{height:16px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.07);overflow:hidden;margin-top:14px}
 .progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--gold-dark),var(--gold),var(--gold-light))}
-.card-title{font-family:Oswald,Impact,sans-serif;font-size:30px;line-height:1;letter-spacing:.04em;text-transform:uppercase;margin-bottom:14px}
+.card-title{font-family:Oswald,sans-serif;font-size:30px;line-height:1;letter-spacing:.04em;text-transform:uppercase;margin-bottom:14px}
 .section-grid-public{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
 .section-card-public{
   border-radius:20px;border:1px solid rgba(241,209,122,.14);background:rgba(0,0,0,.22);
   padding:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
 }
-.section-name{font-family:Oswald,Impact,sans-serif;font-size:22px;line-height:1;letter-spacing:.035em;text-transform:uppercase;margin-bottom:10px}
+.section-name{font-family:Oswald,sans-serif;font-size:22px;line-height:1;letter-spacing:.035em;text-transform:uppercase;margin-bottom:10px}
 .section-meta-public{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
-.section-percent{font-family:Oswald,Impact,sans-serif;font-size:28px;color:var(--gold-light);margin-top:10px}
+.section-percent{font-family:Oswald,sans-serif;font-size:28px;color:var(--gold-light);margin-top:10px}
 .parts-card{margin-top:16px}
 .public-parts-list{display:grid;gap:9px}
 .public-part{
@@ -100,7 +100,7 @@ body{
 .ms-head{padding:20px;border-bottom:1px solid rgba(241,209,122,.10);background:radial-gradient(circle at 90% 0%,rgba(241,209,122,.13),transparent 34%),linear-gradient(135deg,rgba(185,138,39,.12),rgba(216,216,214,.035))}
 .ms-kicker{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
 .ms-pill{border-radius:999px;border:1px solid rgba(241,209,122,.18);background:rgba(0,0,0,.22);color:var(--muted);font-size:10px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;padding:6px 9px}
-.ms-title{font-family:Oswald,Impact,sans-serif;font-size:clamp(30px,5vw,54px);line-height:.95;letter-spacing:.035em;text-transform:uppercase}
+.ms-title{font-family:Oswald,sans-serif;font-size:clamp(30px,5vw,54px);line-height:.95;letter-spacing:.035em;text-transform:uppercase}
 .ms-body{padding:20px}
 .ms-copy{white-space:pre-wrap;font-size:15px;line-height:1.65;font-weight:650;color:var(--cream)}
 .ms-gallery{margin-top:18px;display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
@@ -132,7 +132,7 @@ body{
   padding:14px 16px;cursor:pointer;text-align:left;
 }
 .public-section-toggle:hover{background:rgba(185,138,39,.13)}
-.public-section-toggle-title{font-family:Oswald,Impact,sans-serif;font-size:22px;line-height:1;letter-spacing:.035em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.public-section-toggle-title{font-family:Oswald,sans-serif;font-size:22px;line-height:1;letter-spacing:.035em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .public-section-toggle-meta{color:var(--muted);font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
 .public-section-toggle-icon{color:var(--gold-light);font-size:22px}
 .public-section-drop-body{display:none;padding:12px}
@@ -142,6 +142,63 @@ body{
   .public-tabs{grid-template-columns:1fr}
   .public-section-toggle{grid-template-columns:1fr auto}
   .public-section-toggle-meta{grid-column:1/-1}
+}
+
+
+/* ===== v86 public page sync with main app ===== */
+:root{
+  --gs-display:'Oswald',system-ui,sans-serif;
+  --gs-tracking-tight:-0.018em;
+}
+body{margin:0}
+.public-wrap{max-width:none;margin:0;padding:0}
+.public-hero{
+  border-radius:0!important;
+  border-left:none!important;
+  border-right:none!important;
+  border-top:none!important;
+  margin-bottom:18px!important;
+  padding:22px 24px!important;
+  box-shadow:0 10px 40px rgba(0,0,0,.28)!important;
+}
+.public-hero:before{display:none!important;content:none!important}
+.public-logo{
+  width:auto!important;
+  height:78px!important;
+  max-height:78px!important;
+  max-width:min(340px,42vw)!important;
+  object-fit:contain!important;
+}
+.public-logo-wrap{margin-bottom:14px!important}
+.hero-title,.kpi-value,.card-title,.section-name,.section-percent,.ms-title,.public-section-toggle-title,.public-tab{
+  font-family:var(--gs-display)!important;
+  font-weight:700!important;
+  letter-spacing:var(--gs-tracking-tight)!important;
+}
+.public-main{max-width:1220px;margin:0 auto;padding:0 18px 18px}
+.public-tabs .public-tab{
+  display:inline-flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:9px!important;
+}
+.public-tabs .public-tab i{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:1.2em!important;
+  font-size:1.15em!important;
+  line-height:1!important;
+  flex-shrink:0!important;
+}
+.public-tabs .public-tab .tab-label{line-height:1}
+@media(max-width:900px){
+  .public-logo{height:68px!important;max-height:68px!important}
+}
+@media(max-width:520px){
+  .public-hero{padding:16px 14px!important}
+  .public-main{padding:0 10px 10px}
 }
 
 </style>
@@ -154,7 +211,7 @@ body{
     </div>
     <div class="hero-inner">
       <div>
-        <div class="hero-title" id="build-title">C10 Build Tracker</div>
+        <div class="hero-title" id="build-title">My Build</div>
         <div class="hero-sub" id="build-subtitle">The story behind the build.</div>
         <div class="hero-updated" id="updated-at">Loading build data...</div>
       </div>
@@ -162,10 +219,11 @@ body{
     </div>
   </div>
 
+  <div class="public-main">
   <div class="public-tabs">
-    <button class="public-tab active" type="button" data-public-tab="dashboard" onclick="showPublicPanel('dashboard')">Dashboard</button>
-    <button class="public-tab" type="button" data-public-tab="buildlist" onclick="showPublicPanel('buildlist')">Build List</button>
-    <button class="public-tab" type="button" data-public-tab="milestones" onclick="showPublicPanel('milestones')">Milestones</button>
+    <button class="public-tab active" type="button" data-public-tab="dashboard" onclick="showPublicPanel('dashboard')"><i class="ti ti-gauge"></i><span class="tab-label">Dashboard</span></button>
+    <button class="public-tab" type="button" data-public-tab="buildlist" onclick="showPublicPanel('buildlist')"><i class="ti ti-tools"></i><span class="tab-label">Build List</span></button>
+    <button class="public-tab" type="button" data-public-tab="milestones" onclick="showPublicPanel('milestones')"><i class="ti ti-notebook"></i><span class="tab-label">Milestones</span></button>
   </div>
 
   <div id="public-dashboard" class="public-panel active">
@@ -199,7 +257,8 @@ body{
       <div class="card-title">Build Milestones</div>
       <div id="milestone-list" class="milestone-list"></div>
     </div>
-  </div>
+    </div>
+</div>
 </div>
 
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
@@ -263,12 +322,12 @@ function closeLightbox(){const lb=document.getElementById('lightbox'),img=docume
 window.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox()});
 
 function render(data){
-  document.getElementById('build-title').textContent='C10 Build Tracker';
+  document.getElementById('build-title').textContent=data.buildTitle||'My Build';
   document.getElementById('build-subtitle').textContent=data.buildSubtitle||'The story behind the build.';
   document.getElementById('updated-at').textContent=data.updatedAt?'Last updated '+fmtDate(data.updatedAt):'';
 
   const img=document.getElementById('hero-img');
-  img.innerHTML=data.vehicleImage?`<img src="${data.vehicleImage}" alt="Build preview image">`:`<div class="hero-empty">No build image published yet.</div>`;
+  img.innerHTML=data.vehicleImage?`<img src="${data.vehicleImage}" alt="${esc((data.buildTitle||'My Build')+' Preview')}">`:`<div class="hero-empty">No build image published yet.</div>`;
 
   const pct=parseInt(data.completion||0)||0;
   document.getElementById('overall-completion').textContent=pct+'%';
