@@ -3333,8 +3333,12 @@ body{margin:0}
   transition:border-color .15s,background .15s,box-shadow .15s;
   display:flex;
   flex-direction:column;
+  align-items:stretch;
+}
+.ms-photo-drop-zone:not(.has-photos){
+  min-height:92px;
   justify-content:center;
-  min-height:76px;
+  align-items:center;
 }
 .ms-photo-drop-zone.drag-over{
   border-color:rgba(241,209,122,.62);
@@ -3343,17 +3347,15 @@ body{margin:0}
 }
 .ms-photo-drop-zone .milestone-gallery{
   margin-top:0;
-}
-.ms-photo-drop-zone .milestone-gallery:empty{
-  display:none;
+  width:100%;
 }
 .ms-photo-drop-hint{
-  margin-top:0;
-  min-height:48px;
+  margin:0;
   display:flex;
   align-items:center;
   justify-content:center;
   gap:8px;
+  line-height:1;
   color:var(--gs-muted);
   font-family:var(--gs-display)!important;
   font-size:11px;
@@ -3361,9 +3363,18 @@ body{margin:0}
   letter-spacing:var(--gs-tracking-tight)!important;
   text-transform:uppercase;
 }
-.ms-photo-drop-zone .milestone-gallery:not(:empty)+.ms-photo-drop-hint{
+.ms-photo-drop-zone:not(.has-photos) .ms-photo-drop-hint{
+  width:100%;
+  min-height:64px;
+}
+.ms-photo-drop-zone.has-photos .ms-photo-drop-hint{
   margin-top:12px;
-  min-height:0;
+}
+.ms-photo-drop-hint i{
+  font-size:15px;
+  line-height:1;
+  display:inline-flex;
+  align-items:center;
 }
 .ms-photo-drop-zone.drag-over .ms-photo-drop-hint,
 .ms-photo-drop-hint i{
@@ -5540,6 +5551,8 @@ let cachedMediaMsShardCount=0;
 let cachedPublicMediaMsShardCount=0;
 let cachedPrivateVehicleFingerprint='';
 let cachedPublicVehicleFingerprint='';
+let cachedPrivateMediaPlanFingerprint='';
+let cachedPublicMediaPlanFingerprint='';
 let firebaseReady=false;
 let authReady=false;
 let currentUser=null;
@@ -5576,7 +5589,7 @@ function packState(){
       vehicleModel:VEHICLE_MODEL
     },
     meta:{
-      appVersion:'v129-sync-polish',
+      appVersion:'v130-milestone-polish',
       updatedAt:new Date().toISOString()
     }
   };
@@ -5812,6 +5825,10 @@ function vehicleMediaFingerprint(payload){
   const a=String((payload&&payload.vehicleImage)||'');
   const b=String((payload&&payload.vehicleImageOriginal)||'');
   return 'v:'+a.length+':'+b.length+':'+(a?a.slice(0,48):'')+':'+(b?b.slice(0,48):'');
+}
+function mediaPlanFingerprint(plan){
+  const shardSig=(plan.shardPayloads||[]).map((p,i)=>i+':'+estimatePayloadBytes(p)).join(',');
+  return vehicleMediaFingerprint(plan.vehiclePayload)+'|s:'+(plan.shardPayloads||[]).length+'|'+shardSig;
 }
 async function writeVehicleMediaDoc(docRef,payload,cacheKey){
   if(!docRef)return false;
@@ -6097,6 +6114,7 @@ async function saveCloudState(){
   const {core,media}=splitCloudPayload(full);
   const cloudMedia=await prepareMediaForCloudSave(media);
   const privatePlan=planMediaWrites(cloudMedia);
+  const privateMediaFp=mediaPlanFingerprint(privatePlan);
   const corePayload=sanitizeForFirestore(core);
   corePayload.meta=Object.assign({},corePayload.meta||{},{mediaMsShardCount:privatePlan.shardPayloads.length});
   corePayload.savedAt=firebase.firestore.FieldValue.serverTimestamp();
@@ -6105,22 +6123,40 @@ async function saveCloudState(){
   const {core:pubCore,media:pubMedia}=splitPublicPayload(publicPayload());
   const pubCloudMedia=await prepareMediaForCloudSave(pubMedia);
   const publicPlan=planMediaWrites(pubCloudMedia);
+  const publicMediaFp=mediaPlanFingerprint(publicPlan);
   const pubCorePayload=sanitizeForFirestore(pubCore);
   pubCorePayload.mediaMsShardCount=publicPlan.shardPayloads.length;
   pubCorePayload.savedAt=firebase.firestore.FieldValue.serverTimestamp();
   const pubCoreBytes=estimatePayloadBytes(pubCorePayload);
   if(pubCoreBytes>CLOUD_DOC_BYTE_LIMIT)throw new Error('Public build data is too large ('+pubCoreBytes+' bytes).');
-  await Promise.all([
+  const privateMediaChanged=privateMediaFp!==cachedPrivateMediaPlanFingerprint;
+  const publicMediaChanged=publicMediaFp!==cachedPublicMediaPlanFingerprint;
+  const ops=[
     firestoreDocRef.set(corePayload,{merge:true}),
-    writeVehicleMediaDoc(mediaVehicleDocRef,privatePlan.vehiclePayload,'private'),
-    writeMediaShards(FIRESTORE_COLLECTION,FIRESTORE_MEDIA_MS_PREFIX,privatePlan.shardPayloads,cachedMediaMsShardCount),
-    writeVehicleMediaDoc(publicMediaVehicleDocRef,publicPlan.vehiclePayload,'public'),
-    writeMediaShards(PUBLIC_COLLECTION,PUBLIC_MEDIA_MS_PREFIX,publicPlan.shardPayloads,cachedPublicMediaMsShardCount),
     publicDocRef.set(pubCorePayload,{merge:true})
-  ]);
-  cachedMediaMsShardCount=privatePlan.shardPayloads.length;
-  cachedPublicMediaMsShardCount=publicPlan.shardPayloads.length;
-  console.log('Saved to Firestore', full.meta.updatedAt,'core='+coreBytes+'b mediaShards='+privatePlan.shardPayloads.length);
+  ];
+  if(privateMediaChanged){
+    ops.push(
+      writeVehicleMediaDoc(mediaVehicleDocRef,privatePlan.vehiclePayload,'private'),
+      writeMediaShards(FIRESTORE_COLLECTION,FIRESTORE_MEDIA_MS_PREFIX,privatePlan.shardPayloads,cachedMediaMsShardCount)
+    );
+  }
+  if(publicMediaChanged){
+    ops.push(
+      writeVehicleMediaDoc(publicMediaVehicleDocRef,publicPlan.vehiclePayload,'public'),
+      writeMediaShards(PUBLIC_COLLECTION,PUBLIC_MEDIA_MS_PREFIX,publicPlan.shardPayloads,cachedPublicMediaMsShardCount)
+    );
+  }
+  await Promise.all(ops);
+  if(privateMediaChanged){
+    cachedPrivateMediaPlanFingerprint=privateMediaFp;
+    cachedMediaMsShardCount=privatePlan.shardPayloads.length;
+  }
+  if(publicMediaChanged){
+    cachedPublicMediaPlanFingerprint=publicMediaFp;
+    cachedPublicMediaMsShardCount=publicPlan.shardPayloads.length;
+  }
+  console.log('Saved to Firestore', full.meta.updatedAt,'core='+coreBytes+'b','mediaWrites='+(privateMediaChanged||publicMediaChanged));
   return true;
 }
 
@@ -6655,9 +6691,8 @@ function scheduleSave(){
 }
 
 async function doSave(){
-  saveLocalStateNow();
-
   if(!firebaseReady){
+    saveLocalStateNow();
     setSaveInd('idle','Cloud offline, local backup only');
     return;
   }
@@ -7911,11 +7946,9 @@ function renderMilestones(){
           ${sectionOptions(m.relatedSection||'')}
         </select>
         <textarea class="ms-textarea" placeholder="Write the build update here..." onchange="updateMilestone('${m.id}','body',this.value)">${esc(m.body||'')}</textarea>
-        <div class="ms-photo-drop-zone" ondragover="milestonePhotoDragOver(event)" ondragleave="milestonePhotoDragLeave(event)" ondrop="milestonePhotoDrop('${m.id}',event)">
-          <div class="milestone-gallery">
-            ${photos.map((src,i)=>`<div class="ms-photo"><img src="${src}" alt="Milestone image"><button class="ms-photo-remove" type="button" onclick="removeMilestonePhoto('${m.id}',${i})"><i class="ti ti-x"></i></button></div>`).join('')}
-          </div>
-          <div class="ms-photo-drop-hint"><i class="ti ti-upload"></i> Drag &amp; drop photos here</div>
+        <div class="ms-photo-drop-zone${photos.length?' has-photos':''}" ondragover="milestonePhotoDragOver(event)" ondragleave="milestonePhotoDragLeave(event)" ondrop="milestonePhotoDrop('${m.id}',event)">
+          ${photos.length?`<div class="milestone-gallery">${photos.map((src,i)=>`<div class="ms-photo"><img src="${src}" alt="Milestone image"><button class="ms-photo-remove" type="button" onclick="removeMilestonePhoto('${m.id}',${i})"><i class="ti ti-x"></i></button></div>`).join('')}</div>`:''}
+          <div class="ms-photo-drop-hint"><i class="ti ti-upload"></i><span>Drag &amp; drop photos here</span></div>
         </div>
         <div class="milestone-actions">
           <input id="ms-photo-${m.id}" type="file" accept="image/*" multiple style="display:none" onchange="handleMilestonePhotos('${m.id}',event)">
