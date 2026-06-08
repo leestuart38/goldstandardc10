@@ -2970,7 +2970,55 @@ button[onclick="logoutUser()"]:not(.top-logout-btn){
   border-color:rgba(241,209,122,.58);
 }
 
-
+/* ===== v139 garage multi-build ===== */
+.garage-wrap{position:relative;flex:0 0 auto}
+.garage-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  border-radius:999px;border:1px solid rgba(241,209,122,.28);
+  background:rgba(0,0,0,.32);color:var(--gs-cream);
+  padding:8px 12px;font-size:10px;font-weight:900;
+  letter-spacing:.05em;text-transform:uppercase;cursor:pointer;
+  max-width:min(220px,42vw);min-width:0;
+}
+.garage-btn:hover{background:rgba(185,138,39,.22);border-color:rgba(241,209,122,.5)}
+.garage-btn-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.garage-btn-caret{font-size:11px;opacity:.7;flex-shrink:0}
+.garage-menu{
+  display:none;position:absolute;top:calc(100% + 8px);right:0;z-index:120;
+  width:min(320px,calc(100vw - 24px));
+  border-radius:14px;border:1px solid rgba(241,209,122,.22);
+  background:linear-gradient(180deg,#1a1712,#0f0d0a);
+  box-shadow:0 18px 48px rgba(0,0,0,.55);padding:10px;
+}
+.garage-menu.open{display:block}
+.garage-menu-hdr{padding:6px 8px 10px;border-bottom:1px solid rgba(241,209,122,.12);margin-bottom:8px}
+.garage-menu-title{display:block;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--gs-gold)}
+.garage-menu-sub{display:block;font-size:10px;opacity:.65;margin-top:3px}
+.garage-menu-list{display:flex;flex-direction:column;gap:4px;max-height:min(280px,42vh);overflow:auto;margin-bottom:8px}
+.garage-menu-item{
+  display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;
+  border:1px solid transparent;border-radius:10px;background:rgba(255,255,255,.03);
+  color:var(--gs-cream);padding:9px 10px;cursor:pointer;text-align:left;
+}
+.garage-menu-item:hover{background:rgba(185,138,39,.14);border-color:rgba(241,209,122,.18)}
+.garage-menu-item.active{border-color:rgba(241,209,122,.42);background:rgba(185,138,39,.18)}
+.garage-menu-item.archived{opacity:.72}
+.garage-menu-item-name{font-size:12px;font-weight:800;line-height:1.2}
+.garage-menu-item-meta{font-size:10px;opacity:.62}
+.garage-menu-actions{display:flex;flex-direction:column;gap:6px;padding-top:8px;border-top:1px solid rgba(241,209,122,.12)}
+.garage-menu-action{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;width:100%;
+  border-radius:999px;border:1px solid rgba(241,209,122,.22);background:rgba(0,0,0,.28);
+  color:var(--gs-cream);padding:8px 10px;font-size:10px;font-weight:800;
+  letter-spacing:.05em;text-transform:uppercase;cursor:pointer;
+}
+.garage-menu-action.primary{background:rgba(185,138,39,.22);border-color:rgba(241,209,122,.36)}
+.garage-menu-action:hover{background:rgba(185,138,39,.28)}
+.top-bar-actions .garage-wrap{flex:0 0 auto}
+@media(max-width:480px){
+  .top-bar-actions .garage-wrap{flex:1 1 100%}
+  .garage-btn{width:100%;max-width:none;justify-content:space-between}
+}
 
 
 
@@ -5494,6 +5542,24 @@ body{margin:0}
     <button class="header-edit-vehicle-btn" type="button" onclick="openVehicleEditorModal('edit')" title="Edit vehicle details"><i class="ti ti-pencil"></i><span>Edit</span></button>
   </div>
   <div class="top-bar-actions">
+    <div class="garage-wrap">
+      <button class="garage-btn" id="garage-btn" type="button" onclick="toggleGarageMenu(event)" aria-expanded="false" aria-haspopup="true" aria-controls="garage-menu">
+        <i class="ti ti-car-garage" aria-hidden="true"></i>
+        <span class="garage-btn-label" id="garage-current-label">My Build</span>
+        <i class="ti ti-chevron-down garage-btn-caret" aria-hidden="true"></i>
+      </button>
+      <div class="garage-menu" id="garage-menu" role="menu">
+        <div class="garage-menu-hdr">
+          <span class="garage-menu-title">Garage</span>
+          <span class="garage-menu-sub">Switch between vehicle builds</span>
+        </div>
+        <div class="garage-menu-list" id="garage-menu-list"></div>
+        <div class="garage-menu-actions">
+          <button class="garage-menu-action primary" type="button" onclick="openGarageCreateModal()"><i class="ti ti-plus"></i>Create New Build</button>
+          <button class="garage-menu-action" type="button" onclick="archiveActiveBuild()"><i class="ti ti-archive"></i>Archive Build</button>
+        </div>
+      </div>
+    </div>
     <span class="save-indicator" id="save-ind"><i class="ti ti-cloud-check" aria-hidden="true" style="font-size:12px;margin-right:3px"></i>Auto-save on</span>
     <button class="share-build-btn" type="button" onclick="sharePublicBuild()"><i class="ti ti-copy"></i>Copy Public Link</button>
     <div class="top-account-row">
@@ -6005,7 +6071,28 @@ let BUILD_NAME='Gold Standard 38';
 let VEHICLE_YEAR='';
 let VEHICLE_MAKE='';
 let VEHICLE_MODEL='';
-const SAVE_KEY='c10tracker_v3';
+let VEHICLE_NICKNAME='';
+function localSaveKey(){return 'c10tracker_v3_'+(activeBuildId||LEGACY_BUILD_ID);}
+const BLANK_BUILD_SECTIONS=[
+  {key:'engine',name:'Engine',budget:0,parts:[]},
+  {key:'drivetrain',name:'Drivetrain',budget:0,parts:[]},
+  {key:'chassis',name:'Suspension',budget:0,parts:[]},
+  {key:'brakes',name:'Brakes',budget:0,parts:[]},
+  {key:'wheels',name:'Wheels / Tires',budget:0,parts:[]},
+  {key:'interior',name:'Interior',budget:0,parts:[]},
+  {key:'body',name:'Body / Paint',budget:0,parts:[]},
+  {key:'electrical',name:'Electrical',budget:0,parts:[]},
+  {key:'tools',name:'Other',budget:0,parts:[]}
+];
+const BUILD_TEMPLATES={
+  blank:{label:'Blank Build',sections:()=>cloneDefaultData(BLANK_BUILD_SECTIONS)},
+  'custom-truck':{label:'Custom Truck',sections:()=>cloneDefaultData(DEFAULT_SECTIONS)},
+  'classic-car':{label:'Classic Car',sections:()=>cloneDefaultData(BLANK_BUILD_SECTIONS)},
+  motorcycle:{label:'Motorcycle',sections:()=>cloneDefaultData(BLANK_BUILD_SECTIONS)},
+  'race-car':{label:'Race Car',sections:()=>cloneDefaultData(BLANK_BUILD_SECTIONS)},
+  overland:{label:'Off-Road / Overland',sections:()=>cloneDefaultData(BLANK_BUILD_SECTIONS)},
+  other:{label:'Other',sections:()=>cloneDefaultData(BLANK_BUILD_SECTIONS)}
+};
 const FIREBASE_CONFIG={
   apiKey:'AIzaSyAAkSCcoeOLVJ3bghyABrbTgvaFmu16UcQ',
   authDomain:'gold-standart-c10.firebaseapp.com',
@@ -6014,18 +6101,48 @@ const FIREBASE_CONFIG={
   messagingSenderId:'236965953727',
   appId:'1:236965953727:web:dc984e6173b1305b98860a'
 };
-const FIRESTORE_COLLECTION='tracker';
-const FIRESTORE_DOC='gold-standard-c10';
-const FIRESTORE_MEDIA_LEGACY_DOC='gold-standard-c10-media';
-const FIRESTORE_MEDIA_VEHICLE_DOC='gold-standard-c10-media-vehicle';
-const FIRESTORE_MEDIA_MS_PREFIX='gold-standard-c10-media-ms-';
+/*
+ * FIRESTORE GARAGE STRUCTURE (multi-build)
+ * --------------------------------------
+ * users/{uid}/meta/app          — activeBuildId, legacyMigrated, migrationVersion
+ * users/{uid}/builds/{buildId}  — full private tracker state + build metadata
+ * users/{uid}/buildMedia/{buildId}-vehicle
+ * users/{uid}/buildMedia/{buildId}-ms-{n}
+ * publicBuilds/{publicSlug}     — published page for active build only
+ * publicBuilds/{publicSlug}-media-vehicle
+ * publicBuilds/{publicSlug}-media-ms-{n}
+ *
+ * MIGRATION (once per user):
+ * tracker/gold-standard-c10 → users/{uid}/builds/gold-standard-c10
+ * Legacy tracker doc is never deleted. legacyMigrated flag prevents re-run.
+ *
+ * PUBLIC URL: public.html?build={publicSlug}  (GitHub Pages + query param)
+ */
+const LEGACY_TRACKER_COLLECTION='tracker';
+const LEGACY_BUILD_ID='gold-standard-c10';
+const LEGACY_MEDIA_MS_PREFIX='gold-standard-c10-media-ms-';
 const PUBLIC_COLLECTION='publicBuilds';
-const PUBLIC_DOC='gold-standard-c10';
-const PUBLIC_MEDIA_VEHICLE_DOC='gold-standard-c10-media-vehicle';
-const PUBLIC_MEDIA_MS_PREFIX='gold-standard-c10-media-ms-';
+const USER_BUILDS_SUB='builds';
+const USER_MEDIA_SUB='buildMedia';
+const USER_META_SUB='meta';
+let activeBuildId=null;
+let activePublicSlug=null;
+let garageBuilds=[];
+let garageMenuOpen=false;
+let privateMediaMsPrefix='';
+let publicMediaMsPrefix='';
+let FIRESTORE_COLLECTION='';
+let FIRESTORE_DOC='';
+let FIRESTORE_MEDIA_LEGACY_DOC='';
+let FIRESTORE_MEDIA_VEHICLE_DOC='';
+let FIRESTORE_MEDIA_MS_PREFIX='';
+let PUBLIC_DOC='';
+let PUBLIC_MEDIA_VEHICLE_DOC='';
+let PUBLIC_MEDIA_MS_PREFIX='';
 const CLOUD_DOC_BYTE_LIMIT=950000;
 let firebaseDb=null;
 let firestoreDocRef=null;
+let publicDocRef=null;
 let mediaDocRef=null;
 let mediaVehicleDocRef=null;
 let publicMediaVehicleDocRef=null;
@@ -6051,13 +6168,25 @@ const RESEARCH_MAX_LINKS=10;
 
 function loadState(){
   try{
-    const raw=localStorage.getItem(SAVE_KEY);
+    const raw=localStorage.getItem(localSaveKey());
     return raw?JSON.parse(raw):null;
   }catch(e){return null;}
 }
 
 function packState(){
+  const now=new Date().toISOString();
   return {
+    buildId:activeBuildId||LEGACY_BUILD_ID,
+    publicSlug:activePublicSlug||activeBuildId||LEGACY_BUILD_ID,
+    buildName:BUILD_NAME,
+    vehicleYear:VEHICLE_YEAR,
+    vehicleMake:VEHICLE_MAKE,
+    vehicleModel:VEHICLE_MODEL,
+    vehicleNickname:VEHICLE_NICKNAME,
+    archived:false,
+    template:activeBuildTemplate||'custom-truck',
+    createdAt:activeBuildCreatedAt||now,
+    updatedAt:now,
     sections,
     sponsors,
     decisions,
@@ -6074,22 +6203,382 @@ function packState(){
       buildName:BUILD_NAME,
       vehicleYear:VEHICLE_YEAR,
       vehicleMake:VEHICLE_MAKE,
-      vehicleModel:VEHICLE_MODEL
+      vehicleModel:VEHICLE_MODEL,
+      vehicleNickname:VEHICLE_NICKNAME
     },
     meta:{
-      appVersion:'v138-research-decided-list',
-      updatedAt:new Date().toISOString()
+      appVersion:'v139-garage-multibuild',
+      updatedAt:now,
+      buildId:activeBuildId,
+      publicSlug:activePublicSlug
     }
   };
 }
+let activeBuildTemplate='custom-truck';
+let activeBuildCreatedAt='';
 
 function saveLocalStateNow(){
   try{
-    localStorage.setItem(SAVE_KEY,JSON.stringify(packState()));
+    localStorage.setItem(localSaveKey(),JSON.stringify(packState()));
     return true;
   }catch(e){
     console.warn('Local save failed:',e);
     return false;
+  }
+}
+function getUserRootRef(){
+  if(!firebaseDb||!currentUser)return null;
+  return firebaseDb.collection('users').doc(currentUser.uid);
+}
+function getUserBuildsCol(){
+  const root=getUserRootRef();
+  return root?root.collection(USER_BUILDS_SUB):null;
+}
+function getUserMediaCol(){
+  const root=getUserRootRef();
+  return root?root.collection(USER_MEDIA_SUB):null;
+}
+function getUserMetaRef(){
+  const root=getUserRootRef();
+  return root?root.collection(USER_META_SUB).doc('app'):null;
+}
+function slugifyBuildId(name,fallback){
+  const base=String(name||fallback||'build').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,48);
+  return base||'build';
+}
+async function uniqueBuildId(base){
+  const col=getUserBuildsCol();
+  if(!col)return base||'build-'+Date.now();
+  let i=0;
+  while(i<100){
+    const id=i?`${base}-${i}`:base;
+    const snap=await col.doc(id).get();
+    if(!snap.exists)return id;
+    i++;
+  }
+  return base+'-'+Date.now();
+}
+function bindActiveBuildRefs(buildId,publicSlug){
+  if(!firebaseDb||!currentUser||!buildId)throw new Error('Cannot bind build refs.');
+  const slug=publicSlug||buildId;
+  activeBuildId=buildId;
+  activePublicSlug=slug;
+  const uid=currentUser.uid;
+  FIRESTORE_COLLECTION='users/'+uid+'/'+USER_BUILDS_SUB;
+  FIRESTORE_DOC=buildId;
+  firestoreDocRef=getUserBuildsCol().doc(buildId);
+  mediaVehicleDocRef=getUserMediaCol().doc(buildId+'-vehicle');
+  privateMediaMsPrefix=buildId+'-ms-';
+  FIRESTORE_MEDIA_MS_PREFIX=privateMediaMsPrefix;
+  PUBLIC_DOC=slug;
+  publicDocRef=firebaseDb.collection(PUBLIC_COLLECTION).doc(slug);
+  publicMediaVehicleDocRef=firebaseDb.collection(PUBLIC_COLLECTION).doc(slug+'-media-vehicle');
+  publicMediaMsPrefix=slug+'-media-ms-';
+  PUBLIC_MEDIA_MS_PREFIX=publicMediaMsPrefix;
+  mediaDocRef=null;
+  FIRESTORE_MEDIA_LEGACY_DOC='';
+  FIRESTORE_MEDIA_VEHICLE_DOC=buildId+'-vehicle';
+  cachedMediaMsShardCount=0;
+  cachedPublicMediaMsShardCount=0;
+  cachedPrivateVehicleFingerprint='';
+  cachedPublicVehicleFingerprint='';
+  cachedPrivateMediaPlanFingerprint='';
+  cachedPublicMediaPlanFingerprint='';
+}
+function buildMetaFromDoc(data){
+  if(!data)return null;
+  return{
+    buildId:data.buildId||data.meta?.buildId||'',
+    publicSlug:data.publicSlug||data.meta?.publicSlug||data.buildId||'',
+    buildName:data.buildName||data.settings?.buildName||'My Build',
+    vehicleYear:data.vehicleYear||data.settings?.vehicleYear||'',
+    vehicleMake:data.vehicleMake||data.settings?.vehicleMake||'',
+    vehicleModel:data.vehicleModel||data.settings?.vehicleModel||'',
+    vehicleNickname:data.vehicleNickname||data.settings?.vehicleNickname||'',
+    archived:!!data.archived,
+    template:data.template||'custom-truck',
+    createdAt:data.createdAt||'',
+    updatedAt:data.updatedAt||data.meta?.updatedAt||''
+  };
+}
+async function loadGarageBuildList(){
+  const col=getUserBuildsCol();
+  if(!col)return [];
+  const snap=await withTimeout(col.get(),12000,'Garage list load');
+  const list=snap.docs.map(d=>buildMetaFromDoc(Object.assign({buildId:d.id},d.data()))).filter(Boolean);
+  list.sort((a,b)=>{
+    if(!!a.archived!==!!b.archived)return a.archived?1:-1;
+    return String(b.updatedAt||'').localeCompare(String(a.updatedAt||''));
+  });
+  garageBuilds=list;
+  return list;
+}
+function applyCloudStateToApp(cloud){
+  applySettingsFromState(cloud);
+  vehicleImage=cloud.vehicleImage||'';
+  vehicleImageOriginal=cloud.vehicleImageOriginal||'';
+  milestones=Array.isArray(cloud.milestones)?cloud.milestones:[];
+  milestoneCtr=parseInt(cloud.milestoneCtr||0)||milestones.length||0;
+  workTasks=Array.isArray(cloud.workTasks)?cloud.workTasks:[];
+  workTaskCtr=parseInt(cloud.workTaskCtr||0)||workTasks.length||0;
+  workHourCtr=parseInt(cloud.workHourCtr||0)||0;
+  sections=cloud.sections||cloneDefaultData(DEFAULT_SECTIONS);
+  sponsors=cloud.sponsors||cloneDefaultData(DEFAULT_SPONSORS);
+  decisions=cloud.decisions||cloneDefaultData(DEFAULT_DECISIONS);
+  activeBuildTemplate=cloud.template||'custom-truck';
+  activeBuildCreatedAt=cloud.createdAt||'';
+  if(cloud.buildId)activeBuildId=cloud.buildId;
+  if(cloud.publicSlug)activePublicSlug=cloud.publicSlug;
+  repairTrackerState();
+}
+async function loadLegacyPrivateMedia(state){
+  if(!firebaseDb||!state)return false;
+  let loaded=false;
+  const legacyVehicle=firebaseDb.collection(LEGACY_TRACKER_COLLECTION).doc(LEGACY_BUILD_ID+'-media-vehicle');
+  try{
+    const vSnap=await withTimeout(legacyVehicle.get(),8000,'Legacy vehicle media');
+    if(vSnap.exists){
+      const v=vSnap.data();
+      if(v.vehicleImage)state.vehicleImage=v.vehicleImage;
+      if(v.vehicleImageOriginal)state.vehicleImageOriginal=v.vehicleImageOriginal;
+      loaded=true;
+    }
+  }catch(e){console.warn(e);}
+  const shardCount=Number(state.meta&&state.meta.mediaMsShardCount)||0;
+  if(shardCount>0){
+    const photoMap=await loadMilestonePhotoShards(LEGACY_TRACKER_COLLECTION,LEGACY_MEDIA_MS_PREFIX,shardCount);
+    if(photoMap.size){applyMilestonePhotoMap(state,photoMap);loaded=true;}
+  }
+  const legacyMedia=firebaseDb.collection(LEGACY_TRACKER_COLLECTION).doc(LEGACY_BUILD_ID+'-media');
+  try{
+    const mediaSnap=await withTimeout(legacyMedia.get(),8000,'Legacy media');
+    if(mediaSnap.exists)mergeLegacyPrivateMedia(state,mediaSnap.data());
+  }catch(e){console.warn(e);}
+  return loaded;
+}
+async function migrateLegacyBuildIfNeeded(){
+  const metaRef=getUserMetaRef();
+  const buildsCol=getUserBuildsCol();
+  if(!metaRef||!buildsCol)throw new Error('Garage unavailable.');
+  const metaSnap=await withTimeout(metaRef.get(),12000,'Garage meta load');
+  const meta=metaSnap.exists?metaSnap.data():{};
+  if(meta.legacyMigrated){
+    return meta;
+  }
+  const existing=await withTimeout(buildsCol.limit(1).get(),12000,'Garage builds probe');
+  if(!existing.empty){
+    await metaRef.set({legacyMigrated:true,activeBuildId:meta.activeBuildId||existing.docs[0].id},{merge:true});
+    return Object.assign({},meta,{legacyMigrated:true,activeBuildId:meta.activeBuildId||existing.docs[0].id});
+  }
+  const legacyRef=firebaseDb.collection(LEGACY_TRACKER_COLLECTION).doc(LEGACY_BUILD_ID);
+  const legacySnap=await withTimeout(legacyRef.get(),12000,'Legacy build load');
+  const buildId=LEGACY_BUILD_ID;
+  const publicSlug=LEGACY_BUILD_ID;
+  let payload;
+  if(legacySnap.exists&&hasUsableCloudState(legacySnap.data())){
+    payload=Object.assign({},legacySnap.data());
+    await loadLegacyPrivateMedia(payload);
+  }else{
+    payload={
+      sections:cloneDefaultData(DEFAULT_SECTIONS),
+      sponsors:cloneDefaultData(DEFAULT_SPONSORS),
+      decisions:cloneDefaultData(DEFAULT_DECISIONS),
+      milestones:[],
+      workTasks:[],
+      settings:{buildName:BUILD_NAME,targetBudget:TARGET_BUDGET,truckCost:TRUCK_COST}
+    };
+  }
+  const now=new Date().toISOString();
+  const buildDoc=Object.assign({},payload,{
+    buildId,publicSlug,
+    buildName:payload.settings?.buildName||BUILD_NAME||'Gold Standard 38',
+    vehicleYear:payload.settings?.vehicleYear||'',
+    vehicleMake:payload.settings?.vehicleMake||'',
+    vehicleModel:payload.settings?.vehicleModel||'',
+    vehicleNickname:'',
+    archived:false,
+    template:'custom-truck',
+    createdAt:now,
+    updatedAt:now,
+    meta:Object.assign({},payload.meta||{},{appVersion:'v139-garage-multibuild',buildId,publicSlug,updatedAt:now})
+  });
+  await buildsCol.doc(buildId).set(sanitizeForFirestore(buildDoc),{merge:true});
+  await metaRef.set({
+    legacyMigrated:true,
+    legacyMigratedAt:now,
+    activeBuildId:buildId,
+    migrationVersion:1
+  },{merge:true});
+  console.log('Migrated legacy build to users/'+currentUser.uid+'/builds/'+buildId);
+  return {legacyMigrated:true,activeBuildId:buildId};
+}
+async function saveUserGarageMeta(patch){
+  const metaRef=getUserMetaRef();
+  if(!metaRef)return;
+  await metaRef.set(Object.assign({},patch,{updatedAt:new Date().toISOString()}),{merge:true});
+}
+async function loadBuildById(buildId){
+  if(!buildId||!currentUser)throw new Error('Invalid build.');
+  const col=getUserBuildsCol();
+  const snap=await withTimeout(col.doc(buildId).get(),12000,'Build load');
+  if(!snap.exists)throw new Error('Build not found.');
+  const data=snap.data();
+  const slug=data.publicSlug||data.meta?.publicSlug||buildId;
+  bindActiveBuildRefs(buildId,slug);
+  await loadPrivateMedia(data);
+  applyCloudStateToApp(data);
+  saveLocalStateNow();
+  safeBuild();
+  repairAllSponsorLogos();
+  renderGarageUI();
+  syncBuildMetaUI();
+}
+async function flushCloudSave(){
+  clearTimeout(saveTimer);
+  saveTimer=null;
+  if(!firebaseReady||!firestoreDocRef)throw new Error('Cloud sync unavailable.');
+  const ok=await saveCloudState();
+  if(!ok)throw new Error('Cloud save did not complete.');
+  return true;
+}
+async function switchGarageBuild(buildId){
+  if(!buildId||buildId===activeBuildId)return;
+  setSaveInd('saving','Saving current build before switch...');
+  try{
+    await flushCloudSave();
+  }catch(e){
+    console.warn('Switch blocked — save failed:',e);
+    const msg=e&&e.message?String(e.message):'Save failed';
+    setSaveInd('idle','Switch blocked: '+msg);
+    showGarageToast('Could not switch builds. Save failed — you are still on the current build.');
+    return;
+  }
+  try{
+    setSaveInd('saving','Loading build...');
+    await loadBuildById(buildId);
+    await saveUserGarageMeta({activeBuildId:buildId});
+    await loadGarageBuildList();
+    renderGarageUI();
+    closeGarageMenu();
+    setSaveInd('saved','Build switched');
+    setTimeout(()=>setSaveInd('idle','Cloud sync on'),1800);
+  }catch(e){
+    console.warn(e);
+    setSaveInd('idle','Could not load build');
+    showGarageToast('Could not load that build.');
+  }
+}
+function showGarageToast(msg){
+  let el=document.getElementById('garage-toast');
+  if(!el){
+    el=document.createElement('div');
+    el.id='garage-toast';
+    el.className='wl-notify';
+    document.body.appendChild(el);
+  }
+  el.textContent=msg;
+  el.classList.add('show');
+  clearTimeout(showGarageToast._t);
+  showGarageToast._t=setTimeout(()=>el.classList.remove('show'),4200);
+}
+function closeGarageMenu(){
+  garageMenuOpen=false;
+  const menu=document.getElementById('garage-menu');
+  const btn=document.getElementById('garage-btn');
+  if(menu)menu.classList.remove('open');
+  if(btn)btn.setAttribute('aria-expanded','false');
+}
+function toggleGarageMenu(e){
+  if(e)e.stopPropagation();
+  garageMenuOpen=!garageMenuOpen;
+  const menu=document.getElementById('garage-menu');
+  const btn=document.getElementById('garage-btn');
+  if(menu)menu.classList.toggle('open',garageMenuOpen);
+  if(btn)btn.setAttribute('aria-expanded',garageMenuOpen?'true':'false');
+}
+function renderGarageUI(){
+  const label=document.getElementById('garage-current-label');
+  if(label)label.textContent=BUILD_NAME||'My Build';
+  const menu=document.getElementById('garage-menu-list');
+  if(!menu)return;
+  const items=garageBuilds.filter(b=>!b.archived);
+  menu.innerHTML=items.map(b=>`<button class="garage-menu-item${b.buildId===activeBuildId?' active':''}" type="button" onclick="switchGarageBuild('${b.buildId}')"><span class="garage-menu-item-name">${esc(b.buildName||'Untitled build')}</span><span class="garage-menu-item-meta">${esc(formatVehicleLabel(b.vehicleYear,b.vehicleMake,b.vehicleModel)||b.buildId)}</span></button>`).join('')+
+    (garageBuilds.some(b=>b.archived)?garageBuilds.filter(b=>b.archived).map(b=>`<button class="garage-menu-item archived" type="button" onclick="switchGarageBuild('${b.buildId}')"><span class="garage-menu-item-name">${esc(b.buildName||'Archived build')}</span><span class="garage-menu-item-meta">Archived</span></button>`).join(''):'');
+}
+function openGarageCreateModal(){
+  closeGarageMenu();
+  const m=document.getElementById('garage-create-modal');
+  if(m)m.classList.add('open');
+  const n=document.getElementById('garage-create-name');
+  if(n){n.value='';n.focus();}
+  ['garage-create-year','garage-create-make','garage-create-model','garage-create-nickname'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const tpl=document.getElementById('garage-create-template');
+  if(tpl)tpl.value='blank';
+}
+function closeGarageCreateModal(){
+  const m=document.getElementById('garage-create-modal');
+  if(m)m.classList.remove('open');
+}
+async function archiveActiveBuild(){
+  if(!activeBuildId||!confirm('Archive this build? It will stay in your garage but hidden from the main list.'))return;
+  try{
+    await flushCloudSave();
+    const col=getUserBuildsCol();
+    await col.doc(activeBuildId).set({archived:true,updatedAt:new Date().toISOString()},{merge:true});
+    await loadGarageBuildList();
+    const next=garageBuilds.find(b=>!b.archived&&b.buildId!==activeBuildId);
+    if(next)await switchGarageBuild(next.buildId);
+    else showGarageToast('Build archived. Create a new build to continue.');
+    renderGarageUI();
+  }catch(e){
+    showGarageToast('Could not archive build.');
+  }
+}
+async function confirmGarageCreateBuild(){
+  const name=String((document.getElementById('garage-create-name')||{}).value||'').trim()||'New Build';
+  const year=String((document.getElementById('garage-create-year')||{}).value||'').trim().replace(/[^0-9]/g,'').slice(0,4);
+  const make=String((document.getElementById('garage-create-make')||{}).value||'').trim();
+  const model=String((document.getElementById('garage-create-model')||{}).value||'').trim();
+  const nickname=String((document.getElementById('garage-create-nickname')||{}).value||'').trim();
+  const template=(document.getElementById('garage-create-template')||{}).value||'blank';
+  const tpl=BUILD_TEMPLATES[template]||BUILD_TEMPLATES.blank;
+  try{
+    setSaveInd('saving','Saving current build...');
+    await flushCloudSave();
+    const baseId=slugifyBuildId(name,'build');
+    const buildId=await uniqueBuildId(baseId);
+    const publicSlug=buildId;
+    const now=new Date().toISOString();
+    const newBuild={
+      buildId,publicSlug,buildName:name,
+      vehicleYear:year,vehicleMake:make,vehicleModel:model,vehicleNickname:nickname,
+      archived:false,template,createdAt:now,updatedAt:now,
+      sections:tpl.sections(),
+      sponsors:cloneDefaultData(DEFAULT_SPONSORS).map(s=>Object.assign({},s,{logo:'',status:'Prospect',publicVisible:false})),
+      decisions:[],
+      milestones:[],
+      milestoneCtr:0,
+      workTasks:[],
+      workTaskCtr:0,
+      workHourCtr:0,
+      vehicleImage:'',
+      vehicleImageOriginal:'',
+      settings:{targetBudget:0,truckCost:0,buildName:name,vehicleYear:year,vehicleMake:make,vehicleModel:model,vehicleNickname:nickname},
+      meta:{appVersion:'v139-garage-multibuild',updatedAt:now,buildId,publicSlug}
+    };
+    await getUserBuildsCol().doc(buildId).set(sanitizeForFirestore(newBuild),{merge:true});
+    await saveUserGarageMeta({activeBuildId:buildId});
+    closeGarageCreateModal();
+    await loadBuildById(buildId);
+    await loadGarageBuildList();
+    renderGarageUI();
+    scheduleSave();
+    setSaveInd('saved','New build created');
+    setTimeout(()=>setSaveInd('idle','Cloud sync on'),1800);
+  }catch(e){
+    console.warn(e);
+    setSaveInd('idle','Could not create build');
+    showGarageToast(e&&e.message?e.message:'Could not create build.');
   }
 }
 
@@ -6109,11 +6598,6 @@ function initFirebaseSync(){
     if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
     firebaseAuth=firebase.auth();
     firebaseDb=firebase.firestore();
-    firestoreDocRef=firebaseDb.collection(FIRESTORE_COLLECTION).doc(FIRESTORE_DOC);
-    mediaDocRef=firebaseDb.collection(FIRESTORE_COLLECTION).doc(FIRESTORE_MEDIA_LEGACY_DOC);
-    mediaVehicleDocRef=firebaseDb.collection(FIRESTORE_COLLECTION).doc(FIRESTORE_MEDIA_VEHICLE_DOC);
-    publicDocRef=firebaseDb.collection(PUBLIC_COLLECTION).doc(PUBLIC_DOC);
-    publicMediaVehicleDocRef=firebaseDb.collection(PUBLIC_COLLECTION).doc(PUBLIC_MEDIA_VEHICLE_DOC);
     firebaseReady=true;
     return true;
   }catch(e){
@@ -6260,12 +6744,19 @@ async function loadPrivateMedia(state){
     }
   }
   if(shardCount>0){
-    const photoMap=await loadMilestonePhotoShards(FIRESTORE_COLLECTION,FIRESTORE_MEDIA_MS_PREFIX,shardCount);
+    const mediaCol=getUserMediaCol();
+    const msCollection=mediaCol?('users/'+currentUser.uid+'/'+USER_MEDIA_SUB):FIRESTORE_COLLECTION;
+    const msPrefix=privateMediaMsPrefix||FIRESTORE_MEDIA_MS_PREFIX;
+    const photoMap=await loadMilestonePhotoShards(msCollection,msPrefix,shardCount);
     if(photoMap.size){
       applyMilestonePhotoMap(state,photoMap);
       loaded=true;
     }
     cachedMediaMsShardCount=shardCount;
+  }
+  if(!loaded&&activeBuildId===LEGACY_BUILD_ID){
+    const legacyLoaded=await loadLegacyPrivateMedia(state);
+    if(legacyLoaded)loaded=true;
   }
   if(mediaDocRef){
     try{
@@ -6384,9 +6875,11 @@ async function shrinkMediaForCloud(media){
 }
 async function savePrivateMedia(media){
   const plan=planMediaWrites(media);
+  const mediaColPath=currentUser?('users/'+currentUser.uid+'/'+USER_MEDIA_SUB):FIRESTORE_COLLECTION;
+  const msPrefix=privateMediaMsPrefix||FIRESTORE_MEDIA_MS_PREFIX;
   await Promise.all([
     writeVehicleMediaDoc(mediaVehicleDocRef,plan.vehiclePayload,'private'),
-    writeMediaShards(FIRESTORE_COLLECTION,FIRESTORE_MEDIA_MS_PREFIX,plan.shardPayloads,cachedMediaMsShardCount)
+    writeMediaShards(mediaColPath,msPrefix,plan.shardPayloads,cachedMediaMsShardCount)
   ]);
   return plan.shardPayloads.length;
 }
@@ -6407,9 +6900,10 @@ async function savePublicMedia(media,options){
   const skipPrepare=options&&options.prepared;
   const cloudMedia=skipPrepare?media:await prepareMediaForCloudSave(media);
   const plan=planMediaWrites(cloudMedia);
+  const pubMsPrefix=publicMediaMsPrefix||PUBLIC_MEDIA_MS_PREFIX;
   await Promise.all([
     writeVehicleMediaDoc(publicMediaVehicleDocRef,plan.vehiclePayload,'public'),
-    writeMediaShards(PUBLIC_COLLECTION,PUBLIC_MEDIA_MS_PREFIX,plan.shardPayloads,cachedPublicMediaMsShardCount)
+    writeMediaShards(PUBLIC_COLLECTION,pubMsPrefix,plan.shardPayloads,cachedPublicMediaMsShardCount)
   ]);
   return plan.shardPayloads.length;
 }
@@ -6425,7 +6919,9 @@ async function loadCloudState(){
 
 
 function getPublicUrl(){
-  const fallback='https://leestuart38.github.io/goldstandardc10/public.html';
+  const slug=activePublicSlug||activeBuildId||LEGACY_BUILD_ID;
+  const q='?build='+encodeURIComponent(slug);
+  const fallback='https://leestuart38.github.io/goldstandardc10/public.html'+q;
 
   if(window.location.protocol==='file:'){
     return fallback;
@@ -6433,14 +6929,10 @@ function getPublicUrl(){
 
   const origin=window.location.origin;
   let path=window.location.pathname||'/';
-
-  // Remove file names from the end of the URL.
   path=path.replace(/\/(index\.html|public\.html)$/,'');
-
-  // Normalize trailing slash.
   if(!path.endsWith('/'))path+='/';
 
-  return origin+path+'public.html';
+  return origin+path+'public.html'+q;
 }
 
 function publicSectionsPayload(){
@@ -6613,7 +7105,7 @@ async function sharePublicBuild(){
 }
 
 async function saveCloudState(){
-  if(!firebaseReady||!firestoreDocRef)return false;
+  if(!firebaseReady||!firestoreDocRef||!publicDocRef)return false;
   const full=packState();
   const {core,media}=splitCloudPayload(full);
   const cloudMedia=await prepareMediaForCloudSave(media);
@@ -6640,15 +7132,18 @@ async function saveCloudState(){
     publicDocRef.set(pubCorePayload,{merge:true})
   ];
   if(privateMediaChanged){
+    const mediaColPath=currentUser?('users/'+currentUser.uid+'/'+USER_MEDIA_SUB):FIRESTORE_COLLECTION;
+    const msPrefix=privateMediaMsPrefix||FIRESTORE_MEDIA_MS_PREFIX;
     ops.push(
       writeVehicleMediaDoc(mediaVehicleDocRef,privatePlan.vehiclePayload,'private'),
-      writeMediaShards(FIRESTORE_COLLECTION,FIRESTORE_MEDIA_MS_PREFIX,privatePlan.shardPayloads,cachedMediaMsShardCount)
+      writeMediaShards(mediaColPath,msPrefix,privatePlan.shardPayloads,cachedMediaMsShardCount)
     );
   }
   if(publicMediaChanged){
+    const pubMsPrefix=publicMediaMsPrefix||PUBLIC_MEDIA_MS_PREFIX;
     ops.push(
       writeVehicleMediaDoc(publicMediaVehicleDocRef,publicPlan.vehiclePayload,'public'),
-      writeMediaShards(PUBLIC_COLLECTION,PUBLIC_MEDIA_MS_PREFIX,publicPlan.shardPayloads,cachedPublicMediaMsShardCount)
+      writeMediaShards(PUBLIC_COLLECTION,pubMsPrefix,publicPlan.shardPayloads,cachedPublicMediaMsShardCount)
     );
   }
   await Promise.all(ops);
@@ -6911,8 +7406,12 @@ async function loginWithEmail(e){
 
 async function logoutUser(){
   try{
+    try{await flushCloudSave();}catch(e){console.warn('Pre-logout save:',e);}
     appLoaded=false;
     currentUser=null;
+    activeBuildId=null;
+    activePublicSlug=null;
+    garageBuilds=[];
     const root=document.getElementById('tracker-root');
     if(root)root.classList.add('auth-hidden');
     showAuthScreen('Signed out.');
@@ -6980,6 +7479,13 @@ function waitForAuth(){
 }
 
 function applySettingsFromState(state){
+  if(state){
+    if(state.buildName!=null)BUILD_NAME=String(state.buildName||'').trim()||BUILD_NAME;
+    if(state.vehicleYear!=null)VEHICLE_YEAR=String(state.vehicleYear||'');
+    if(state.vehicleMake!=null)VEHICLE_MAKE=String(state.vehicleMake||'');
+    if(state.vehicleModel!=null)VEHICLE_MODEL=String(state.vehicleModel||'');
+    if(state.vehicleNickname!=null)VEHICLE_NICKNAME=String(state.vehicleNickname||'');
+  }
   if(state&&state.settings){
     TARGET_BUDGET=parseFloat(state.settings.targetBudget)||TARGET_BUDGET;
     TRUCK_COST=parseFloat(state.settings.truckCost)||TRUCK_COST;
@@ -6987,6 +7493,7 @@ function applySettingsFromState(state){
     VEHICLE_YEAR=state.settings.vehicleYear!=null?String(state.settings.vehicleYear):VEHICLE_YEAR;
     VEHICLE_MAKE=state.settings.vehicleMake!=null?String(state.settings.vehicleMake):VEHICLE_MAKE;
     VEHICLE_MODEL=state.settings.vehicleModel!=null?String(state.settings.vehicleModel):VEHICLE_MODEL;
+    VEHICLE_NICKNAME=state.settings.vehicleNickname!=null?String(state.settings.vehicleNickname):VEHICLE_NICKNAME;
   }
   syncBuildMetaUI();
 }
@@ -7013,6 +7520,7 @@ function syncBuildMetaUI(){
     const label=formatVehicleLabel(VEHICLE_YEAR,VEHICLE_MAKE,VEHICLE_MODEL);
     vehicleMeta.textContent=label||'Add year, make, and model in Change Vehicle';
   }
+  renderGarageUI();
 }
 function updateBuildName(v){
   BUILD_NAME=String(v||'').trim()||'My Build';
@@ -7058,7 +7566,7 @@ function openVehicleEditorModal(mode){
   const title=document.getElementById('vehicle-editor-title');
   const sub=document.getElementById('vehicle-editor-sub');
   if(title)title.textContent=vehicleEditorMode==='create'?'Create New Vehicle':'Edit Vehicle';
-  if(sub)sub.textContent=vehicleEditorMode==='create'?'Set up a new build profile. Multi-build switching is coming soon — for now this updates your active build.':'Update build name, vehicle details, photos, cost, and budget.';
+  if(sub)sub.textContent=vehicleEditorMode==='create'?'Set up vehicle details for the active build. Use Garage → Create New Build for a separate project.':'Update build name, vehicle details, photos, cost, and budget for the active build.';
   const buildEl=document.getElementById('veh-editor-build-name');
   if(buildEl)buildEl.value=vehicleEditorMode==='create'?'':(BUILD_NAME||'');
   const yearEl=document.getElementById('veh-editor-year');
@@ -7157,7 +7665,7 @@ function renderVehiclePanel(){
       ${originalBlock}
     </div>
   </div>
-  <div class="vehicle-panel-note"><i class="ti ti-info-circle"></i><span><strong>Multi-build switching is coming soon.</strong> Use Create New Vehicle to set up your next profile. For now, both Create and Edit update your active build and sync to the dashboard and public page.</span></div>`;
+  <div class="vehicle-panel-note"><i class="ti ti-info-circle"></i><span><strong>Garage builds</strong> — use the Garage menu in the header to create or switch builds. Edit Vehicle updates the active build only.</span></div>`;
 }
 function updateTargetBudget(v){
   TARGET_BUDGET=parseMoneyInput(v);
@@ -7198,66 +7706,35 @@ function safeBuild(){
 }
 
 async function initData(){
-  showCloudLoading('Connecting to Firestore before rendering tracker');
+  showCloudLoading('Loading your garage from Firestore...');
   initFirebaseSync();
-  let loadedFrom='local';
+
+  if(firebaseReady&&currentUser){
+    try{
+      const meta=await migrateLegacyBuildIfNeeded();
+      await loadGarageBuildList();
+      let buildId=meta.activeBuildId;
+      if(!buildId||!garageBuilds.some(b=>b.buildId===buildId)){
+        const preferred=garageBuilds.find(b=>!b.archived);
+        buildId=(preferred||garageBuilds[0]||{}).buildId||LEGACY_BUILD_ID;
+      }
+      await loadBuildById(buildId);
+      await saveUserGarageMeta({activeBuildId:buildId});
+      setSaveInd('saved','Garage loaded');
+      setTimeout(()=>setSaveInd('idle','Cloud sync on'),1800);
+      return;
+    }catch(e){
+      console.warn('Garage load failed. Falling back to local backup:',e);
+      showCloudLoading('Cloud slow or unavailable. Loading local backup...');
+      setSaveInd('idle','Cloud error, local backup loaded');
+    }
+  }else{
+    showCloudLoading('Cloud unavailable. Loading local backup...');
+  }
 
   try{
-    if(firebaseReady){
-      try{
-        const cloud=await loadCloudState();
-        if(cloud && hasUsableSections(cloud.sections)){
-          applySettingsFromState(cloud);
-          vehicleImage=cloud.vehicleImage||'';
-          vehicleImageOriginal=cloud.vehicleImageOriginal||'';
-          milestones=Array.isArray(cloud.milestones)?cloud.milestones:[];
-          milestoneCtr=parseInt(cloud.milestoneCtr||0)||milestones.length||0;
-          workTasks=Array.isArray(cloud.workTasks)?cloud.workTasks:[];
-          workTaskCtr=parseInt(cloud.workTaskCtr||0)||workTasks.length||0;
-          workHourCtr=parseInt(cloud.workHourCtr||0)||0;
-          sections=cloud.sections||cloneDefaultData(DEFAULT_SECTIONS);
-          sponsors=cloud.sponsors||cloneDefaultData(DEFAULT_SPONSORS);
-          decisions=cloud.decisions||cloneDefaultData(DEFAULT_DECISIONS);
-          repairTrackerState();
-          saveLocalStateNow();
-          if(safeBuild()){
-            loadedFrom='cloud';
-            setSaveInd('saved','Cloud data loaded');
-            setTimeout(()=>setSaveInd('idle','Cloud sync on'),1800);
-          }
-          return;
-        }
-
-        vehicleImage='';
-        vehicleImageOriginal='';
-        milestones=[];
-        milestoneCtr=0;
-        workTasks=[];
-        workTaskCtr=0;
-        workHourCtr=0;
-        sections=cloneDefaultData(DEFAULT_SECTIONS);
-        sponsors=cloneDefaultData(DEFAULT_SPONSORS);
-        decisions=cloneDefaultData(DEFAULT_DECISIONS);
-        repairTrackerState();
-        await withTimeout(saveCloudState(),12000,'Cloud seed save');
-        saveLocalStateNow();
-        if(safeBuild()){
-          loadedFrom='cloud-seed';
-          setSaveInd('saved','Cloud database seeded');
-          setTimeout(()=>setSaveInd('idle','Cloud sync on'),1800);
-        }
-        return;
-      }catch(e){
-        console.warn('Cloud load failed. Falling back to local backup only:',e);
-        showCloudLoading('Cloud slow or unavailable. Loading local backup...');
-        setSaveInd('idle','Cloud error, local backup loaded');
-      }
-    }else{
-      showCloudLoading('Cloud unavailable. Loading local backup...');
-    }
-
     const local=loadState();
-    if(local && hasUsableSections(local.sections)){
+    if(local&&hasUsableSections(local.sections)){
       applySettingsFromState(local);
       vehicleImage=local.vehicleImage||'';
       vehicleImageOriginal=local.vehicleImageOriginal||'';
@@ -7281,11 +7758,11 @@ async function initData(){
       sponsors=cloneDefaultData(DEFAULT_SPONSORS);
       decisions=cloneDefaultData(DEFAULT_DECISIONS);
     }
-
     repairTrackerState();
     safeBuild();
     repairAllSponsorLogos();
-    if(loadedFrom==='local')setSaveInd('idle','Loaded from local backup');
+    renderGarageUI();
+    setSaveInd('idle','Loaded from local backup');
   }finally{
     hideCloudLoading();
   }
@@ -9757,10 +10234,11 @@ async function bootTracker(){
   if(trackerBooted) return;
   trackerBooted=true;
 
-  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
+  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,toggleGarageMenu,closeGarageMenu,switchGarageBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,archiveActiveBuild,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
   document.addEventListener('click',e=>{
     if(!e.target.closest('.tracker-nav-more-wrap'))closeMoreMenu();
     if(!e.target.closest('.tracker-nav-mobile-wrap'))closeMobileNavMenu();
+    if(!e.target.closest('.garage-wrap'))closeGarageMenu();
   });
 
   bindNavTouchGuard();
@@ -9873,6 +10351,60 @@ window.addEventListener('pageshow',()=>setTimeout(()=>{ if(!document.querySelect
   <div class="ms-lightbox-inner" onclick="event.stopPropagation()">
     <button class="ms-lightbox-close" type="button" onclick="closeMilestoneLightbox()"><i class="ti ti-x"></i></button>
     <img class="ms-lightbox-img" id="ms-lightbox-img" src="" alt="Expanded milestone image">
+  </div>
+</div>
+
+<div class="vehicle-editor-modal" id="garage-create-modal" onclick="closeGarageCreateModal()">
+  <div class="vehicle-editor-inner" onclick="event.stopPropagation()">
+    <div class="vehicle-editor-hdr">
+      <div>
+        <h3 class="vehicle-editor-title">Create New Build</h3>
+        <div class="vehicle-editor-sub">Add another vehicle project to your garage.</div>
+      </div>
+      <button class="vehicle-editor-close" type="button" onclick="closeGarageCreateModal()" title="Close"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="vehicle-editor-body">
+      <div class="vehicle-editor-form">
+        <div class="veh-editor-field">
+          <label for="garage-create-name">Build name</label>
+          <input class="veh-editor-input build-name-field" id="garage-create-name" type="text" maxlength="80" placeholder="Name your build"/>
+        </div>
+        <div class="veh-editor-row">
+          <div class="veh-editor-field">
+            <label for="garage-create-year">Year</label>
+            <input class="veh-editor-input" id="garage-create-year" type="text" inputmode="numeric" maxlength="4" placeholder="1972"/>
+          </div>
+          <div class="veh-editor-field">
+            <label for="garage-create-make">Make</label>
+            <input class="veh-editor-input" id="garage-create-make" type="text" maxlength="40" placeholder="Chevrolet"/>
+          </div>
+          <div class="veh-editor-field">
+            <label for="garage-create-model">Model</label>
+            <input class="veh-editor-input" id="garage-create-model" type="text" maxlength="40" placeholder="C10"/>
+          </div>
+        </div>
+        <div class="veh-editor-field">
+          <label for="garage-create-nickname">Nickname (optional)</label>
+          <input class="veh-editor-input" id="garage-create-nickname" type="text" maxlength="60" placeholder="Gold Standard"/>
+        </div>
+        <div class="veh-editor-field">
+          <label for="garage-create-template">Starting template</label>
+          <select class="veh-editor-input" id="garage-create-template">
+            <option value="blank">Blank Build</option>
+            <option value="custom-truck">Custom Truck</option>
+            <option value="classic-car">Classic Car</option>
+            <option value="motorcycle">Motorcycle</option>
+            <option value="race-car">Race Car</option>
+            <option value="overland">Off-Road / Overland</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">
+        <button class="vehicle-edit-btn" type="button" onclick="confirmGarageCreateBuild()"><i class="ti ti-plus"></i>Create Build</button>
+        <button class="vehicle-edit-btn" type="button" style="opacity:.85" onclick="closeGarageCreateModal()">Cancel</button>
+      </div>
+    </div>
   </div>
 </div>
 

@@ -747,11 +747,25 @@ const FIREBASE_CONFIG={
   messagingSenderId:'236965953727',
   appId:'1:236965953727:web:dc984e6173b1305b98860a'
 };
+/*
+ * PUBLIC PAGE — per-build slug from URL
+ * public.html?build={publicSlug}  (preferred for GitHub Pages)
+ * public.html#{publicSlug}        (hash fallback)
+ * Loads publicBuilds/{publicSlug} and media shards:
+ *   {slug}-media-vehicle, {slug}-media-ms-{n}
+ */
 const PUBLIC_COLLECTION='publicBuilds';
-const PUBLIC_DOC='gold-standard-c10';
-const PUBLIC_MEDIA_VEHICLE_DOC='gold-standard-c10-media-vehicle';
-const PUBLIC_MEDIA_MS_PREFIX='gold-standard-c10-media-ms-';
-let db,docRef;
+let db,docRef,activePublicSlug='';
+function getPublicBuildSlug(){
+  const params=new URLSearchParams(window.location.search);
+  const q=String(params.get('build')||'').trim();
+  if(q)return q;
+  const hash=String(window.location.hash||'').replace(/^#/,'').trim();
+  return hash;
+}
+function publicMediaDocIds(slug){
+  return {vehicle:slug+'-media-vehicle',msPrefix:slug+'-media-ms-'};
+}
 
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function publicPartUrl(url){
@@ -1220,13 +1234,14 @@ function render(data){
 }
 
 function showError(msg){document.getElementById('updated-at').textContent=msg}
-async function mergePublicMedia(data){
-  if(!data||!db)return data||{};
+async function mergePublicMedia(data,slug){
+  if(!data||!db||!slug)return data||{};
+  const mediaIds=publicMediaDocIds(slug);
   const shardCount=Number(data.mediaMsShardCount)||0;
   const hasInlinePhotos=Array.isArray(data.milestones)&&data.milestones.some(m=>Array.isArray(m.photos)&&m.photos.length);
   if(!shardCount&&(data.vehicleImage||hasInlinePhotos))return data;
   try{
-    const vSnap=await db.collection(PUBLIC_COLLECTION).doc(PUBLIC_MEDIA_VEHICLE_DOC).get();
+    const vSnap=await db.collection(PUBLIC_COLLECTION).doc(mediaIds.vehicle).get();
     if(vSnap.exists){
       const v=vSnap.data()||{};
       if(v.vehicleImage)data.vehicleImage=v.vehicleImage;
@@ -1235,7 +1250,7 @@ async function mergePublicMedia(data){
     if(shardCount>0){
       const photoMap=new Map();
       for(let i=0;i<shardCount;i++){
-        const sSnap=await db.collection(PUBLIC_COLLECTION).doc(PUBLIC_MEDIA_MS_PREFIX+i).get();
+        const sSnap=await db.collection(PUBLIC_COLLECTION).doc(mediaIds.msPrefix+i).get();
         if(sSnap.exists){
           (sSnap.data().milestones||[]).forEach(m=>{
             const prev=photoMap.get(m.id)||[];
@@ -1257,13 +1272,18 @@ async function mergePublicMedia(data){
   return data;
 }
 async function init(){
+  activePublicSlug=getPublicBuildSlug();
+  if(!activePublicSlug){
+    showError('Build not found.');
+    return;
+  }
   try{
     if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
     db=firebase.firestore();
-    docRef=db.collection(PUBLIC_COLLECTION).doc(PUBLIC_DOC);
+    docRef=db.collection(PUBLIC_COLLECTION).doc(activePublicSlug);
     docRef.onSnapshot(async snap=>{
-      if(!snap.exists){showError('Public build data has not been published yet. Check Firestore rules and click Share Build in the private tracker.');return;}
-      const data=await mergePublicMedia(snap.data()||{});
+      if(!snap.exists){showError('Public build data has not been published yet. Open the private tracker, select this build, and click Copy Public Link.');return;}
+      const data=await mergePublicMedia(snap.data()||{},activePublicSlug);
       render(data);
     },err=>{console.warn(err);showError('Could not load public build data.')})
   }catch(e){console.warn(e);showError('Public page failed to initialize.')}
