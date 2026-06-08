@@ -3336,6 +3336,7 @@ body{margin:0}
   display:flex;
   flex-direction:column;
   align-items:stretch;
+  cursor:pointer;
 }
 .ms-photo-drop-zone:not(.has-photos){
   min-height:92px;
@@ -3351,26 +3352,80 @@ body{margin:0}
   margin-top:0;
   width:100%;
 }
+.ms-photo-drop-zone .milestone-gallery,
+.ms-photo-drop-zone .ms-photo{
+  cursor:default;
+}
 .ms-photo-drop-hint{
   margin:0;
   display:flex;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
   gap:8px;
-  line-height:1;
+  line-height:1.35;
   color:var(--gs-muted);
   font-family:var(--gs-display)!important;
   font-size:11px;
   font-weight:700;
   letter-spacing:var(--gs-tracking-tight)!important;
   text-transform:uppercase;
+  width:100%;
+  padding:8px 0;
 }
 .ms-photo-drop-zone:not(.has-photos) .ms-photo-drop-hint{
-  width:100%;
   min-height:64px;
 }
 .ms-photo-drop-zone.has-photos .ms-photo-drop-hint{
   margin-top:12px;
+}
+.ms-photo-drop-btn{
+  pointer-events:auto;
+  flex-shrink:0;
+}
+.ms-photo-drop-or{
+  font-family:Inter,system-ui,sans-serif!important;
+  font-size:9px!important;
+  font-weight:800!important;
+  letter-spacing:.08em!important;
+  text-transform:uppercase!important;
+  color:var(--gs-muted)!important;
+}
+/* Shared single-image drop zones (partners, vehicle editor, future uploaders) */
+.image-drop-field-label{
+  display:block;
+  font-family:var(--gs-display)!important;
+  font-size:11px!important;
+  font-weight:700!important;
+  letter-spacing:var(--gs-tracking-tight)!important;
+  text-transform:uppercase!important;
+  color:var(--gs-gold-light)!important;
+  margin-bottom:6px;
+}
+.image-drop-single{margin-top:0}
+.image-drop-single:not(.has-photos){min-height:120px}
+.image-drop-preview{
+  width:100%;
+  border-radius:12px;
+  overflow:hidden;
+  margin-bottom:8px;
+  aspect-ratio:4/3;
+  border:1px solid rgba(241,209,122,.18);
+  background:rgba(0,0,0,.28);
+}
+.image-drop-preview img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+}
+.image-drop-remove{
+  margin-top:8px;
+  width:100%;
+  justify-content:center;
+}
+.research-links-cap{
+  font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--gs-muted);
 }
 .ms-photo-drop-hint i{
   font-size:15px;
@@ -3504,7 +3559,7 @@ body{margin:0}
 }
 .spon-field label .spon-private-tag{margin-left:4px}
 .spon-public-grid{
-  display:grid;grid-template-columns:92px minmax(0,1fr);gap:12px;align-items:start;
+  display:grid;grid-template-columns:minmax(140px,180px) minmax(0,1fr);gap:12px;align-items:start;
 }
 .spon-public-logo-col{display:flex;flex-direction:column;gap:8px;align-items:stretch}
 .spon-public-fields-col{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px}
@@ -3618,6 +3673,138 @@ body{margin:0}
   .spon-field.span-2,.spon-field.span-3{grid-column:1/-1}
   .spon-public-grid{grid-template-columns:1fr}
   .spon-public-fields-col{grid-template-columns:1fr}
+}
+
+/* ===== v136 research accordion + links/images ===== */
+#research-stats{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))!important;margin-bottom:14px}
+.research-filter-bar{grid-template-columns:1.2fr .9fr .9fr .8fr;margin-bottom:14px}
+.research-section{margin-bottom:0}
+.sponsor-section-head .add-row-btn{
+  width:auto!important;flex-shrink:0;border-top:0!important;
+  border-radius:999px!important;border:1px solid rgba(241,209,122,.28)!important;
+  padding:10px 14px!important;font-size:11px!important;letter-spacing:.06em!important;
+  background:linear-gradient(180deg,rgba(0,0,0,.5),rgba(0,0,0,.28))!important;
+}
+.sponsor-section-head .add-row-btn:hover{
+  background:rgba(185,138,39,.18)!important;border-color:rgba(241,209,122,.52)!important;
+}
+.research-list-item.open{background:linear-gradient(180deg,rgba(185,138,39,.08),rgba(0,0,0,.12))}
+.research-list-head{
+  grid-template-columns:24px minmax(0,1fr) auto auto auto 30px!important;
+}
+.research-list-title-col{min-width:0}
+.research-list-name{
+  display:block;font-family:var(--gs-display)!important;font-size:15px!important;font-weight:700!important;
+  letter-spacing:var(--gs-tracking-tight)!important;text-transform:uppercase!important;
+  color:var(--gs-cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.research-list-sub{
+  display:block;margin-top:2px;font-size:9px;font-weight:800;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--gs-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.research-head-priority{
+  display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;
+  font-size:9px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;
+}
+.research-list-fields{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 10px;padding-top:12px;
+}
+.research-title-inp{
+  font-family:var(--gs-display)!important;font-size:16px!important;font-weight:700!important;
+  letter-spacing:var(--gs-tracking-tight)!important;text-transform:uppercase!important;
+}
+.research-card-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 10px;
+}
+.research-links-block{
+  grid-column:1/-1;padding-top:4px;margin-top:2px;border-top:1px solid rgba(241,209,122,.1);
+}
+.research-links-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;
+}
+.research-links-title{
+  font-family:var(--gs-display)!important;font-size:11px!important;font-weight:700!important;
+  letter-spacing:var(--gs-tracking-tight)!important;text-transform:uppercase!important;color:var(--gs-gold-light);
+}
+.research-link-row{
+  display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.4fr) 30px;gap:8px;align-items:end;margin-bottom:8px;
+}
+.research-link-del{
+  width:30px;height:34px;border-radius:8px;border:1px solid rgba(239,68,68,.35);
+  background:rgba(0,0,0,.28);color:#fca5a5;cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.research-link-del:hover{background:rgba(239,68,68,.14)}
+.research-links-empty{
+  padding:10px 12px;border-radius:10px;border:1px dashed rgba(241,209,122,.18);
+  color:var(--gs-muted);font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+}
+.research-images-block{
+  grid-column:1/-1;padding-top:4px;margin-top:2px;border-top:1px solid rgba(241,209,122,.1);
+}
+.research-list-body .visual-status-select{
+  width:100%!important;min-width:0!important;padding:6px 24px 6px 9px!important;font-size:10px!important;
+}
+.research-field label{
+  display:block;font-family:Inter,system-ui,sans-serif;font-size:8px;font-weight:800;
+  letter-spacing:.09em;text-transform:uppercase;color:var(--gs-muted);margin-bottom:4px;
+}
+.research-inp,.research-textarea,.research-select{
+  width:100%;border-radius:8px;border:1px solid rgba(240,205,115,.2);
+  background:rgba(0,0,0,.28);color:var(--gs-cream);padding:6px 9px;
+  font-family:Inter,system-ui,sans-serif!important;font-size:12px;font-weight:500;outline:none;box-sizing:border-box;
+}
+.research-textarea{resize:vertical;min-height:56px;line-height:1.45}
+.research-inp:focus,.research-textarea:focus,.research-select:focus{
+  border-color:var(--gs-gold-light);box-shadow:0 0 0 3px rgba(197,155,53,.2);
+}
+.research-field.span-2{grid-column:span 2}
+.research-field.span-3{grid-column:1/-1}
+.research-priority-chip{
+  display:inline-flex;align-items:center;padding:5px 8px;border-radius:999px;
+  font-size:9px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;
+}
+.research-card-actions{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;padding-top:10px;
+  border-top:1px solid rgba(241,209,122,.1);
+}
+.research-moved-pill{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;
+  font-size:9px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;
+  border:1px solid rgba(22,163,74,.35);color:#86efac;background:rgba(22,163,74,.12);
+}
+.research-empty{
+  padding:28px 16px;text-align:center;border-radius:16px;border:1px solid rgba(241,209,122,.14);
+  color:var(--gs-muted);font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;
+}
+.research-modal-step{display:none}
+.research-modal-step.active{display:block}
+.research-part-form{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px;
+}
+.research-part-form .research-field.span-2{grid-column:span 2}
+.research-modal-actions{
+  display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;
+}
+.research-modal-btn{
+  min-height:40px;padding:10px 16px;border-radius:12px;border:1px solid rgba(241,209,122,.28);
+  background:rgba(0,0,0,.35);color:var(--gs-cream);font-size:11px;font-weight:800;
+  letter-spacing:.06em;text-transform:uppercase;cursor:pointer;
+}
+.research-modal-btn.primary{
+  border-color:rgba(241,209,122,.45);
+  background:linear-gradient(135deg,#6f4f12,#b98a27,#f1d17a);color:#120f08;
+}
+.research-modal-btn:hover{filter:brightness(1.06)}
+@media(max-width:900px){
+  .research-list-head{grid-template-columns:24px minmax(0,1fr) auto 30px!important;grid-template-rows:auto auto}
+  .research-list-head .research-head-priority,.research-list-head .spon-list-status{display:none}
+  .research-list-fields,.research-card-grid{grid-template-columns:1fr 1fr}
+  .research-field.span-2,.research-field.span-3,.research-links-block,.research-images-block{grid-column:1/-1}
+  .research-link-row{grid-template-columns:1fr 30px;grid-template-rows:auto auto}
+  .research-link-row .research-field.span-2{grid-column:1/-1}
+  .research-filter-bar{grid-template-columns:1fr}
+  .research-part-form{grid-template-columns:1fr}
+  .research-part-form .research-field.span-2{grid-column:1/-1}
 }
 
 /* ===== v88 visible menu bar under header ===== */
@@ -5314,7 +5501,7 @@ body{margin:0}
         <button class="tab" data-panel="parts" data-path="parts" onclick="showPanel('parts',true)"><i class="ti ti-tools"></i><span class="tab-label">Parts</span></button>
         <button class="tab" data-panel="worklog" data-path="worklog" onclick="showPanel('worklog',true)"><i class="ti ti-tool"></i><span class="tab-label">Work Log</span></button>
         <button class="tab" data-panel="sponsorships" data-path="partners" onclick="showPanel('sponsorships',true)"><i class="ti ti-currency-dollar"></i><span class="tab-label">Build Partners</span></button>
-        <button class="tab" data-panel="decisions" data-path="decisions" onclick="showPanel('decisions',true)"><i class="ti ti-list-check"></i><span class="tab-label">Decisions</span></button>
+        <button class="tab" data-panel="decisions" data-path="research" onclick="showPanel('decisions',true)"><i class="ti ti-search"></i><span class="tab-label">Research</span></button>
         <button class="tab" data-panel="milestones" data-path="milestones" onclick="showPanel('milestones',true)"><i class="ti ti-notebook"></i><span class="tab-label">Milestones</span></button>
       </div>
       <div class="tracker-nav-more-wrap">
@@ -5347,7 +5534,7 @@ body{margin:0}
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('parts')"><i class="ti ti-tools"></i><span>Parts</span></button>
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('worklog')"><i class="ti ti-tool"></i><span>Work Log</span></button>
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('sponsorships')"><i class="ti ti-currency-dollar"></i><span>Build Partners</span></button>
-          <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('decisions')"><i class="ti ti-list-check"></i><span>Decisions</span></button>
+          <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('decisions')"><i class="ti ti-search"></i><span>Research</span></button>
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('milestones')"><i class="ti ti-notebook"></i><span>Milestones</span></button>
           <div class="tracker-nav-mobile-divider" aria-hidden="true"></div>
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('vehicle')"><i class="ti ti-arrows-exchange"></i><span>Change Vehicle</span></button>
@@ -5549,10 +5736,33 @@ body{margin:0}
   </div>
 </div>
 <div id="panel-decisions" class="panel">
-  <div class="tbl-card"><div class="tbl-wrap"><table class="dec-tbl"><thead><tr>
-    <th>Decision</th><th>Options</th><th>Why it matters</th><th>Current lean</th><th>Status</th><th></th>
-  </tr></thead><tbody id="dec-tbody"></tbody></table></div>
-  <button class="add-row-btn" onclick="addDecision()"><i class="ti ti-plus" aria-hidden="true"></i> Add decision</button></div>
+  <div class="stat-grid" id="research-stats"></div>
+  <div class="filter-bar research-filter-bar">
+    <input class="filter-inp" id="research-search" type="search" placeholder="Search title, notes, links..." oninput="setResearchFilters()">
+    <select class="filter-select" id="research-category-filter" onchange="setResearchFilters()">
+      <option value="">All categories</option>
+    </select>
+    <select class="filter-select" id="research-status-filter" onchange="setResearchFilters()">
+      <option value="">All statuses</option>
+    </select>
+    <select class="filter-select" id="research-priority-filter" onchange="setResearchFilters()">
+      <option value="">All priorities</option>
+      <option value="Critical">Critical</option>
+      <option value="High">High</option>
+      <option value="Medium">Medium</option>
+      <option value="Low">Low</option>
+    </select>
+  </div>
+  <div class="sponsor-section research-section">
+    <div class="sponsor-section-head">
+      <div>
+        <div class="sponsor-section-title">Research Pipeline</div>
+        <div class="sponsor-section-sub">Ideas and planning before parts hit the build list.</div>
+      </div>
+      <button class="add-row-btn" type="button" onclick="addResearch()"><i class="ti ti-plus" aria-hidden="true"></i> Add research item</button>
+    </div>
+    <div class="spon-pipeline-list" id="research-list"></div>
+  </div>
 </div>
 </div>
 </div>
@@ -5814,6 +6024,12 @@ let appLoaded=false;
 let partCtr=2000,sponsorCtr=200,decCtr=200,milestoneCtr=0,workTaskCtr=0,workHourCtr=0;
 let saveTimer=null;
 let partFilters={search:'',status:'',priority:''};
+let researchFilters={search:'',category:'',status:'',priority:''};
+let researchModalId=null;
+let openResearchId=null;
+let researchLinkCtr=0;
+const RESEARCH_START_LINKS=2;
+const RESEARCH_MAX_LINKS=10;
 
 function loadState(){
   try{
@@ -5843,7 +6059,7 @@ function packState(){
       vehicleModel:VEHICLE_MODEL
     },
     meta:{
-      appVersion:'v134-partner-layout',
+      appVersion:'v137-image-drop-unified',
       updatedAt:new Date().toISOString()
     }
   };
@@ -6513,7 +6729,62 @@ function repairSponsors(savedSponsors){
 function sponsorNeedsPublicSetup(s){
   return s&&s.status==='Confirmed'&&(!s.logo||!String(s.website||'').trim()||!s.tier||!s.publicVisible);
 }
-function repairDecisions(savedDecisions){ return Array.isArray(savedDecisions) && savedDecisions.length ? savedDecisions : cloneDefaultData(DEFAULT_DECISIONS); }
+const RESEARCH_CATEGORIES=['Engine','Transmission','Drivetrain','Suspension','Brakes','Wheels','Tires','Interior','Audio','Electrical','Body','Paint','Fabrication','Other'];
+const RESEARCH_STATUSES=['Researching','Interested','Comparing','Shortlisted','Decided','Rejected'];
+const LEGACY_DECISION_STATUS={Open:'Researching','In Progress':'Comparing',Decided:'Decided','On Hold':'Researching'};
+const RESEARCH_CATEGORY_TO_SECTION={
+  Engine:'engine',Transmission:'trans',Drivetrain:'trans',Suspension:'chassis',Brakes:'brakes',
+  Wheels:'wheels',Tires:'wheels',Interior:'interior',Audio:'interior',Electrical:'electrical',
+  Body:'body',Paint:'paint',Fabrication:'tools',Other:null
+};
+function normalizeResearchLinks(raw){
+  if(Array.isArray(raw)){
+    return raw.map((l,i)=>{
+      if(typeof l==='string'){
+        const url=l.trim();
+        return url?{id:'rl-'+i,label:'',url}:null;
+      }
+      if(!l||typeof l!=='object')return null;
+      return{id:String(l.id||('rl-'+i)),label:String(l.label||'').trim(),url:String(l.url||'').trim()};
+    }).filter(Boolean);
+  }
+  const str=String(raw||'').trim();
+  if(!str)return [];
+  return str.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).map((url,i)=>({id:'rl-'+i,label:'',url}));
+}
+function normalizeResearchItem(raw){
+  if(!raw||typeof raw!=='object')return null;
+  const r=Object.assign({},raw);
+  r.title=String(r.title||r.decision||'Untitled research').trim()||'Untitled research';
+  r.decision=r.title;
+  if(!r.notes){
+    const bits=[];
+    if(r.options)bits.push('Options: '+String(r.options).trim());
+    if(r.matters)bits.push('Why it matters: '+String(r.matters).trim());
+    if(r.lean)bits.push('Current lean: '+String(r.lean).trim());
+    r.notes=bits.join('\n');
+  }else{r.notes=String(r.notes||'')}
+  r.links=normalizeResearchLinks(r.links);
+  r.category=RESEARCH_CATEGORIES.includes(r.category)?r.category:'Other';
+  let st=LEGACY_DECISION_STATUS[r.status]||r.status;
+  if(!RESEARCH_STATUSES.includes(st))st='Researching';
+  r.status=st;
+  r.priority=['Critical','High','Medium','Low'].includes(r.priority)?r.priority:'Medium';
+  r.images=Array.isArray(r.images)?r.images:[];
+  r.createdAt=r.createdAt||new Date().toISOString();
+  if(r.status==='Decided'&&!r.decidedAt)r.decidedAt=r.createdAt;
+  else if(r.status!=='Decided')r.decidedAt=r.decidedAt||'';
+  else r.decidedAt=r.decidedAt||'';
+  r.movedToPartId=String(r.movedToPartId||'');
+  return r;
+}
+function repairDecisions(savedDecisions){
+  const list=Array.isArray(savedDecisions)&&savedDecisions.length?savedDecisions:cloneDefaultData(DEFAULT_DECISIONS);
+  return list.filter(Boolean).map(normalizeResearchItem).filter(Boolean);
+}
+function researchSectionKeyForCategory(cat){
+  return RESEARCH_CATEGORY_TO_SECTION[cat]||null;
+}
 function repairWorkTasks(saved){
   if(!Array.isArray(saved))return [];
   return saved.filter(Boolean).map(t=>{
@@ -6746,13 +7017,19 @@ function updateVehicleModel(v){
   scheduleSave();
 }
 function renderVehicleEditorPreview(slot,data){
-  const el=document.getElementById(slot==='hero'?'veh-editor-hero-preview':'veh-editor-original-preview');
+  const inputId=slot==='hero'?'veh-editor-hero-input':'veh-editor-original-input';
+  const dropId=slot==='hero'?'veh-editor-hero-drop':'veh-editor-original-drop';
+  const el=document.getElementById(dropId);
   if(!el)return;
-  if(data){
-    el.innerHTML=`<img src="${data}" alt="">`;
-  }else{
-    el.innerHTML='<div class="veh-editor-photo-empty">No image yet</div>';
-  }
+  const alt=slot==='hero'?'Hero rendering':'Original photo';
+  paintSingleImageDropZone(el,{
+    inputId,
+    imageSrc:data||'',
+    btnLabel:data?'Replace photo':'Add photo',
+    dropHandler:`vehEditorImageDrop('${slot}',event)`,
+    removeHandler:data?`clearVehicleEditorImage('${slot}')`:'',
+    altText:alt
+  });
 }
 function openVehicleEditorModal(mode){
   vehicleEditorMode=mode==='create'?'create':'edit';
@@ -6785,9 +7062,8 @@ function closeVehicleEditorModal(){
   const modal=document.getElementById('vehicle-editor-modal');
   if(modal)modal.classList.remove('open');
 }
-async function handleVehicleEditorImageUpload(slot,e){
-  const file=e&&e.target&&e.target.files?e.target.files[0]:null;
-  if(!file)return;
+async function handleVehicleEditorImageFile(slot,file){
+  if(!file||!file.type||!file.type.startsWith('image/'))return;
   try{
     setSaveInd('saving','Compressing image...');
     const data=await compressVehicleImage(file);
@@ -6798,9 +7074,18 @@ async function handleVehicleEditorImageUpload(slot,e){
   }catch(err){
     console.warn(err);
     setSaveInd('idle','Image upload failed');
+  }
+}
+async function handleVehicleEditorImageUpload(slot,e){
+  const file=e&&e.target&&e.target.files?e.target.files[0]:null;
+  try{
+    await handleVehicleEditorImageFile(slot,file);
   }finally{
     if(e&&e.target)e.target.value='';
   }
+}
+function vehEditorImageDrop(slot,e){
+  singleImageFileDrop(e,(file)=>handleVehicleEditorImageFile(slot,file));
 }
 function clearVehicleEditorImage(slot){
   if(slot==='hero')vehicleEditorDraft.hero='';
@@ -6840,7 +7125,7 @@ function renderVehiclePanel(){
   if(!el)return;
   const ymm=formatVehicleLabel(VEHICLE_YEAR,VEHICLE_MAKE,VEHICLE_MODEL);
   const hero=vehicleImage?`<img src="${vehicleImage}" alt="${esc(buildPreviewTitle())}">`:'<div class="vehicle-current-empty"><i class="ti ti-photo-up"></i><span>No hero image yet</span></div>';
-  const originalBlock=vehicleImageOriginal?`<div class="vehicle-current-original"><label>Original vehicle photo</label><div class="vehicle-current-original-img"><img src="${vehicleImageOriginal}" alt="Original vehicle photo"></div></div>`:'';
+  const originalBlock=vehicleImageOriginal?`<div class="vehicle-current-original"><label class="image-drop-field-label">Original photo</label><div class="vehicle-current-original-img"><img src="${vehicleImageOriginal}" alt="Original photo"></div></div>`:'';
   el.innerHTML=`<div class="vehicle-current-card">
     <div class="vehicle-current-hero">${hero}</div>
     <div class="vehicle-current-body">
@@ -8173,6 +8458,54 @@ function milestonePhotoDrop(id,e){
   if(zone)zone.classList.remove('drag-over');
   handleMilestonePhotoFiles(id,e.dataTransfer&&e.dataTransfer.files?e.dataTransfer.files:[]);
 }
+/* Image upload pattern: multi-photo zones use photoDropHintHtml + photoDropZoneClick;
+   single-image zones use singleImageDropZoneHtml / paintSingleImageDropZone + singleImageFileDrop. */
+function triggerPhotoInput(inputId){
+  const el=document.getElementById(inputId);
+  if(el)el.click();
+}
+function photoDropZoneClick(e,inputId){
+  if(e.target.closest('.milestone-gallery,.ms-photo,.ms-photo-remove,.ms-photo-drop-btn,.image-drop-preview,.image-drop-remove'))return;
+  triggerPhotoInput(inputId);
+}
+function photoDropHintHtml(inputId,btnLabel){
+  return `<div class="ms-photo-drop-hint">
+    <button type="button" class="ms-photo-drop-btn ms-btn" onclick="event.stopPropagation();triggerPhotoInput('${inputId}')"><i class="ti ti-photo-plus"></i>${btnLabel}</button>
+    <span class="ms-photo-drop-or">or drag &amp; drop here</span>
+  </div>`;
+}
+function imageDropDragOver(e){milestonePhotoDragOver(e)}
+function imageDropDragLeave(e){milestonePhotoDragLeave(e)}
+function singleImageFileDrop(e,onFile){
+  e.preventDefault();
+  e.stopPropagation();
+  const zone=e.currentTarget;
+  if(zone)zone.classList.remove('drag-over');
+  const file=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];
+  if(file&&file.type&&file.type.startsWith('image/')&&onFile)onFile(file);
+}
+function paintSingleImageDropZone(el,opts){
+  if(!el||!opts)return;
+  const hasImage=!!opts.imageSrc;
+  el.className=`ms-photo-drop-zone image-drop-single${hasImage?' has-photos':''}`;
+  el.setAttribute('onclick',`photoDropZoneClick(event,'${opts.inputId}')`);
+  el.setAttribute('ondragover','imageDropDragOver(event)');
+  el.setAttribute('ondragleave','imageDropDragLeave(event)');
+  el.setAttribute('ondrop',opts.dropHandler||'');
+  const preview=hasImage?`<div class="image-drop-preview"><img src="${opts.imageSrc}" alt="${esc(opts.altText||'Image')}"></div>`:'';
+  const removeBtn=hasImage&&opts.removeHandler?`<button type="button" class="ms-btn danger image-drop-remove" onclick="event.stopPropagation();${opts.removeHandler}"><i class="ti ti-trash"></i>Remove</button>`:'';
+  el.innerHTML=`${preview}${photoDropHintHtml(opts.inputId,opts.btnLabel||(hasImage?'Replace photo':'Add photo'))}${removeBtn}`;
+}
+function singleImageDropZoneHtml(opts){
+  const hasImage=!!opts.imageSrc;
+  const preview=hasImage?`<div class="image-drop-preview"><img src="${opts.imageSrc}" alt="${esc(opts.altText||'Image')}"></div>`:'';
+  const removeBtn=hasImage&&opts.removeHandler?`<button type="button" class="ms-btn danger image-drop-remove" onclick="event.stopPropagation();${opts.removeHandler}"><i class="ti ti-trash"></i>Remove</button>`:'';
+  return `<div class="ms-photo-drop-zone image-drop-single${hasImage?' has-photos':''}" onclick="photoDropZoneClick(event,'${opts.inputId}')" ondragover="imageDropDragOver(event)" ondragleave="imageDropDragLeave(event)" ondrop="${opts.dropHandler}">
+    ${preview}
+    ${photoDropHintHtml(opts.inputId,opts.btnLabel||(hasImage?'Replace photo':'Add photo'))}
+    ${removeBtn}
+  </div>`;
+}
 
 function removeMilestonePhoto(id,index){
   const m=milestones.find(x=>x.id===id);
@@ -8282,13 +8615,12 @@ function renderMilestones(){
           ${sectionOptions(m.relatedSection||'')}
         </select>
         <textarea class="ms-textarea" placeholder="Write the build update here..." onchange="updateMilestone('${m.id}','body',this.value)">${esc(m.body||'')}</textarea>
-        <div class="ms-photo-drop-zone${photos.length?' has-photos':''}" ondragover="milestonePhotoDragOver(event)" ondragleave="milestonePhotoDragLeave(event)" ondrop="milestonePhotoDrop('${m.id}',event)">
-          ${photos.length?`<div class="milestone-gallery">${photos.map((src,i)=>`<div class="ms-photo"><img src="${src}" alt="Milestone image"><button class="ms-photo-remove" type="button" onclick="removeMilestonePhoto('${m.id}',${i})"><i class="ti ti-x"></i></button></div>`).join('')}</div>`:''}
-          <div class="ms-photo-drop-hint"><i class="ti ti-upload"></i><span>Drag &amp; drop photos here</span></div>
+        <input id="ms-photo-${m.id}" type="file" accept="image/*" multiple style="display:none" onchange="handleMilestonePhotos('${m.id}',event)">
+        <div class="ms-photo-drop-zone${photos.length?' has-photos':''}" onclick="photoDropZoneClick(event,'ms-photo-${m.id}')" ondragover="milestonePhotoDragOver(event)" ondragleave="milestonePhotoDragLeave(event)" ondrop="milestonePhotoDrop('${m.id}',event)">
+          ${photos.length?`<div class="milestone-gallery">${photos.map((src,i)=>`<div class="ms-photo"><img src="${src}" alt="Milestone image" onclick="event.stopPropagation();openMilestoneLightbox(this.src)"><button class="ms-photo-remove" type="button" onclick="event.stopPropagation();removeMilestonePhoto('${m.id}',${i})"><i class="ti ti-x"></i></button></div>`).join('')}</div>`:''}
+          ${photoDropHintHtml('ms-photo-'+m.id,'Add photos')}
         </div>
         <div class="milestone-actions">
-          <input id="ms-photo-${m.id}" type="file" accept="image/*" multiple style="display:none" onchange="handleMilestonePhotos('${m.id}',event)">
-          <button class="ms-btn" type="button" onclick="document.getElementById('ms-photo-${m.id}').click()"><i class="ti ti-photo-plus"></i>Add Photos</button>
           <button class="ms-btn post" type="button" onclick="postMilestone('${m.id}')"><i class="ti ti-send"></i>Post Milestone</button>
           <button class="ms-btn danger" type="button" onclick="deleteMilestone('${m.id}')"><i class="ti ti-trash"></i>Delete</button>
         </div>
@@ -8522,17 +8854,24 @@ function sponsorStatusClass(st){
     Outreach:'vs-contacted'
   }[st]||'vs-prospect';
 }
-function decisionStatusClass(st){
+function researchStatusClass(st){
   return {
+    Researching:'vs-open',
+    Interested:'vs-interested',
+    Comparing:'vs-progress',
+    Shortlisted:'vs-negotiating',
+    Decided:'vs-decided',
+    Rejected:'vs-declined',
     Open:'vs-open',
     'In Progress':'vs-progress',
-    Decided:'vs-decided',
     'On Hold':'vs-hold'
   }[st]||'vs-open';
 }
+function decisionStatusClass(st){return researchStatusClass(st);}
 function visualStatusSelect(type,id,value,options,onchangeFn){
-  const cls=type==='sponsor'?sponsorStatusClass(value):decisionStatusClass(value);
-  return `<span class="visual-status-wrap"><select class="visual-status-select ${cls}" onchange="${onchangeFn}('${id}','status',this.value);this.className='visual-status-select '+(${type==='sponsor'?'sponsorStatusClass':'decisionStatusClass'})(this.value)">${options.map(st=>`<option value="${st}"${value===st?' selected':''}>${st}</option>`).join('')}</select></span>`;
+  const clsFn=type==='sponsor'?'sponsorStatusClass':'researchStatusClass';
+  const cls=type==='sponsor'?sponsorStatusClass(value):researchStatusClass(value);
+  return `<span class="visual-status-wrap"><select class="visual-status-select ${cls}" onchange="${onchangeFn}('${id}','status',this.value);this.className='visual-status-select '+(${clsFn})(this.value)">${options.map(st=>`<option value="${st}"${value===st?' selected':''}>${st}</option>`).join('')}</select></span>`;
 }
 
 let openSponsorId=null;
@@ -8567,7 +8906,8 @@ function renderSponsorPipelineCard(s){
   const isConfirmed=s.status==='Confirmed';
   const needsSetup=isConfirmed&&sponsorNeedsPublicSetup(s);
   const banner=needsSetup?`<div class="spon-confirmed-banner"><strong>Complete public profile</strong>Upload a logo, add website + tier, set partner value, and enable public visibility so this partner appears on the public build page.</div>`:'';
-  const logo=s.logo?`<img src="${s.logo}" alt="${esc(sponsorName(s))} logo">`:`<span class="spon-logo-empty">No logo</span>`;
+  const logoInputId='spon-logo-'+s.id;
+  const logoDrop=`<input id="${logoInputId}" type="file" accept="image/*" style="display:none" onchange="handleSponsorLogoUpload('${s.id}',event)">${singleImageDropZoneHtml({inputId:logoInputId,imageSrc:s.logo||'',btnLabel:s.logo?'Replace logo':'Add logo',dropHandler:`sponsorLogoDrop('${s.id}',event)`,removeHandler:s.logo?`removeSponsorLogo('${s.id}')`:'',altText:sponsorName(s)+' logo'})}`;
   const displayName=sponsorName(s);
   const nameLabel=displayName==='Untitled partner'?'Untitled partner':displayName;
   return `<div class="spon-list-item${isConfirmed?' is-confirmed':''}${isOpen?' open':''}" id="sr-${s.id}">
@@ -8593,12 +8933,8 @@ function renderSponsorPipelineCard(s){
         </div>
         <div class="spon-field span-3 spon-public-grid">
           <div class="spon-public-logo-col">
-            <div class="spon-logo-preview">${logo}</div>
-            <div class="spon-logo-actions">
-              <input id="spon-logo-${s.id}" type="file" accept="image/*" style="display:none" onchange="handleSponsorLogoUpload('${s.id}',event)">
-              <button class="ms-btn" type="button" onclick="event.stopPropagation();document.getElementById('spon-logo-${s.id}').click()"><i class="ti ti-photo-up"></i>Upload</button>
-              ${s.logo?`<button class="ms-btn danger" type="button" onclick="event.stopPropagation();removeSponsorLogo('${s.id}')"><i class="ti ti-trash"></i>Remove</button>`:''}
-            </div>
+            <label class="image-drop-field-label">Partner logo</label>
+            ${logoDrop}
           </div>
           <div class="spon-public-fields-col">
             <div class="spon-field span-2"><label>Website</label><input class="spon-inp" value="${esc(s.website||'')}" onchange="updSpon('${s.id}','website',this.value)" placeholder="https://"></div>
@@ -8721,9 +9057,8 @@ async function repairAllSponsorLogos(){
     doSave();
   }
 }
-async function handleSponsorLogoUpload(id,e){
-  const file=e&&e.target&&e.target.files?e.target.files[0]:null;
-  if(!file)return;
+async function handleSponsorLogoFile(id,file){
+  if(!file||!file.type||!file.type.startsWith('image/'))return;
   const s=sponsors.find(x=>x.id===id);if(!s)return;
   try{
     setSaveInd('saving','Compressing partner logo...');
@@ -8734,9 +9069,18 @@ async function handleSponsorLogoUpload(id,e){
   }catch(err){
     console.warn(err);
     setSaveInd('idle',err&&err.message?String(err.message):'Logo upload failed');
+  }
+}
+async function handleSponsorLogoUpload(id,e){
+  const file=e&&e.target&&e.target.files?e.target.files[0]:null;
+  try{
+    await handleSponsorLogoFile(id,file);
   }finally{
     if(e&&e.target)e.target.value='';
   }
+}
+function sponsorLogoDrop(id,e){
+  singleImageFileDrop(e,(file)=>handleSponsorLogoFile(id,file));
 }
 function removeSponsorLogo(id){
   const s=sponsors.find(x=>x.id===id);if(!s)return;
@@ -8766,30 +9110,417 @@ function delSpon(id){
   scheduleSave();
 }
 
-function buildDecRow(d){
-  const tr=document.createElement('tr');tr.id='dr-'+d.id;
-  tr.innerHTML=`
-    <td><input class="dec-inp" value="${esc(d.decision)}" onchange="updDec('${d.id}','decision',this.value)" style="min-width:120px;font-weight:500"/></td>
-    <td><input class="dec-inp" value="${esc(d.options)}" onchange="updDec('${d.id}','options',this.value)" style="min-width:150px"/></td>
-    <td><input class="dec-inp" value="${esc(d.matters)}" onchange="updDec('${d.id}','matters',this.value)" style="min-width:150px"/></td>
-    <td><input class="dec-inp" value="${esc(d.lean)}" onchange="updDec('${d.id}','lean',this.value)" style="min-width:100px;color:#8B6914;font-weight:500"/></td>
-    <td>${visualStatusSelect('decision',d.id,d.status,['Open','In Progress','Decided','On Hold'],'updDec')}</td>
-    <td><button class="del-btn" onclick="delDec('${d.id}')"><i class="ti ti-trash" aria-hidden="true"></i></button></td>`;
-  return tr;
+function researchMatchesFilter(r){
+  const item=normalizeResearchItem(r);
+  if(!item)return false;
+  const q=(researchFilters.search||'').trim().toLowerCase();
+  if(q){
+    const linkHay=(item.links||[]).map(l=>(l.label+' '+l.url).toLowerCase()).join(' ');
+    const hay=[item.title,item.notes,linkHay,item.category,item.status,item.priority].join(' ').toLowerCase();
+    if(!hay.includes(q))return false;
+  }
+  if(researchFilters.category&&item.category!==researchFilters.category)return false;
+  if(researchFilters.status&&item.status!==researchFilters.status)return false;
+  if(researchFilters.priority&&item.priority!==researchFilters.priority)return false;
+  return true;
 }
-function updDec(id,f,v){const d=decisions.find(x=>x.id===id);if(d){d[f]=v;scheduleSave();}}
-function addDecision(){
-  const id='dc-'+(++decCtr);
-  const d={id,decision:'',options:'',matters:'',lean:'',status:'Open'};
-  decisions.push(d);
-  const tb=document.getElementById('dec-tbody'),row=buildDecRow(d);tb.appendChild(row);
-  const i=row.querySelector('input');if(i)i.focus();
+function initResearchFilterOptions(){
+  const catSel=document.getElementById('research-category-filter');
+  const stSel=document.getElementById('research-status-filter');
+  if(catSel&&!catSel.dataset.ready){
+    catSel.innerHTML='<option value="">All categories</option>'+RESEARCH_CATEGORIES.map(c=>`<option value="${c}">${c}</option>`).join('');
+    catSel.dataset.ready='1';
+  }
+  if(stSel&&!stSel.dataset.ready){
+    stSel.innerHTML='<option value="">All statuses</option>'+RESEARCH_STATUSES.map(s=>`<option value="${s}">${s}</option>`).join('');
+    stSel.dataset.ready='1';
+  }
+}
+function setResearchFilters(){
+  const s=document.getElementById('research-search');
+  const c=document.getElementById('research-category-filter');
+  const st=document.getElementById('research-status-filter');
+  const pr=document.getElementById('research-priority-filter');
+  researchFilters={
+    search:s?s.value:'',
+    category:c?c.value:'',
+    status:st?st.value:'',
+    priority:pr?pr.value:''
+  };
+  renderResearchList();
+}
+function updateResearchStats(){
+  const el=document.getElementById('research-stats');
+  if(!el)return;
+  const items=decisions.map(normalizeResearchItem).filter(Boolean);
+  const researching=items.filter(r=>!['Decided','Rejected'].includes(r.status)).length;
+  const decided=items.filter(r=>r.status==='Decided').length;
+  const rejected=items.filter(r=>r.status==='Rejected').length;
+  el.innerHTML=`
+    <div class="stat"><label>Total research items</label><div class="val muted">${items.length}</div></div>
+    <div class="stat"><label>Still researching</label><div class="val gold">${researching}</div></div>
+    <div class="stat"><label>Decided</label><div class="val green">${decided}</div></div>
+    <div class="stat"><label>Rejected</label><div class="val">${rejected}</div></div>`;
+}
+function syncResearchListOpenState(){
+  document.querySelectorAll('.research-list-item').forEach(el=>{
+    const isOpen=openResearchId&&el.id==='rr-'+openResearchId;
+    el.classList.toggle('open',!!isOpen);
+    const pm=el.querySelector('.research-list-pm');
+    if(pm)pm.textContent=isOpen?'−':'+';
+  });
+}
+function toggleResearchRow(id){
+  openResearchId=openResearchId===id?null:id;
+  syncResearchListOpenState();
+}
+function openResearchRow(id){
+  openResearchId=id;
+  syncResearchListOpenState();
+}
+function researchHeadSub(item){
+  const bits=[item.category];
+  const linkCount=(item.links||[]).length;
+  const imgCount=(item.images||[]).length;
+  if(linkCount)bits.push(linkCount+(linkCount===1?' link':' links'));
+  if(imgCount)bits.push(imgCount+(imgCount===1?' photo':' photos'));
+  return bits.join(' · ');
+}
+function defaultResearchLinks(count){
+  const links=[];
+  for(let i=0;i<count;i++)links.push({id:'rl-'+(++researchLinkCtr),label:'',url:''});
+  return links;
+}
+function renderResearchLinksHtml(item){
+  const links=item.links||[];
+  const canAdd=links.length<RESEARCH_MAX_LINKS;
+  const rows=links.length?links.map(l=>`<div class="research-link-row">
+      <div class="research-field"><label>Label</label><input class="research-inp" value="${esc(l.label)}" placeholder="Option name" onchange="updResearchLink('${item.id}','${l.id}','label',this.value)"></div>
+      <div class="research-field"><label>URL</label><input class="research-inp" value="${esc(l.url)}" placeholder="https://" onchange="updResearchLink('${item.id}','${l.id}','url',this.value)"></div>
+      <button class="research-link-del" type="button" title="Remove link" onclick="event.stopPropagation();delResearchLink('${item.id}','${l.id}')"><i class="ti ti-trash" aria-hidden="true"></i></button>
+    </div>`).join(''):`<div class="research-links-empty">No links yet — add URLs to compare options.</div>`;
+  const addBtn=canAdd?`<button class="ms-btn" type="button" onclick="event.stopPropagation();addResearchLink('${item.id}')"><i class="ti ti-plus"></i>Add link</button>`:`<span class="research-links-cap">Max ${RESEARCH_MAX_LINKS} links</span>`;
+  return `<div class="research-links-block">
+    <div class="research-links-head">
+      <span class="research-links-title">Comparison links <span class="research-links-cap">(${links.length}/${RESEARCH_MAX_LINKS})</span></span>
+      ${addBtn}
+    </div>
+    ${rows}
+  </div>`;
+}
+function renderResearchImagesHtml(item){
+  const images=Array.isArray(item.images)?item.images:[];
+  const inputId='research-photo-'+item.id;
+  return `<div class="research-images-block">
+    <div class="research-links-head">
+      <span class="research-links-title">Comparison photos</span>
+    </div>
+    <input id="${inputId}" type="file" accept="image/*" multiple style="display:none" onchange="handleResearchPhotos('${item.id}',event)">
+    <div class="ms-photo-drop-zone${images.length?' has-photos':''}" onclick="photoDropZoneClick(event,'${inputId}')" ondragover="researchPhotoDragOver(event)" ondragleave="researchPhotoDragLeave(event)" ondrop="researchPhotoDrop('${item.id}',event)">
+      ${images.length?`<div class="milestone-gallery">${images.map((src,i)=>`<div class="ms-photo"><img src="${src}" alt="Research comparison" onclick="event.stopPropagation();openMilestoneLightbox(this.src)"><button class="ms-photo-remove" type="button" onclick="event.stopPropagation();removeResearchPhoto('${item.id}',${i})"><i class="ti ti-x"></i></button></div>`).join('')}</div>`:''}
+      ${photoDropHintHtml(inputId,'Add photos')}
+    </div>
+  </div>`;
+}
+function renderResearchCard(r){
+  const item=normalizeResearchItem(r);
+  const isOpen=openResearchId===item.id;
+  const moved=item.movedToPartId;
+  const titleLabel=item.title==='Untitled research'||!item.title?'Untitled research':item.title;
+  const decidedAction=item.status==='Decided'?(
+    moved?`<span class="research-moved-pill"><i class="ti ti-check" aria-hidden="true"></i>Already added to parts list</span>`
+    :`<button class="ms-btn" type="button" onclick="openResearchToPartModal('${item.id}')"><i class="ti ti-arrow-right"></i>Add to Parts List</button>`
+  ):'';
+  const catOpts=RESEARCH_CATEGORIES.map(c=>`<option value="${c}"${item.category===c?' selected':''}>${c}</option>`).join('');
+  const priOpts=PK.map(p=>`<option value="${p}"${item.priority===p?' selected':''}>${p}</option>`).join('');
+  return `<div class="spon-list-item research-list-item${isOpen?' open':''}" id="rr-${item.id}">
+    <div class="spon-list-head research-list-head" onclick="toggleResearchRow('${item.id}')">
+      <span class="spon-list-pm research-list-pm" aria-hidden="true">${isOpen?'−':'+'}</span>
+      <div class="research-list-title-col">
+        <span class="research-list-name">${esc(titleLabel)}</span>
+        <span class="research-list-sub">${esc(researchHeadSub(item))}</span>
+      </div>
+      <span class="spon-list-status ${researchStatusClass(item.status)}">${esc(item.status)}</span>
+      <span class="research-head-priority ${pcls(item.priority)}">${esc(item.priority)}</span>
+      <button class="spon-list-del" type="button" title="Delete research item" onclick="event.stopPropagation();delResearch('${item.id}')"><i class="ti ti-trash" aria-hidden="true"></i></button>
+    </div>
+    <div class="spon-list-body research-list-body" onclick="event.stopPropagation()">
+      <div class="research-list-fields">
+        <div class="research-field span-2"><label>Title</label><input class="research-inp research-title-inp" value="${esc(item.title)}" placeholder="Research title" onchange="updResearch('${item.id}','title',this.value)"></div>
+        <div class="research-field"><label>Status</label>${visualStatusSelect('research',item.id,item.status,RESEARCH_STATUSES,'updResearch')}</div>
+        <div class="research-field"><label>Category</label><select class="research-select" onchange="updResearch('${item.id}','category',this.value)">${catOpts}</select></div>
+        <div class="research-field"><label>Priority</label><select class="research-select" onchange="updResearch('${item.id}','priority',this.value)">${priOpts}</select></div>
+        <div class="research-field span-3"><label>Notes</label><textarea class="research-textarea" rows="3" placeholder="Options, comparisons, why it matters..." onchange="updResearch('${item.id}','notes',this.value)">${esc(item.notes)}</textarea></div>
+        ${renderResearchLinksHtml(item)}
+        ${renderResearchImagesHtml(item)}
+      </div>
+      ${decidedAction?`<div class="research-card-actions">${decidedAction}</div>`:''}
+    </div>
+  </div>`;
+}
+function renderResearchList(){
+  const el=document.getElementById('research-list');
+  if(!el)return;
+  const list=decisions.filter(researchMatchesFilter);
+  el.innerHTML=list.length?list.map(renderResearchCard).join(''):`<div class="spon-empty"><i class="ti ti-search" style="font-size:34px;display:block;margin-bottom:8px;color:var(--gs-gold-light)"></i>No research items match your filters.</div>`;
+}
+function renderResearch(){
+  initResearchFilterOptions();
+  updateResearchStats();
+  renderResearchList();
+}
+function updResearch(id,f,v){
+  const r=decisions.find(x=>x.id===id);if(!r)return;
+  normalizeResearchItem(r);
+  const prevStatus=r.status;
+  if(f==='title'){r.title=String(v||'').trim()||'Untitled research';r.decision=r.title;}
+  else if(f==='status'){
+    r.status=v;
+    if(v==='Decided'&&prevStatus!=='Decided'){
+      r.decidedAt=new Date().toISOString();
+      openResearchDecidedModal(id);
+    }
+  }else if(f==='notes'){r.notes=String(v||'');}
+  else if(f==='category'){r.category=v;}
+  else if(f==='priority'){r.priority=v;}
+  normalizeResearchItem(r);
+  scheduleSave();
+  updateResearchStats();
+  if(f==='notes')return;
+  renderResearchList();
+}
+function updDec(id,f,v){updResearch(id,f,v);}
+function storeResearchItem(id,item){
+  const idx=decisions.findIndex(x=>x.id===id);
+  if(idx<0||!item)return null;
+  decisions[idx]=item;
+  return item;
+}
+function touchResearchItem(id){
+  const idx=decisions.findIndex(x=>x.id===id);
+  if(idx<0)return null;
+  const norm=normalizeResearchItem(decisions[idx]);
+  if(!norm)return null;
+  decisions[idx]=norm;
+  return norm;
+}
+function addResearchLink(id){
+  const item=touchResearchItem(id);
+  if(!item)return;
+  item.links=item.links||[];
+  if(item.links.length>=RESEARCH_MAX_LINKS){
+    setSaveInd('idle','Max '+RESEARCH_MAX_LINKS+' links per research item');
+    return;
+  }
+  item.links.push({id:'rl-'+(++researchLinkCtr),label:'',url:''});
+  storeResearchItem(id,item);
+  openResearchId=id;
+  renderResearchList();
+  scheduleSave();
+  const card=document.getElementById('rr-'+id);
+  if(card){
+    const rows=card.querySelectorAll('.research-link-row');
+    const last=rows[rows.length-1];
+    if(last){const inp=last.querySelector('.research-inp');if(inp)inp.focus();}
+  }
+}
+function updResearchLink(id,linkId,f,v){
+  const item=touchResearchItem(id);
+  if(!item)return;
+  const link=(item.links||[]).find(l=>l.id===linkId);
+  if(!link)return;
+  link[f]=String(v||'').trim();
+  storeResearchItem(id,normalizeResearchItem(item));
+  scheduleSave();
+  if(f==='label')return;
+  renderResearchList();
+}
+function delResearchLink(id,linkId){
+  const item=touchResearchItem(id);
+  if(!item)return;
+  item.links=(item.links||[]).filter(l=>l.id!==linkId);
+  storeResearchItem(id,normalizeResearchItem(item));
+  renderResearchList();
   scheduleSave();
 }
-function delDec(id){
+async function handleResearchPhotoFiles(id,files){
+  const list=Array.from(files||[]).filter(f=>f&&f.type&&f.type.startsWith('image/'));
+  if(!list.length)return;
+  const r=decisions.find(x=>x.id===id);
+  if(!r)return;
+  try{
+    normalizeResearchItem(r);
+    const room=Math.max(0,8-(r.images?r.images.length:0));
+    if(!room){setSaveInd('idle','Max 8 photos per research item');return;}
+    for(const file of list.slice(0,room)){
+      const sizeMb=(file.size/1048576).toFixed(1);
+      setSaveInd('saving',sizeMb>=2?`Compressing ${sizeMb} MB image...`:'Compressing images...');
+      const data=await compressMilestoneImage(file);
+      r.images=r.images||[];
+      r.images.push(data);
+    }
+    openResearchId=id;
+    renderResearchList();
+    scheduleSave();
+    doSave();
+  }catch(err){
+    console.warn(err);
+    setSaveInd('idle',err&&err.message?String(err.message):'Image upload failed');
+  }
+}
+async function handleResearchPhotos(id,e){
+  const files=Array.from(e&&e.target&&e.target.files?e.target.files:[]);
+  try{
+    await handleResearchPhotoFiles(id,files);
+  }finally{
+    if(e&&e.target)e.target.value='';
+  }
+}
+function researchPhotoDragOver(e){
+  e.preventDefault();
+  e.stopPropagation();
+  const zone=e.currentTarget;
+  if(zone)zone.classList.add('drag-over');
+}
+function researchPhotoDragLeave(e){
+  e.preventDefault();
+  const zone=e.currentTarget;
+  if(zone)zone.classList.remove('drag-over');
+}
+function researchPhotoDrop(id,e){
+  e.preventDefault();
+  e.stopPropagation();
+  const zone=e.currentTarget;
+  if(zone)zone.classList.remove('drag-over');
+  handleResearchPhotoFiles(id,e.dataTransfer&&e.dataTransfer.files?e.dataTransfer.files:[]);
+}
+function removeResearchPhoto(id,index){
+  const r=decisions.find(x=>x.id===id);
+  if(!r||!Array.isArray(r.images))return;
+  r.images.splice(index,1);
+  renderResearchList();
+  scheduleSave();
+  doSave();
+}
+function addResearch(){
+  const id='rc-'+(++decCtr);
+  const r=normalizeResearchItem({id,title:'',category:'Other',status:'Researching',priority:'Medium',notes:'',links:defaultResearchLinks(RESEARCH_START_LINKS),images:[],createdAt:new Date().toISOString(),decidedAt:'',movedToPartId:''});
+  decisions.push(r);
+  openResearchId=id;
+  renderResearch();
+  scheduleSave();
+  const card=document.getElementById('rr-'+id);
+  if(card){const inp=card.querySelector('.research-title-inp');if(inp){inp.focus();inp.select();}}
+}
+function addDecision(){addResearch();}
+function delResearch(id){
+  if(!confirm('Delete this research item?'))return;
+  if(openResearchId===id)openResearchId=null;
   decisions=decisions.filter(d=>d.id!==id);
-  const r=document.getElementById('dr-'+id);if(r)r.remove();
+  renderResearch();
   scheduleSave();
+}
+function delDec(id){delResearch(id);}
+function showResearchModalStep(step){
+  document.querySelectorAll('.research-modal-step').forEach(el=>el.classList.remove('active'));
+  const el=document.getElementById('research-modal-'+step);
+  if(el)el.classList.add('active');
+}
+function openResearchModal(){
+  const modal=document.getElementById('research-decided-modal');
+  if(modal)modal.classList.add('open');
+}
+function closeResearchDecidedModal(){
+  const modal=document.getElementById('research-decided-modal');
+  if(modal)modal.classList.remove('open');
+  researchModalId=null;
+}
+function prefillResearchPartForm(r){
+  const item=normalizeResearchItem(r);
+  const sk=researchSectionKeyForCategory(item.category)||sections[0]?.key||'chassis';
+  const set=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val==null?'':val;};
+  set('research-part-name',item.title);
+  set('research-part-section',sk);
+  set('research-part-priority',item.priority||'Medium');
+  set('research-part-vendor','TBD');
+  set('research-part-budget','');
+  set('research-part-actual','');
+  set('research-part-sponsored','');
+  set('research-part-status','Need to Buy');
+  const links=item.links||[];
+  const link=links.length?links[0].url:'';
+  set('research-part-link',link);
+  set('research-part-notes',item.notes||'');
+}
+function openResearchDecidedModal(id){
+  researchModalId=id;
+  const r=decisions.find(x=>x.id===id);
+  if(!r)return;
+  normalizeResearchItem(r);
+  const titleEl=document.getElementById('research-modal-prompt-title');
+  if(titleEl)titleEl.textContent='Move this decision to the parts list?';
+  if(r.movedToPartId)showResearchModalStep('already');
+  else showResearchModalStep('prompt');
+  openResearchModal();
+}
+function openResearchToPartModal(id){
+  researchModalId=id;
+  const r=decisions.find(x=>x.id===id);
+  if(!r)return;
+  normalizeResearchItem(r);
+  if(r.movedToPartId)showResearchModalStep('already');
+  else{prefillResearchPartForm(r);refreshResearchPartSectionSelect();showResearchModalStep('form');}
+  openResearchModal();
+}
+function researchPartSectionOptions(selectedKey){
+  return sections.map(s=>`<option value="${s.key}"${s.key===selectedKey?' selected':''}>${esc(s.name)}</option>`).join('');
+}
+function refreshResearchPartSectionSelect(){
+  const sel=document.getElementById('research-part-section');
+  if(!sel||!researchModalId)return;
+  const r=decisions.find(x=>x.id===researchModalId);
+  const sk=sel.value||researchSectionKeyForCategory(r?.category)||sections[0]?.key||'chassis';
+  sel.innerHTML=researchPartSectionOptions(sk);
+}
+function researchDecidedPromptAdd(){
+  const r=decisions.find(x=>x.id===researchModalId);
+  if(!r)return;
+  normalizeResearchItem(r);
+  if(r.movedToPartId)showResearchModalStep('already');
+  else{prefillResearchPartForm(r);refreshResearchPartSectionSelect();showResearchModalStep('form');}
+}
+function confirmResearchToPart(){
+  const r=decisions.find(x=>x.id===researchModalId);
+  if(!r)return;
+  normalizeResearchItem(r);
+  if(r.movedToPartId){showResearchModalStep('already');return;}
+  const sk=(document.getElementById('research-part-section')||{}).value;
+  const sec=sections.find(s=>s.key===sk);
+  if(!sec){alert('Choose a parts section.');return;}
+  const name=String((document.getElementById('research-part-name')||{}).value||'').trim()||r.title||'New part';
+  const part={
+    id:'cx-'+(++partCtr),
+    name,
+    priority:PK.includes((document.getElementById('research-part-priority')||{}).value)?document.getElementById('research-part-priority').value:'Medium',
+    vendor:String((document.getElementById('research-part-vendor')||{}).value||'TBD').trim()||'TBD',
+    budget:parseFloat((document.getElementById('research-part-budget')||{}).value)||0,
+    actual:parseFloat((document.getElementById('research-part-actual')||{}).value)||0,
+    sponsored:parseFloat((document.getElementById('research-part-sponsored')||{}).value)||0,
+    status:['Need to Buy','Ordered','Received','Installed','N/A'].includes((document.getElementById('research-part-status')||{}).value)?document.getElementById('research-part-status').value:'Need to Buy',
+    link:String((document.getElementById('research-part-link')||{}).value||'').trim(),
+    notes:String((document.getElementById('research-part-notes')||{}).value||'')
+  };
+  sec.parts.push(part);
+  r.movedToPartId=part.id;
+  r.status='Decided';
+  r.decidedAt=r.decidedAt||new Date().toISOString();
+  normalizeResearchItem(r);
+  renderRows(sec);
+  updateSecHeader(sec);
+  updateDashboard();
+  renderResearch();
+  scheduleSave();
+  closeResearchDecidedModal();
 }
 
 const MORE_PANELS=['vehicle','settings','billing','users','export','help'];
@@ -8799,7 +9530,7 @@ const NAV_LABELS={
   parts:'Parts',
   worklog:'Work Log',
   sponsorships:'Build Partners',
-  decisions:'Decisions',
+  decisions:'Research',
   milestones:'Milestones',
   vehicle:'Change Vehicle',
   settings:'Settings',
@@ -8881,7 +9612,7 @@ const ROUTES={
   parts:'parts',
   worklog:'worklog',
   sponsorships:'partners',
-  decisions:'decisions',
+  decisions:'research',
   vehicle:'vehicle',
   settings:'settings',
   billing:'billing',
@@ -8898,6 +9629,7 @@ const ROUTE_TO_PANEL={
   sponsors:'sponsorships',
   partners:'sponsorships',
   decisions:'decisions',
+  research:'decisions',
   vehicle:'vehicle',
   settings:'settings',
   billing:'billing',
@@ -8972,6 +9704,7 @@ function showPanel(name,pushRoute=false){
   if(name==='worklog')renderWorkLog();
   if(name==='vehicle')renderVehiclePanel();
   if(name==='sponsorships')renderSponsors();
+  if(name==='decisions')renderResearch();
   if(pushRoute)updateRoute(name,false);
 }
 
@@ -8984,8 +9717,7 @@ function build(){
   updateDashboard();
   renderMilestones();
   renderSponsors();
-  const dtb=document.getElementById('dec-tbody');
-  if(dtb){dtb.innerHTML=''; decisions.forEach(d=>dtb.appendChild(buildDecRow(d)));}
+  renderResearch();
   renderWorkLog();
   renderVehiclePanel();
   showPanel(panelFromRoute(),false);
@@ -8997,7 +9729,7 @@ async function bootTracker(){
   if(trackerBooted) return;
   trackerBooted=true;
 
-  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
+  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
   document.addEventListener('click',e=>{
     if(!e.target.closest('.tracker-nav-more-wrap'))closeMoreMenu();
     if(!e.target.closest('.tracker-nav-mobile-wrap'))closeMobileNavMenu();
@@ -9068,22 +9800,14 @@ window.addEventListener('pageshow',()=>setTimeout(()=>{ if(!document.querySelect
         </div>
         <div class="veh-editor-photos">
           <div class="veh-editor-photo-slot">
-            <label>Rendering / hero photo</label>
-            <div class="veh-editor-photo-preview" id="veh-editor-hero-preview"><div class="veh-editor-photo-empty">No image yet</div></div>
+            <label class="image-drop-field-label" for="veh-editor-hero-input">Hero rendering</label>
             <input id="veh-editor-hero-input" type="file" accept="image/*" style="display:none" onchange="handleVehicleEditorImageUpload('hero',event)">
-            <div class="veh-editor-photo-actions">
-              <button class="veh-editor-photo-btn" type="button" onclick="document.getElementById('veh-editor-hero-input').click()"><i class="ti ti-upload"></i>Upload</button>
-              <button class="veh-editor-photo-remove" type="button" onclick="clearVehicleEditorImage('hero')"><i class="ti ti-trash"></i>Remove</button>
-            </div>
+            <div id="veh-editor-hero-drop" class="ms-photo-drop-zone image-drop-single"></div>
           </div>
           <div class="veh-editor-photo-slot">
-            <label>Original vehicle photo</label>
-            <div class="veh-editor-photo-preview" id="veh-editor-original-preview"><div class="veh-editor-photo-empty">No image yet</div></div>
+            <label class="image-drop-field-label" for="veh-editor-original-input">Original photo</label>
             <input id="veh-editor-original-input" type="file" accept="image/*" style="display:none" onchange="handleVehicleEditorImageUpload('original',event)">
-            <div class="veh-editor-photo-actions">
-              <button class="veh-editor-photo-btn" type="button" onclick="document.getElementById('veh-editor-original-input').click()"><i class="ti ti-upload"></i>Upload</button>
-              <button class="veh-editor-photo-remove" type="button" onclick="clearVehicleEditorImage('original')"><i class="ti ti-trash"></i>Remove</button>
-            </div>
+            <div id="veh-editor-original-drop" class="ms-photo-drop-zone image-drop-single"></div>
           </div>
         </div>
         <div class="veh-editor-money-row">
@@ -9121,6 +9845,51 @@ window.addEventListener('pageshow',()=>setTimeout(()=>{ if(!document.querySelect
   <div class="ms-lightbox-inner" onclick="event.stopPropagation()">
     <button class="ms-lightbox-close" type="button" onclick="closeMilestoneLightbox()"><i class="ti ti-x"></i></button>
     <img class="ms-lightbox-img" id="ms-lightbox-img" src="" alt="Expanded milestone image">
+  </div>
+</div>
+
+<div class="vehicle-editor-modal" id="research-decided-modal" onclick="closeResearchDecidedModal()">
+  <div class="vehicle-editor-inner" style="width:min(640px,100%)" onclick="event.stopPropagation()">
+    <div class="vehicle-editor-hdr">
+      <div>
+        <h3 class="vehicle-editor-title" id="research-modal-prompt-title">Move this decision to the parts list?</h3>
+        <div class="vehicle-editor-sub">Convert research into a tracked part on your build list.</div>
+      </div>
+      <button class="vehicle-editor-close" type="button" onclick="closeResearchDecidedModal()" title="Close"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="vehicle-editor-body">
+      <div class="research-modal-step active" id="research-modal-prompt">
+        <p style="margin:0 0 16px;font-size:13px;line-height:1.5;color:var(--gs-cream)">Move this decision to the parts list?</p>
+        <div class="research-modal-actions">
+          <button class="research-modal-btn primary" type="button" onclick="researchDecidedPromptAdd()">Add to Parts List</button>
+          <button class="research-modal-btn" type="button" onclick="closeResearchDecidedModal()">Not Now</button>
+        </div>
+      </div>
+      <div class="research-modal-step" id="research-modal-form">
+        <div class="research-part-form">
+          <div class="research-field span-2"><label>Part name</label><input class="research-inp" id="research-part-name" type="text" placeholder="Part name"></div>
+          <div class="research-field"><label>Section</label><select class="research-select" id="research-part-section"></select></div>
+          <div class="research-field"><label>Priority</label><select class="research-select" id="research-part-priority"><option value="Critical">Critical</option><option value="High">High</option><option value="Medium" selected>Medium</option><option value="Low">Low</option></select></div>
+          <div class="research-field"><label>Vendor</label><input class="research-inp" id="research-part-vendor" type="text" placeholder="TBD"></div>
+          <div class="research-field"><label>Budget</label><input class="research-inp" id="research-part-budget" type="number" min="0" step="0.01" placeholder="0"></div>
+          <div class="research-field"><label>Actual cost</label><input class="research-inp" id="research-part-actual" type="number" min="0" step="0.01" placeholder="0"></div>
+          <div class="research-field"><label>Sponsored value</label><input class="research-inp" id="research-part-sponsored" type="number" min="0" step="0.01" placeholder="0"></div>
+          <div class="research-field"><label>Status</label><select class="research-select" id="research-part-status"><option value="Need to Buy" selected>Need to Buy</option><option value="Ordered">Ordered</option><option value="Received">Received</option><option value="Installed">Installed</option><option value="N/A">N/A</option></select></div>
+          <div class="research-field span-2"><label>Link</label><input class="research-inp" id="research-part-link" type="url" placeholder="https://"></div>
+          <div class="research-field span-2"><label>Notes</label><textarea class="research-textarea" id="research-part-notes" rows="3" placeholder="Part notes"></textarea></div>
+        </div>
+        <div class="research-modal-actions">
+          <button class="research-modal-btn primary" type="button" onclick="confirmResearchToPart()">Add to Parts List</button>
+          <button class="research-modal-btn" type="button" onclick="closeResearchDecidedModal()">Cancel</button>
+        </div>
+      </div>
+      <div class="research-modal-step" id="research-modal-already">
+        <p style="margin:0 0 16px;font-size:13px;line-height:1.5;color:#86efac;font-weight:700">Already added to parts list</p>
+        <div class="research-modal-actions">
+          <button class="research-modal-btn" type="button" onclick="closeResearchDecidedModal()">Close</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
