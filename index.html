@@ -3292,6 +3292,72 @@ body{margin:0}
   }
 }
 
+/* ===== v128 milestone typography + photo drop ===== */
+.milestone-toolbar-title,
+.milestone-post-title,
+.ms-title-input,
+.milestone-add-btn,
+.ms-btn{
+  font-family:var(--gs-display)!important;
+  font-weight:700!important;
+  letter-spacing:var(--gs-tracking-tight)!important;
+}
+.milestone-toolbar-title{
+  font-size:clamp(24px,3.2vw,32px)!important;
+  line-height:.95!important;
+  letter-spacing:var(--gs-tracking-tight)!important;
+}
+.ms-title-input{
+  font-size:clamp(22px,3vw,28px)!important;
+  line-height:.95!important;
+  text-transform:uppercase!important;
+  letter-spacing:var(--gs-tracking-tight)!important;
+}
+.milestone-post-title{
+  letter-spacing:var(--gs-tracking-tight)!important;
+}
+.ms-date-input,
+.ms-select,
+.ms-textarea{
+  font-family:'Inter',system-ui,sans-serif!important;
+  font-weight:600!important;
+  letter-spacing:normal!important;
+  text-transform:none!important;
+}
+.ms-photo-drop-zone{
+  margin-top:14px;
+  padding:14px;
+  border-radius:18px;
+  border:2px dashed rgba(241,209,122,.24);
+  background:rgba(0,0,0,.14);
+  transition:border-color .15s,background .15s,box-shadow .15s;
+}
+.ms-photo-drop-zone.drag-over{
+  border-color:rgba(241,209,122,.62);
+  background:rgba(185,138,39,.12);
+  box-shadow:0 0 0 3px rgba(197,155,53,.18);
+}
+.ms-photo-drop-zone .milestone-gallery{
+  margin-top:0;
+}
+.ms-photo-drop-hint{
+  margin-top:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  color:var(--gs-muted);
+  font-family:var(--gs-display)!important;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:var(--gs-tracking-tight)!important;
+  text-transform:uppercase;
+}
+.ms-photo-drop-zone.drag-over .ms-photo-drop-hint,
+.ms-photo-drop-hint i{
+  color:var(--gs-gold-light);
+}
+
 /* ===== v88 visible menu bar under header ===== */
 .tracker-nav{
   padding:0!important;
@@ -5496,7 +5562,7 @@ function packState(){
       vehicleModel:VEHICLE_MODEL
     },
     meta:{
-      appVersion:'v127-compress-permissions',
+      appVersion:'v128-milestone-ux',
       updatedAt:new Date().toISOString()
     }
   };
@@ -5626,12 +5692,21 @@ function chunkMilestonePhotoRows(rows,limit){
   if(batch.length)chunks.push(batch);
   return chunks;
 }
-function applyMilestonePhotoMap(state,photoMap){
+function applyMilestonePhotoMap(state,photoMap,onlyIfMissing){
   if(!state||!photoMap||!photoMap.size||!Array.isArray(state.milestones))return;
   state.milestones=state.milestones.map(m=>{
     const photos=photoMap.get(m.id);
-    return photos&&photos.length?Object.assign({},m,{photos}):m;
+    if(!photos||!photos.length)return m;
+    if(onlyIfMissing&&Array.isArray(m.photos)&&m.photos.length)return m;
+    return Object.assign({},m,{photos});
   });
+}
+function mergeLegacyPrivateMedia(state,legacy){
+  if(!state||!legacy)return;
+  if(!state.vehicleImage&&legacy.vehicleImage)state.vehicleImage=legacy.vehicleImage;
+  if(!state.vehicleImageOriginal&&legacy.vehicleImageOriginal)state.vehicleImageOriginal=legacy.vehicleImageOriginal;
+  const photoMap=new Map((legacy.milestones||[]).map(m=>[m.id,Array.isArray(m.photos)?m.photos:[]]));
+  applyMilestonePhotoMap(state,photoMap,true);
 }
 async function loadMilestonePhotoShards(collection,prefix,count){
   const photoMap=new Map();
@@ -5677,13 +5752,21 @@ async function loadPrivateMedia(state){
     }
     cachedMediaMsShardCount=shardCount;
   }
-  if(!loaded&&mediaDocRef){
+  if(mediaDocRef){
     try{
       const mediaSnap=await withTimeout(mediaDocRef.get(),8000,'Cloud media load');
       if(mediaSnap.exists){
-        applyCloudMedia(state,mediaSnap.data());
-        cachedMediaMsShardCount=0;
-        loaded=true;
+        const hadVehicle=!!(state.vehicleImage||state.vehicleImageOriginal);
+        const hadMsPhotos=Array.isArray(state.milestones)&&state.milestones.some(m=>Array.isArray(m.photos)&&m.photos.length);
+        if(!loaded){
+          applyCloudMedia(state,mediaSnap.data());
+          cachedMediaMsShardCount=0;
+          loaded=true;
+        }else{
+          mergeLegacyPrivateMedia(state,mediaSnap.data());
+          if(!hadVehicle&&(state.vehicleImage||state.vehicleImageOriginal))loaded=true;
+          if(!hadMsPhotos&&Array.isArray(state.milestones)&&state.milestones.some(m=>Array.isArray(m.photos)&&m.photos.length))loaded=true;
+        }
       }
     }catch(e){
       console.warn('Cloud media load failed:',e);
@@ -5726,9 +5809,19 @@ async function writeMediaShards(collection,prefix,shardPayloads,prevCount){
   }
   return shardPayloads.length;
 }
+async function prepareMediaForCloudSave(media){
+  try{
+    planMediaWrites(media);
+    return media;
+  }catch(e){
+    console.warn('Optimizing media for Firestore limits:',e);
+    setSaveInd('saving','Optimizing photos for cloud...');
+    return shrinkMediaForCloud(media);
+  }
+}
 async function shrinkMediaForCloud(media){
-  const vehicleOpts={maxW:1280,maxH:820,targetBytes:IMAGE_TARGET_VEHICLE,minW:480,minH:320,startQuality:0.82,minQuality:0.24};
-  const milestoneOpts={maxW:1000,maxH:750,targetBytes:IMAGE_TARGET_MILESTONE,minW:360,minH:270,startQuality:0.78,minQuality:0.22};
+  const vehicleOpts={maxW:1600,maxH:1060,targetBytes:IMAGE_TARGET_VEHICLE,minW:720,minH:480,startQuality:0.86,minQuality:0.72};
+  const milestoneOpts={maxW:1500,maxH:1125,targetBytes:IMAGE_TARGET_MILESTONE,minW:640,minH:480,startQuality:0.84,minQuality:0.7};
   const out={
     vehicleImage:media.vehicleImage||'',
     vehicleImageOriginal:media.vehicleImageOriginal||'',
@@ -5752,18 +5845,6 @@ async function shrinkMediaForCloud(media){
   }
   return out;
 }
-function applyShrunkMediaToState(shrunk){
-  if(!shrunk)return;
-  if(shrunk.vehicleImage!==undefined)vehicleImage=shrunk.vehicleImage||'';
-  if(shrunk.vehicleImageOriginal!==undefined)vehicleImageOriginal=shrunk.vehicleImageOriginal||'';
-  if(Array.isArray(shrunk.milestones)&&Array.isArray(milestones)){
-    const photoMap=new Map(shrunk.milestones.map(m=>[m.id,Array.isArray(m.photos)?m.photos:[]]));
-    milestones=milestones.map(m=>{
-      if(!photoMap.has(m.id))return m;
-      return Object.assign({},m,{photos:photoMap.get(m.id)||[]});
-    });
-  }
-}
 async function savePrivateMedia(media){
   const plan=planMediaWrites(media);
   const vehicleDoc=Object.assign({},plan.vehiclePayload,{savedAt:firebase.firestore.FieldValue.serverTimestamp()});
@@ -5784,7 +5865,8 @@ function splitPublicPayload(payload){
   return {core,media};
 }
 async function savePublicMedia(media){
-  const plan=planMediaWrites(media);
+  const cloudMedia=await prepareMediaForCloudSave(media);
+  const plan=planMediaWrites(cloudMedia);
   const vehicleDoc=Object.assign({},plan.vehiclePayload,{savedAt:firebase.firestore.FieldValue.serverTimestamp()});
   if(publicMediaVehicleDocRef)await publicMediaVehicleDocRef.set(vehicleDoc,{merge:true});
   return writeMediaShards(PUBLIC_COLLECTION,PUBLIC_MEDIA_MS_PREFIX,plan.shardPayloads,cachedPublicMediaMsShardCount);
@@ -5976,9 +6058,8 @@ async function saveCloudState(){
   if(!firebaseReady||!firestoreDocRef)return false;
   const full=packState();
   const {core,media}=splitCloudPayload(full);
-  const shrunkMedia=await shrinkMediaForCloud(media);
-  applyShrunkMediaToState(shrunkMedia);
-  const mediaMsShardCount=await savePrivateMedia(shrunkMedia);
+  const cloudMedia=await prepareMediaForCloudSave(media);
+  const mediaMsShardCount=await savePrivateMedia(cloudMedia);
   const corePayload=sanitizeForFirestore(core);
   corePayload.meta=Object.assign({},corePayload.meta||{},{mediaMsShardCount});
   corePayload.savedAt=firebase.firestore.FieldValue.serverTimestamp();
@@ -7462,8 +7543,8 @@ function renderVehicleImage(){
   }
 }
 
-const IMAGE_TARGET_VEHICLE=320000;
-const IMAGE_TARGET_MILESTONE=150000;
+const IMAGE_TARGET_VEHICLE=420000;
+const IMAGE_TARGET_MILESTONE=520000;
 const IMAGE_MAX_UPLOAD_BYTES=30*1024*1024;
 
 function dataUrlByteLength(dataUrl){
@@ -7481,11 +7562,11 @@ function compressImageFromSource(src,opts){
       const canvas=document.createElement('canvas');
       const ctx=canvas.getContext('2d',{alpha:false});
       let scale=Math.min(settings.maxW/img.width,settings.maxH/img.height,1);
-      if(settings.fileSize>5*1024*1024)scale*=0.72;
-      if(settings.fileSize>10*1024*1024)scale*=0.62;
       let quality=settings.startQuality;
       let data='';
-      for(let pass=0;pass<24;pass++){
+      ctx.imageSmoothingEnabled=true;
+      ctx.imageSmoothingQuality='high';
+      for(let pass=0;pass<20;pass++){
         const w=Math.max(settings.minW,Math.round(img.width*scale));
         const h=Math.max(settings.minH,Math.round(img.height*scale));
         canvas.width=w;
@@ -7496,12 +7577,12 @@ function compressImageFromSource(src,opts){
         data=canvas.toDataURL('image/jpeg',quality);
         if(data.length<=settings.targetBytes)break;
         if(quality>settings.minQuality){
-          quality=Math.max(settings.minQuality,quality-0.06);
+          quality=Math.max(settings.minQuality,quality-0.04);
         }else{
-          scale*=0.84;
+          scale*=0.9;
         }
       }
-      if(data.length>settings.targetBytes*1.35){
+      if(data.length>settings.targetBytes*1.5){
         reject(new Error('Image is still too large after compression. Try a smaller photo.'));
         return;
       }
@@ -7538,8 +7619,8 @@ function compressDataUrl(dataUrl,opts){
 
 function compressVehicleImage(file){
   return compressImageFile(file,{
-    maxW:1280,maxH:820,targetBytes:IMAGE_TARGET_VEHICLE,
-    minW:480,minH:320,startQuality:0.82,minQuality:0.24
+    maxW:1920,maxH:1280,targetBytes:IMAGE_TARGET_VEHICLE,
+    minW:800,minH:540,startQuality:0.92,minQuality:0.78
   });
 }
 
@@ -7617,21 +7698,20 @@ function deleteMilestone(id){
 
 function compressMilestoneImage(file){
   return compressImageFile(file,{
-    maxW:1000,maxH:750,targetBytes:IMAGE_TARGET_MILESTONE,
-    minW:360,minH:270,startQuality:0.78,minQuality:0.22
+    maxW:1800,maxH:1350,targetBytes:IMAGE_TARGET_MILESTONE,
+    minW:720,minH:540,startQuality:0.9,minQuality:0.76
   });
 }
 
-async function handleMilestonePhotos(id,e){
-  const files=Array.from(e&&e.target&&e.target.files?e.target.files:[]);
-  if(!files.length)return;
+async function handleMilestonePhotoFiles(id,files){
+  const list=Array.from(files||[]).filter(f=>f&&f.type&&f.type.startsWith('image/'));
+  if(!list.length)return;
   const m=milestones.find(x=>x.id===id);
-  if(!m)return;
+  if(!m||m.posted)return;
   try{
-    setSaveInd('saving','Compressing images...');
     const room=Math.max(0,6-(m.photos?m.photos.length:0));
     if(!room){setSaveInd('idle','Max 6 photos per milestone');return;}
-    for(const file of files.slice(0,room)){
+    for(const file of list.slice(0,room)){
       const sizeMb=(file.size/1048576).toFixed(1);
       setSaveInd('saving',sizeMb>=2?`Compressing ${sizeMb} MB image...`:'Compressing images...');
       const data=await compressMilestoneImage(file);
@@ -7645,9 +7725,37 @@ async function handleMilestonePhotos(id,e){
     console.warn(err);
     const errMsg=err&&err.message?String(err.message):'Image upload failed';
     setSaveInd('idle',errMsg);
+  }
+}
+
+async function handleMilestonePhotos(id,e){
+  const files=Array.from(e&&e.target&&e.target.files?e.target.files:[]);
+  try{
+    await handleMilestonePhotoFiles(id,files);
   }finally{
     if(e&&e.target)e.target.value='';
   }
+}
+
+function milestonePhotoDragOver(e){
+  e.preventDefault();
+  e.stopPropagation();
+  const zone=e.currentTarget;
+  if(zone)zone.classList.add('drag-over');
+}
+
+function milestonePhotoDragLeave(e){
+  e.preventDefault();
+  const zone=e.currentTarget;
+  if(zone)zone.classList.remove('drag-over');
+}
+
+function milestonePhotoDrop(id,e){
+  e.preventDefault();
+  e.stopPropagation();
+  const zone=e.currentTarget;
+  if(zone)zone.classList.remove('drag-over');
+  handleMilestonePhotoFiles(id,e.dataTransfer&&e.dataTransfer.files?e.dataTransfer.files:[]);
 }
 
 function removeMilestonePhoto(id,index){
@@ -7758,8 +7866,11 @@ function renderMilestones(){
           ${sectionOptions(m.relatedSection||'')}
         </select>
         <textarea class="ms-textarea" placeholder="Write the build update here..." onchange="updateMilestone('${m.id}','body',this.value)">${esc(m.body||'')}</textarea>
-        <div class="milestone-gallery">
-          ${photos.map((src,i)=>`<div class="ms-photo"><img src="${src}" alt="Milestone image"><button class="ms-photo-remove" type="button" onclick="removeMilestonePhoto('${m.id}',${i})"><i class="ti ti-x"></i></button></div>`).join('')}
+        <div class="ms-photo-drop-zone" ondragover="milestonePhotoDragOver(event)" ondragleave="milestonePhotoDragLeave(event)" ondrop="milestonePhotoDrop('${m.id}',event)">
+          <div class="milestone-gallery">
+            ${photos.map((src,i)=>`<div class="ms-photo"><img src="${src}" alt="Milestone image"><button class="ms-photo-remove" type="button" onclick="removeMilestonePhoto('${m.id}',${i})"><i class="ti ti-x"></i></button></div>`).join('')}
+          </div>
+          <div class="ms-photo-drop-hint"><i class="ti ti-upload"></i> Drag &amp; drop photos here</div>
         </div>
         <div class="milestone-actions">
           <input id="ms-photo-${m.id}" type="file" accept="image/*" multiple style="display:none" onchange="handleMilestonePhotos('${m.id}',event)">
@@ -8269,7 +8380,7 @@ async function bootTracker(){
   if(trackerBooted) return;
   trackerBooted=true;
 
-  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,updDec,addDecision,delDec,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
+  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,updDec,addDecision,delDec,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
   document.addEventListener('click',e=>{
     if(!e.target.closest('.tracker-nav-more-wrap'))closeMoreMenu();
     if(!e.target.closest('.tracker-nav-mobile-wrap'))closeMobileNavMenu();
