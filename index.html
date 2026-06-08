@@ -3555,7 +3555,7 @@ body{margin:0}
   border-radius:12px;border:1px solid rgba(241,209,122,.18);
   background:#080808;display:flex;align-items:center;justify-content:center;overflow:hidden;
 }
-.spon-logo-preview img{width:100%;height:100%;object-fit:contain;display:block}
+.spon-logo-preview img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
 .spon-logo-empty{font-size:8px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--gs-muted);text-align:center;line-height:1.2}
 .spon-confirmed-banner{
   margin:0 0 10px;padding:10px 12px;border-radius:12px;
@@ -6981,6 +6981,7 @@ async function initData(){
 
     repairTrackerState();
     safeBuild();
+    repairAllSponsorLogos();
     if(loadedFrom==='local')setSaveInd('idle','Loaded from local backup');
   }finally{
     hideCloudLoading();
@@ -7946,32 +7947,55 @@ function dataUrlByteLength(dataUrl){
 function compressImageFromSource(src,opts){
   const settings=Object.assign({
     maxW:1200,maxH:900,targetBytes:IMAGE_TARGET_MILESTONE,
-    minW:360,minH:270,startQuality:0.8,minQuality:0.22,fileSize:0
+    minW:360,minH:270,startQuality:0.8,minQuality:0.22,fileSize:0,
+    format:'jpeg',matteColor:'#101010',preserveAlpha:false,jpegFallback:false
   },opts||{});
+  const usePng=settings.format==='png'||settings.preserveAlpha;
+  function encodePass(imgEl,scale,quality,asPng){
+    const w=Math.max(settings.minW,Math.round(imgEl.width*scale));
+    const h=Math.max(settings.minH,Math.round(imgEl.height*scale));
+    const canvas=document.createElement('canvas');
+    canvas.width=w;
+    canvas.height=h;
+    const ctx=canvas.getContext('2d',{alpha:asPng});
+    ctx.imageSmoothingEnabled=true;
+    ctx.imageSmoothingQuality='high';
+    if(asPng){
+      ctx.clearRect(0,0,w,h);
+    }else{
+      ctx.fillStyle=settings.matteColor;
+      ctx.fillRect(0,0,w,h);
+    }
+    ctx.drawImage(imgEl,0,0,w,h);
+    return asPng?canvas.toDataURL('image/png'):canvas.toDataURL('image/jpeg',quality);
+  }
   return new Promise((resolve,reject)=>{
     const img=new Image();
     img.onload=()=>{
-      const canvas=document.createElement('canvas');
-      const ctx=canvas.getContext('2d',{alpha:false});
       let scale=Math.min(settings.maxW/img.width,settings.maxH/img.height,1);
       let quality=settings.startQuality;
       let data='';
-      ctx.imageSmoothingEnabled=true;
-      ctx.imageSmoothingQuality='high';
       for(let pass=0;pass<20;pass++){
-        const w=Math.max(settings.minW,Math.round(img.width*scale));
-        const h=Math.max(settings.minH,Math.round(img.height*scale));
-        canvas.width=w;
-        canvas.height=h;
-        ctx.fillStyle='#101010';
-        ctx.fillRect(0,0,w,h);
-        ctx.drawImage(img,0,0,w,h);
-        data=canvas.toDataURL('image/jpeg',quality);
+        data=encodePass(img,scale,quality,usePng);
         if(data.length<=settings.targetBytes)break;
-        if(quality>settings.minQuality){
+        if(usePng){
+          scale*=0.9;
+        }else if(quality>settings.minQuality){
           quality=Math.max(settings.minQuality,quality-0.04);
         }else{
           scale*=0.9;
+        }
+      }
+      if(usePng&&data.length>settings.targetBytes*1.5&&settings.jpegFallback){
+        quality=settings.startQuality;
+        for(let pass=0;pass<12;pass++){
+          data=encodePass(img,scale,quality,false);
+          if(data.length<=settings.targetBytes)break;
+          if(quality>settings.minQuality){
+            quality=Math.max(settings.minQuality,quality-0.04);
+          }else{
+            scale*=0.9;
+          }
         }
       }
       if(data.length>settings.targetBytes*1.5){
@@ -8623,7 +8647,37 @@ function updSpon(id,f,v){
 }
 function toggleSponsorPublicVisible(id,on){updSpon(id,'publicVisible',!!on)}
 function compressSponsorLogo(file){
-  return compressImageFile(file,{maxW:520,maxH:260,targetBytes:180000,minW:120,minH:60,startQuality:0.9,minQuality:0.75});
+  return compressImageFile(file,{
+    maxW:480,maxH:480,targetBytes:220000,minW:80,minH:80,
+    preserveAlpha:true,format:'png',matteColor:'#000000',jpegFallback:true,
+    startQuality:0.92,minQuality:0.82
+  });
+}
+async function repairSponsorLogoBlack(s){
+  if(!s||!s.logo||!String(s.logo).startsWith('data:image'))return false;
+  const logo=String(s.logo);
+  if(logo.startsWith('data:image/png'))return false;
+  try{
+    s.logo=await compressDataUrl(logo,{
+      maxW:480,maxH:480,targetBytes:220000,minW:80,minH:80,
+      preserveAlpha:true,format:'png',matteColor:'#000000',jpegFallback:true,
+      startQuality:0.92,minQuality:0.82
+    });
+    return true;
+  }catch(err){
+    console.warn('Sponsor logo matte repair skipped',err);
+    return false;
+  }
+}
+async function repairAllSponsorLogos(){
+  let changed=false;
+  for(const s of sponsors){
+    if(await repairSponsorLogoBlack(s))changed=true;
+  }
+  if(changed){
+    renderSponsors();
+    scheduleSave();
+  }
 }
 async function handleSponsorLogoUpload(id,e){
   const file=e&&e.target&&e.target.files?e.target.files[0]:null;
