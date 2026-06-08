@@ -3465,11 +3465,6 @@ body{margin:0}
   display:block;font-family:Inter,system-ui,sans-serif;font-size:8px;font-weight:800;
   letter-spacing:.09em;text-transform:uppercase;color:var(--gs-muted);margin-bottom:4px;
 }
-.spon-field label.spon-public-hdr{
-  font-family:var(--gs-display)!important;font-size:11px!important;font-weight:700!important;
-  letter-spacing:var(--gs-tracking-tight)!important;color:var(--gs-gold-light)!important;
-  margin:4px 0 0;padding-top:8px;border-top:1px solid rgba(241,209,122,.12);
-}
 .spon-inp,.spon-textarea,.spon-select{
   width:100%;border-radius:8px;border:1px solid rgba(240,205,115,.2);
   background:rgba(0,0,0,.28);color:var(--gs-cream);padding:6px 9px;
@@ -3491,6 +3486,34 @@ body{margin:0}
 }
 .spon-field.span-2{grid-column:span 2}
 .spon-field.span-3{grid-column:1/-1}
+.spon-section-bar{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding-top:10px;margin-top:2px;border-top:1px solid rgba(241,209,122,.12);
+}
+.spon-section-bar .spon-section-title{
+  font-family:var(--gs-display)!important;font-size:11px!important;font-weight:700!important;
+  letter-spacing:var(--gs-tracking-tight)!important;text-transform:uppercase!important;
+}
+.spon-section-bar.public .spon-section-title{color:var(--gs-gold-light)!important}
+.spon-section-bar.private .spon-section-title{color:var(--gs-muted)!important}
+.spon-private-tag{
+  display:inline-flex;align-items:center;padding:2px 6px;border-radius:999px;
+  font-family:Inter,system-ui,sans-serif;font-size:7px;font-weight:800;letter-spacing:.08em;
+  text-transform:uppercase;color:#fca5a5;background:rgba(239,68,68,.1);
+  border:1px solid rgba(239,68,68,.22);margin-left:6px;vertical-align:middle;
+}
+.spon-field label .spon-private-tag{margin-left:4px}
+.spon-public-grid{
+  display:grid;grid-template-columns:92px minmax(0,1fr);gap:12px;align-items:start;
+}
+.spon-public-logo-col{display:flex;flex-direction:column;gap:8px;align-items:stretch}
+.spon-public-fields-col{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px}
+.spon-public-fields-col .spon-field.span-2{grid-column:span 2}
+.spon-switch-wrap--inline{
+  min-height:0;padding:0;border:0;background:transparent;gap:8px;
+}
+.spon-logo-actions{display:flex;flex-direction:column;gap:6px}
+.spon-logo-actions .ms-btn{padding:6px 8px;font-size:10px;justify-content:center}
 .spon-list-body .visual-status-select{
   width:100%!important;min-width:0!important;padding:6px 24px 6px 9px!important;font-size:10px!important;
   font-family:var(--gs-display)!important;letter-spacing:var(--gs-tracking-tight)!important;
@@ -3527,15 +3550,13 @@ body{margin:0}
   transform:translate(18px,-50%);background:#ecfdf5;
 }
 .spon-switch input:focus-visible+.spon-switch-slider{box-shadow:0 0 0 3px rgba(22,163,74,.25)}
-.spon-logo-row{
-  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
-}
 .spon-logo-preview{
-  width:88px;height:52px;border-radius:12px;border:1px solid rgba(241,209,122,.18);
+  width:72px;height:72px;aspect-ratio:1/1;box-sizing:border-box;padding:8px;
+  border-radius:12px;border:1px solid rgba(241,209,122,.18);
   background:#080808;display:flex;align-items:center;justify-content:center;overflow:hidden;
 }
 .spon-logo-preview img{width:100%;height:100%;object-fit:contain;display:block}
-.spon-logo-empty{font-size:9px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--gs-muted);text-align:center;padding:6px}
+.spon-logo-empty{font-size:8px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--gs-muted);text-align:center;line-height:1.2}
 .spon-confirmed-banner{
   margin:0 0 10px;padding:10px 12px;border-radius:12px;
   border:1px solid rgba(241,209,122,.34);
@@ -3563,12 +3584,6 @@ body{margin:0}
 }
 .spon-confirmed-row:last-child{border-bottom:none}
 .spon-confirmed-row.is-gold{background:linear-gradient(135deg,rgba(185,138,39,.12),rgba(0,0,0,.16))}
-.spon-confirmed-thumb{
-  width:52px;height:40px;border-radius:10px;border:1px solid rgba(241,209,122,.16);
-  background:#080808;display:flex;align-items:center;justify-content:center;overflow:hidden;
-}
-.spon-confirmed-thumb img{width:100%;height:100%;object-fit:contain}
-.spon-confirmed-thumb i{font-size:18px;color:var(--gs-muted)}
 .spon-confirmed-name{
   font-family:var(--gs-display)!important;font-size:14px!important;font-weight:700!important;
   letter-spacing:var(--gs-tracking-tight)!important;text-transform:uppercase!important;
@@ -3601,9 +3616,8 @@ body{margin:0}
   .spon-list-del{grid-column:4;grid-row:1 / span 2}
   .spon-list-fields{grid-template-columns:1fr 1fr}
   .spon-field.span-2,.spon-field.span-3{grid-column:1/-1}
-  .spon-confirmed-row{grid-template-columns:44px minmax(0,1fr) auto;grid-template-rows:auto auto}
-  .spon-confirmed-val{grid-column:2}
-  .spon-visibility-pill,.spon-confirmed-edit{grid-row:2}
+  .spon-public-grid{grid-template-columns:1fr}
+  .spon-public-fields-col{grid-template-columns:1fr}
 }
 
 /* ===== v88 visible menu bar under header ===== */
@@ -5299,7 +5313,7 @@ body{margin:0}
         <button class="tab active" data-panel="dashboard" data-path="dashboard" onclick="showPanel('dashboard',true)"><i class="ti ti-gauge"></i><span class="tab-label">Dashboard</span></button>
         <button class="tab" data-panel="parts" data-path="parts" onclick="showPanel('parts',true)"><i class="ti ti-tools"></i><span class="tab-label">Parts</span></button>
         <button class="tab" data-panel="worklog" data-path="worklog" onclick="showPanel('worklog',true)"><i class="ti ti-tool"></i><span class="tab-label">Work Log</span></button>
-        <button class="tab" data-panel="sponsorships" data-path="partners" onclick="showPanel('sponsorships',true)"><i class="ti ti-building-store"></i><span class="tab-label">Build Partners</span></button>
+        <button class="tab" data-panel="sponsorships" data-path="partners" onclick="showPanel('sponsorships',true)"><i class="ti ti-currency-dollar"></i><span class="tab-label">Build Partners</span></button>
         <button class="tab" data-panel="decisions" data-path="decisions" onclick="showPanel('decisions',true)"><i class="ti ti-list-check"></i><span class="tab-label">Decisions</span></button>
         <button class="tab" data-panel="milestones" data-path="milestones" onclick="showPanel('milestones',true)"><i class="ti ti-notebook"></i><span class="tab-label">Milestones</span></button>
       </div>
@@ -5332,7 +5346,7 @@ body{margin:0}
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('dashboard')"><i class="ti ti-gauge"></i><span>Dashboard</span></button>
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('parts')"><i class="ti ti-tools"></i><span>Parts</span></button>
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('worklog')"><i class="ti ti-tool"></i><span>Work Log</span></button>
-          <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('sponsorships')"><i class="ti ti-building-store"></i><span>Build Partners</span></button>
+          <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('sponsorships')"><i class="ti ti-currency-dollar"></i><span>Build Partners</span></button>
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('decisions')"><i class="ti ti-list-check"></i><span>Decisions</span></button>
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('milestones')"><i class="ti ti-notebook"></i><span>Milestones</span></button>
           <div class="tracker-nav-mobile-divider" aria-hidden="true"></div>
@@ -5531,7 +5545,7 @@ body{margin:0}
         <div class="sponsor-section-sub">Confirmed partners ready for public display and deliverable tracking.</div>
       </div>
     </div>
-    <div class="spon-partners-grid" id="spon-confirmed-grid"></div>
+    <div class="spon-pipeline-list" id="spon-confirmed-grid"></div>
   </div>
 </div>
 <div id="panel-decisions" class="panel">
@@ -5829,7 +5843,7 @@ function packState(){
       vehicleModel:VEHICLE_MODEL
     },
     meta:{
-      appVersion:'v133-build-partners-public',
+      appVersion:'v134-partner-layout',
       updatedAt:new Date().toISOString()
     }
   };
@@ -6310,8 +6324,7 @@ function publicSponsorsPayload(){
       facebook:String(s.facebook||'').trim(),
       youtube:String(s.youtube||'').trim(),
       tiktok:String(s.tiktok||'').trim(),
-      publicDescription:String(s.publicDescription||'').trim(),
-      sponsoredItems:String(s.sponsoredItems||'').trim()
+      publicDescription:String(s.publicDescription||'').trim()
     }));
 }
 
@@ -8499,8 +8512,9 @@ function visualStatusSelect(type,id,value,options,onchangeFn){
 }
 
 let openSponsorId=null;
-function sponsorPublicSwitchHtml(s){
-  return `<div class="spon-switch-wrap">
+function sponsorPublicSwitchHtml(s,inline){
+  const wrapCls=inline?'spon-switch-wrap spon-switch-wrap--inline':'spon-switch-wrap';
+  return `<div class="${wrapCls}">
     <span class="spon-switch-label">Public visible</span>
     <label class="spon-switch">
       <input type="checkbox" ${s.publicVisible?'checked':''} onchange="toggleSponsorPublicVisible('${s.id}',this.checked)">
@@ -8526,12 +8540,13 @@ function openSponsorRow(id){
 }
 function renderSponsorPipelineCard(s){
   const isOpen=openSponsorId===s.id;
-  const needsSetup=sponsorNeedsPublicSetup(s);
-  const banner=needsSetup?`<div class="spon-confirmed-banner"><strong>Confirmed — complete public profile</strong>Upload a logo, add website + tier, set sponsor value, and enable public visibility so this partner appears on the public build page.</div>`:'';
+  const isConfirmed=s.status==='Confirmed';
+  const needsSetup=isConfirmed&&sponsorNeedsPublicSetup(s);
+  const banner=needsSetup?`<div class="spon-confirmed-banner"><strong>Complete public profile</strong>Upload a logo, add website + tier, set partner value, and enable public visibility so this partner appears on the public build page.</div>`:'';
   const logo=s.logo?`<img src="${s.logo}" alt="${esc(sponsorName(s))} logo">`:`<span class="spon-logo-empty">No logo</span>`;
   const displayName=sponsorName(s);
   const nameLabel=displayName==='Untitled partner'?'Untitled partner':displayName;
-  return `<div class="spon-list-item${s.status==='Confirmed'?' is-confirmed':''}${isOpen?' open':''}" id="sr-${s.id}">
+  return `<div class="spon-list-item${isConfirmed?' is-confirmed':''}${isOpen?' open':''}" id="sr-${s.id}">
     <div class="spon-list-head" onclick="toggleSponsorRow('${s.id}')">
       <span class="spon-list-pm" aria-hidden="true">${isOpen?'−':'+'}</span>
       <span class="spon-list-name">${esc(nameLabel)}</span>
@@ -8542,48 +8557,41 @@ function renderSponsorPipelineCard(s){
     <div class="spon-list-body" onclick="event.stopPropagation()">
       ${banner}
       <div class="spon-list-fields">
-        <div class="spon-field span-3"><label>Partner name</label><input class="spon-inp spon-name-inp" value="${esc(sponsorName(s))}" onchange="updSpon('${s.id}','name',this.value)" placeholder="Partner name"></div>
+        <div class="spon-field span-2"><label>Partner name</label><input class="spon-inp spon-name-inp" value="${esc(sponsorName(s))}" onchange="updSpon('${s.id}','name',this.value)" placeholder="Partner name"></div>
         <div class="spon-field"><label>Status</label>${visualStatusSelect('sponsor',s.id,s.status,SPONSOR_STATUSES,'updSpon')}</div>
         <div class="spon-field"><label>Partner value</label><input class="spon-inp cost-inp" type="number" step="0.01" min="0" value="${sponsorValue(s)||''}" placeholder="0" onchange="updSpon('${s.id}','value',this.value)"></div>
-        <div class="spon-field"><label>Partner tier</label><select class="spon-select" onchange="updSpon('${s.id}','tier',this.value)">${SPONSOR_TIERS.map(t=>`<option value="${t}"${s.tier===t?' selected':''}>${esc(t)}</option>`).join('')}</select></div>
         <div class="spon-field"><label>Contact name</label><input class="spon-inp" value="${esc(s.contactName||'')}" onchange="updSpon('${s.id}','contactName',this.value)" placeholder="Contact name"></div>
         <div class="spon-field"><label>Email</label><input class="spon-inp" type="email" value="${esc(s.email||'')}" onchange="updSpon('${s.id}','email',this.value)" placeholder="email@company.com"></div>
-        <div class="spon-field span-3">${sponsorPublicSwitchHtml(s)}</div>
-        <div class="spon-field span-3"><label class="spon-public-hdr">Public profile</label></div>
-        <div class="spon-field span-3"><label>Website</label><input class="spon-inp" value="${esc(s.website||'')}" onchange="updSpon('${s.id}','website',this.value)" placeholder="https://"></div>
-        <div class="spon-field"><label>Instagram</label><input class="spon-inp" value="${esc(s.instagram||'')}" onchange="updSpon('${s.id}','instagram',this.value)" placeholder="@handle or URL"></div>
-        <div class="spon-field"><label>Facebook</label><input class="spon-inp" value="${esc(s.facebook||'')}" onchange="updSpon('${s.id}','facebook',this.value)" placeholder="@page or URL"></div>
-        <div class="spon-field"><label>YouTube</label><input class="spon-inp" value="${esc(s.youtube||'')}" onchange="updSpon('${s.id}','youtube',this.value)" placeholder="@channel or URL"></div>
-        <div class="spon-field"><label>TikTok</label><input class="spon-inp" value="${esc(s.tiktok||'')}" onchange="updSpon('${s.id}','tiktok',this.value)" placeholder="@handle or URL"></div>
-        <div class="spon-field span-3"><label>Public description</label><textarea class="spon-textarea" rows="2" placeholder="Short public bio shown on the Partners page..." onchange="updSpon('${s.id}','publicDescription',this.value)">${esc(s.publicDescription||'')}</textarea></div>
-        <div class="spon-field span-3"><label>Sponsored items</label><textarea class="spon-textarea" rows="2" placeholder="One item per line — products or support provided..." onchange="updSpon('${s.id}','sponsoredItems',this.value)">${esc(s.sponsoredItems||'')}</textarea></div>
-        <div class="spon-field span-3">
-          <label>Logo</label>
-          <div class="spon-logo-row">
+        <div class="spon-field"><label>Partner tier</label><select class="spon-select" onchange="updSpon('${s.id}','tier',this.value)">${SPONSOR_TIERS.map(t=>`<option value="${t}"${s.tier===t?' selected':''}>${esc(t)}</option>`).join('')}</select></div>
+        <div class="spon-field span-3 spon-section-bar public">
+          <span class="spon-section-title">Public profile</span>
+          ${sponsorPublicSwitchHtml(s,true)}
+        </div>
+        <div class="spon-field span-3 spon-public-grid">
+          <div class="spon-public-logo-col">
             <div class="spon-logo-preview">${logo}</div>
-            <input id="spon-logo-${s.id}" type="file" accept="image/*" style="display:none" onchange="handleSponsorLogoUpload('${s.id}',event)">
-            <button class="ms-btn" type="button" onclick="event.stopPropagation();document.getElementById('spon-logo-${s.id}').click()"><i class="ti ti-photo-up"></i>Upload logo</button>
-            ${s.logo?`<button class="ms-btn danger" type="button" onclick="event.stopPropagation();removeSponsorLogo('${s.id}')"><i class="ti ti-trash"></i>Remove</button>`:''}
+            <div class="spon-logo-actions">
+              <input id="spon-logo-${s.id}" type="file" accept="image/*" style="display:none" onchange="handleSponsorLogoUpload('${s.id}',event)">
+              <button class="ms-btn" type="button" onclick="event.stopPropagation();document.getElementById('spon-logo-${s.id}').click()"><i class="ti ti-photo-up"></i>Upload</button>
+              ${s.logo?`<button class="ms-btn danger" type="button" onclick="event.stopPropagation();removeSponsorLogo('${s.id}')"><i class="ti ti-trash"></i>Remove</button>`:''}
+            </div>
+          </div>
+          <div class="spon-public-fields-col">
+            <div class="spon-field span-2"><label>Website</label><input class="spon-inp" value="${esc(s.website||'')}" onchange="updSpon('${s.id}','website',this.value)" placeholder="https://"></div>
+            <div class="spon-field"><label>Instagram</label><input class="spon-inp" value="${esc(s.instagram||'')}" onchange="updSpon('${s.id}','instagram',this.value)" placeholder="@handle or URL"></div>
+            <div class="spon-field"><label>Facebook</label><input class="spon-inp" value="${esc(s.facebook||'')}" onchange="updSpon('${s.id}','facebook',this.value)" placeholder="@page or URL"></div>
+            <div class="spon-field"><label>YouTube</label><input class="spon-inp" value="${esc(s.youtube||'')}" onchange="updSpon('${s.id}','youtube',this.value)" placeholder="@channel or URL"></div>
+            <div class="spon-field"><label>TikTok</label><input class="spon-inp" value="${esc(s.tiktok||'')}" onchange="updSpon('${s.id}','tiktok',this.value)" placeholder="@handle or URL"></div>
+            <div class="spon-field span-2"><label>Public description</label><textarea class="spon-textarea" rows="2" placeholder="Short public bio for the Partners page..." onchange="updSpon('${s.id}','publicDescription',this.value)">${esc(s.publicDescription||'')}</textarea></div>
           </div>
         </div>
-        <div class="spon-field span-3"><label>Deliverables</label><textarea class="spon-textarea" rows="2" placeholder="What the partner is providing..." onchange="updSpon('${s.id}','deliverables',this.value)">${esc(s.deliverables||'')}</textarea></div>
-        <div class="spon-field span-3"><label>Internal notes</label><textarea class="spon-textarea" rows="2" placeholder="Private outreach notes..." onchange="updSpon('${s.id}','notes',this.value)">${esc(s.notes||'')}</textarea></div>
+        <div class="spon-field span-3 spon-section-bar private">
+          <span class="spon-section-title">Private <span class="spon-private-tag">Internal only</span></span>
+        </div>
+        <div class="spon-field"><label>Deliverables <span class="spon-private-tag">Private</span></label><textarea class="spon-textarea" rows="2" placeholder="What the partner is providing..." onchange="updSpon('${s.id}','deliverables',this.value)">${esc(s.deliverables||'')}</textarea></div>
+        <div class="spon-field span-2"><label>Internal notes <span class="spon-private-tag">Private</span></label><textarea class="spon-textarea" rows="2" placeholder="Outreach notes — never shown publicly..." onchange="updSpon('${s.id}','notes',this.value)">${esc(s.notes||'')}</textarea></div>
       </div>
     </div>
-  </div>`;
-}
-function renderConfirmedPartnerCard(s){
-  const thumb=s.logo?`<img src="${s.logo}" alt="">`:`<i class="ti ti-building-store" aria-hidden="true"></i>`;
-  const tierCls=s.tier==='Gold Sponsor'?' is-gold':'';
-  return `<div class="spon-confirmed-row${tierCls}" id="spc-${s.id}">
-    <div class="spon-confirmed-thumb">${thumb}</div>
-    <div>
-      <div class="spon-confirmed-name">${esc(sponsorName(s))}</div>
-      <div class="spon-confirmed-tier">${esc(s.tier||'Supporting Partner')}</div>
-    </div>
-    <div class="spon-confirmed-val">${fmtCAD(sponsorValue(s))}</div>
-    <span class="spon-visibility-pill${s.publicVisible?' on':''}"><i class="ti ${s.publicVisible?'ti-eye':'ti-eye-off'}"></i>${s.publicVisible?'Public':'Private'}</span>
-    <button class="spon-confirmed-edit" type="button" title="Edit partner" onclick="openSponsorRow('${s.id}');document.getElementById('sr-${s.id}')&&document.getElementById('sr-${s.id}').scrollIntoView({behavior:'smooth',block:'center'})"><i class="ti ti-pencil" aria-hidden="true"></i></button>
   </div>`;
 }
 function renderSponsors(){
@@ -8591,13 +8599,14 @@ function renderSponsors(){
   const pipe=document.getElementById('spon-pipeline');
   const grid=document.getElementById('spon-confirmed-grid');
   const section=document.getElementById('spon-confirmed-section');
-  if(pipe){
-    pipe.innerHTML=sponsors.length?sponsors.map(renderSponsorPipelineCard).join(''):`<div class="spon-empty"><i class="ti ti-building-store" style="font-size:34px;display:block;margin-bottom:8px;color:var(--gs-gold-light)"></i>No partners in pipeline yet.</div>`;
-  }
+  const pipeline=sponsors.filter(s=>s.status!=='Confirmed');
   const confirmed=sponsors.filter(s=>s.status==='Confirmed');
+  if(pipe){
+    pipe.innerHTML=pipeline.length?pipeline.map(renderSponsorPipelineCard).join(''):`<div class="spon-empty"><i class="ti ti-currency-dollar" style="font-size:34px;display:block;margin-bottom:8px;color:var(--gs-gold-light)"></i>No partners in pipeline yet.</div>`;
+  }
   if(section)section.style.display=confirmed.length?'':'none';
   if(grid){
-    grid.innerHTML=confirmed.length?confirmed.map(renderConfirmedPartnerCard).join(''):`<div class="spon-partners-empty">Confirmed partners will appear here.</div>`;
+    grid.innerHTML=confirmed.length?confirmed.map(renderSponsorPipelineCard).join(''):`<div class="spon-partners-empty">Confirmed partners will appear here when status is set to Confirmed.</div>`;
   }
 }
 function updSpon(id,f,v){
@@ -8608,7 +8617,7 @@ function updSpon(id,f,v){
   else if(f==='contactName'){s.contactName=String(v||'').trim();s.contact=s.contactName;}
   else{s[f]=v;}
   normalizeSponsor(s);
-  if(f==='status'||f==='name'||f==='value'||f==='publicVisible'||f==='tier'||f==='deliverables'||f==='website'||f==='instagram'||f==='facebook'||f==='youtube'||f==='tiktok'||f==='publicDescription'||f==='sponsoredItems')renderSponsors();
+  if(f==='status'||f==='name'||f==='value'||f==='publicVisible'||f==='tier'||f==='deliverables'||f==='website'||f==='instagram'||f==='facebook'||f==='youtube'||f==='tiktok'||f==='publicDescription')renderSponsors();
   else updateSponStats();
   scheduleSave();
 }
@@ -8641,7 +8650,7 @@ function removeSponsorLogo(id){
 }
 function addSponsor(){
   const id='sp-'+(++sponsorCtr);
-  const s=normalizeSponsor({id,name:'',contactName:'',email:'',website:'',instagram:'',facebook:'',youtube:'',tiktok:'',publicDescription:'',sponsoredItems:'',status:'Prospect',value:0,tier:'Supporting Partner',publicVisible:false,logo:'',deliverables:'',notes:''});
+  const s=normalizeSponsor({id,name:'',contactName:'',email:'',website:'',instagram:'',facebook:'',youtube:'',tiktok:'',publicDescription:'',status:'Prospect',value:0,tier:'Supporting Partner',publicVisible:false,logo:'',deliverables:'',notes:''});
   sponsors.push(s);
   openSponsorId=id;
   renderSponsors();
