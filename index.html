@@ -2501,31 +2501,79 @@ button,.tab,.section-hdr,.chip,.chip-opt,.ss-card{touch-action:manipulation;-web
   display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;
   border-radius:999px;background:#dc2626;color:#fff;font-size:10px;font-weight:900;margin-left:6px;
 }
-.notif-list{display:grid;gap:14px}
+.notif-list{display:grid;gap:6px}
 .notif-card{
-  display:grid;gap:10px;padding:16px 18px;border-radius:18px;border:1px solid rgba(241,209,122,.14);
-  background:rgba(0,0,0,.22);
+  border-radius:14px;border:1px solid rgba(241,209,122,.14);
+  background:rgba(0,0,0,.22);overflow:hidden;
 }
 .notif-card.unread{border-color:rgba(241,209,122,.34);background:rgba(185,138,39,.08)}
+.notif-card.read{opacity:.9}
+.notif-card.read.expanded{opacity:1}
+.notif-summary-row{
+  display:flex;align-items:center;gap:8px;width:100%;
+  padding:8px 12px;text-align:left;font:inherit;color:inherit;
+  border:none;background:transparent;
+}
+.notif-card.read .notif-summary-row{cursor:pointer}
+.notif-card.read .notif-summary-row:hover{background:rgba(185,138,39,.06)}
 .notif-build-badge{
-  display:inline-flex;align-items:center;gap:6px;width:fit-content;
-  padding:5px 10px;border-radius:999px;border:1px solid rgba(241,209,122,.28);
+  display:inline-flex;align-items:center;gap:4px;flex-shrink:0;
+  padding:3px 8px;border-radius:999px;border:1px solid rgba(241,209,122,.28);
   background:rgba(185,138,39,.12);color:var(--gs-gold-light);
-  font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;
+  font-size:9px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;
+  max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.notif-item-title{font-size:12px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--gs-gold-light)}
-.notif-milestone{font-size:12px;font-weight:700;color:var(--gs-cream);opacity:.92}
+.notif-summary-main{flex:1;min-width:0;display:grid;gap:1px}
+.notif-summary-title{
+  font-size:11px;font-weight:800;letter-spacing:.03em;color:var(--gs-gold-light);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.notif-summary-ms{
+  font-size:10px;font-weight:600;color:var(--gs-cream);opacity:.85;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.notif-summary-preview{
+  font-size:10px;color:var(--gs-muted);font-style:italic;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.notif-item-meta{
+  flex-shrink:0;font-size:9px;color:var(--gs-muted);
+  letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;
+}
+.notif-expand-icon{flex-shrink:0;color:var(--gs-muted);font-size:13px;line-height:1}
+.notif-card.unread .notif-expand-icon{display:none}
+.notif-body{display:grid;gap:6px;padding:0 12px 10px}
+.notif-card.read .notif-body{
+  padding-top:8px;border-top:1px solid rgba(241,209,122,.1);
+}
+.notif-card.unread .notif-summary-row{padding-bottom:2px}
 .notif-quote{
-  padding:12px 14px;border-radius:12px;border-left:3px solid rgba(241,209,122,.45);
-  background:rgba(0,0,0,.28);font-size:14px;line-height:1.55;color:var(--gs-cream);white-space:pre-wrap;
+  padding:8px 10px;border-radius:10px;border-left:2px solid rgba(241,209,122,.45);
+  background:rgba(0,0,0,.28);font-size:12px;line-height:1.45;color:var(--gs-cream);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
 }
-.notif-item-meta{font-size:10px;color:var(--gs-muted);letter-spacing:.05em;text-transform:uppercase}
-.notif-thread{margin-top:4px;padding-top:12px;border-top:1px solid rgba(241,209,122,.12)}
+.notif-thread{padding-top:6px;border-top:1px solid rgba(241,209,122,.1)}
 .notif-thread-label{
-  font-size:10px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:var(--gs-muted);margin-bottom:8px;
+  font-size:9px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--gs-muted);margin-bottom:6px;
 }
-.notif-card-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
-.notif-toolbar{display:flex;justify-content:flex-end;margin-bottom:12px}
+.notif-thread .ms-comment{padding:8px 10px;border-radius:10px}
+.notif-thread .ms-comment-head{margin-bottom:3px}
+.notif-thread .ms-comment-author{font-size:10px}
+.notif-thread .ms-comment-body{font-size:12px;line-height:1.4}
+.notif-thread .ms-comment-actions{margin-top:5px;gap:5px}
+.notif-thread .ms-engage-btn{padding:4px 8px;font-size:9px}
+.notif-thread .ms-comment-reply{margin-left:10px}
+.notif-thread .ms-reply-form{gap:6px;margin-top:6px}
+.notif-thread .ms-reply-form textarea{min-height:48px;padding:8px 10px;font-size:12px}
+.notif-card-actions{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.notif-card-actions .ms-btn{padding:5px 10px;font-size:10px}
+.notif-toolbar{display:flex;justify-content:flex-end;margin-bottom:10px}
+.notif-section-label{
+  font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--gs-muted);padding:10px 4px 4px;
+}
+.notif-section-label:first-child{padding-top:2px}
 
 @media(max-width:700px){
   .milestone-post-photo:first-child{
@@ -5865,7 +5913,7 @@ body{margin:0}
   <div class="milestone-toolbar">
     <div>
       <div class="milestone-toolbar-title">Notifications</div>
-      <div class="milestone-toolbar-sub">All builds in one place — see comments, like, and reply without leaving this page.</div>
+      <div class="milestone-toolbar-sub">New alerts stay open — tap read items to expand again.</div>
     </div>
   </div>
   <div class="notif-toolbar">
@@ -10135,6 +10183,7 @@ let notifications=[];
 let notificationsUnsubs=[];
 let notifInboxBuckets={};
 let notifRenderGen=0;
+let notifExpandedIds=new Set();
 let milestoneEngagementCache={};
 let milestoneCommentsCache={};
 
@@ -10233,6 +10282,21 @@ function notifThreadKey(slug,milestoneId){
 function notifReplyInputId(slug,milestoneId,commentId){
   return 'notif-reply-'+slug+'-'+milestoneId+'-'+commentId;
 }
+function notifCardKey(slug,id){
+  return String(slug||'')+'::'+String(id||'');
+}
+function isNotifExpanded(n){
+  if(!n)return false;
+  if(!n.read)return true;
+  return notifExpandedIds.has(notifCardKey(n.inboxSlug||n.publicSlug,n.id));
+}
+function notifPreviewText(n,max){
+  const body=notifCommentBody(n);
+  const limit=max||64;
+  if(body)return body.length>limit?body.slice(0,limit)+'…':body;
+  if(n.type==='milestone_like')return 'Liked milestone post';
+  return '';
+}
 function renderEngagementCommentsHtml(slug,milestoneId,comments,context){
   const top=comments.filter(c=>!c.parentId);
   const replies=comments.filter(c=>c.parentId&&c.parentId!==c.id);
@@ -10269,29 +10333,43 @@ function renderEngagementCommentsHtml(slug,milestoneId,comments,context){
   if(!html)html='<div class="milestone-empty" style="padding:14px 0">No comments yet.</div>';
   return html;
 }
-function renderNotifCardShell(n,showThread){
+function renderNotifCardShell(n,showThread,expanded){
   const slug=n.inboxSlug||n.publicSlug||'';
   const buildName=esc(resolveNotifBuildName(n));
-  const msTitle=n.milestoneTitle?`<div class="notif-milestone"><i class="ti ti-notebook"></i> ${esc(n.milestoneTitle)}</div>`:'';
-  const body=notifCommentBody(n);
-  const quote=(n.type==='milestone_comment'||n.type==='comment_reply')&&body
-    ?`<div class="notif-quote">"${esc(body)}"</div>`:'';
-  const likeOnly=n.type==='milestone_like'&&!body?'<div class="notif-quote">Someone liked this milestone post.</div>':'';
-  const thread=showThread&&notifHasThread(n)
-    ?`<div class="notif-thread" id="notif-thread-${esc(slug)}-${esc(n.milestoneId)}"><div class="notif-thread-label">Conversation</div><div class="milestone-empty" style="padding:10px 0">Loading comments...</div></div>`
-    :'';
-  return `<article class="notif-card${n.read?'':' unread'}" data-notif-id="${esc(n.id)}" data-notif-slug="${esc(slug)}">
-    <div class="notif-build-badge"><i class="ti ti-car-garage"></i>${buildName}</div>
-    <div class="notif-item-title">${esc(notificationTitle(n))}</div>
-    ${msTitle}
-    ${quote||likeOnly}
-    <div class="notif-item-meta">${esc(fmtNotifTime(n.createdAt))}</div>
-    ${thread}
-    <div class="notif-card-actions">
-      ${n.milestoneId?`<button class="ms-btn" type="button" onclick="openNotificationOnBuild('${esc(slug)}','${esc(n.milestoneId)}','${esc(n.id)}')"><i class="ti ti-external-link"></i>Open build milestone</button>`:''}
-      ${!n.read?`<button class="ms-btn" type="button" onclick="markNotificationRead('${esc(slug)}','${esc(n.id)}')"><i class="ti ti-check"></i>Mark read</button>`:''}
-    </div>
-  </article>`;
+  const time=esc(fmtNotifTime(n.createdAt));
+  const title=esc(notificationTitle(n));
+  const secondary=!expanded&&n.read
+    ?(notifPreviewText(n)||n.milestoneTitle||'')
+    :(n.milestoneTitle||'');
+  const secondaryLine=secondary?`<span class="notif-summary-ms">${esc(secondary)}</span>`:'';
+  const chevron=expanded?'ti-chevron-up':'ti-chevron-down';
+  const summaryInner=`<span class="notif-build-badge"><i class="ti ti-car-garage"></i>${buildName}</span>
+    <span class="notif-summary-main"><span class="notif-summary-title">${title}</span>${secondaryLine}</span>
+    <span class="notif-item-meta">${time}</span>
+    <span class="notif-expand-icon"><i class="ti ${chevron}"></i></span>`;
+  const summary=n.read
+    ?`<button class="notif-summary-row" type="button" onclick="toggleNotifExpand('${esc(slug)}','${esc(n.id)}')">${summaryInner}</button>`
+    :`<div class="notif-summary-row">${summaryInner}</div>`;
+  let body='';
+  if(expanded){
+    const quoteBody=notifCommentBody(n);
+    const quote=(n.type==='milestone_comment'||n.type==='comment_reply')&&quoteBody
+      ?`<div class="notif-quote">"${esc(quoteBody)}"</div>`:'';
+    const likeOnly=n.type==='milestone_like'&&!quoteBody?'<div class="notif-quote">Someone liked this milestone post.</div>':'';
+    const thread=showThread&&notifHasThread(n)
+      ?`<div class="notif-thread" id="notif-thread-${esc(slug)}-${esc(n.milestoneId)}"><div class="notif-thread-label">Conversation</div><div class="milestone-empty" style="padding:6px 0;font-size:11px">Loading…</div></div>`
+      :'';
+    body=`<div class="notif-body">
+      ${quote||likeOnly}
+      ${thread}
+      <div class="notif-card-actions">
+        ${n.milestoneId?`<button class="ms-btn" type="button" onclick="openNotificationOnBuild('${esc(slug)}','${esc(n.milestoneId)}','${esc(n.id)}')"><i class="ti ti-external-link"></i>Open</button>`:''}
+        ${!n.read?`<button class="ms-btn" type="button" onclick="markNotificationRead('${esc(slug)}','${esc(n.id)}')"><i class="ti ti-check"></i>Mark read</button>`:''}
+      </div>
+    </div>`;
+  }
+  const stateCls=(n.read?' read':' unread')+(expanded?' expanded':' collapsed');
+  return `<article class="notif-card${stateCls}" data-notif-id="${esc(n.id)}" data-notif-slug="${esc(slug)}">${summary}${body}</article>`;
 }
 async function renderNotifications(){
   const el=document.getElementById('notif-list');
@@ -10301,13 +10379,21 @@ async function renderNotifications(){
     el.innerHTML='<div class="milestone-empty"><i class="ti ti-bell"></i>No notifications yet. Likes and comments on your public milestones will show up here.</div>';
     return;
   }
+  const unread=notifications.filter(n=>!n.read);
+  const read=notifications.filter(n=>n.read);
   const seenThreads=new Set();
-  el.innerHTML=notifications.map(n=>{
-    const key=notifHasThread(n)?notifThreadKey(n.inboxSlug||n.publicSlug,n.milestoneId):'';
-    const showThread=!!key&&!seenThreads.has(key);
-    if(showThread)seenThreads.add(key);
-    return renderNotifCardShell(n,showThread);
-  }).join('');
+  const renderGroup=(list,label)=>{
+    if(!list.length)return '';
+    const cards=list.map(n=>{
+      const expanded=isNotifExpanded(n);
+      const key=expanded&&notifHasThread(n)?notifThreadKey(n.inboxSlug||n.publicSlug,n.milestoneId):'';
+      const showThread=!!key&&!seenThreads.has(key);
+      if(showThread)seenThreads.add(key);
+      return renderNotifCardShell(n,showThread,expanded);
+    }).join('');
+    return (label?`<div class="notif-section-label">${label}</div>`:'')+cards;
+  };
+  el.innerHTML=renderGroup(unread,'New')+renderGroup(read,unread.length?'Earlier':'');
   const threadKeys=[...seenThreads];
   await Promise.all(threadKeys.map(async key=>{
     if(gen!==notifRenderGen)return;
@@ -10323,12 +10409,22 @@ async function renderNotifications(){
   }));
 }
 async function markNotificationRead(slug,id){
+  notifExpandedIds.delete(notifCardKey(slug,id));
   const col=engagementInboxCol(slug);
   if(col)await col.doc(id).set({read:true},{merge:true}).catch(()=>{});
 }
 async function markAllNotificationsRead(){
+  notifExpandedIds.clear();
   const unread=notifications.filter(n=>!n.read);
   await Promise.all(unread.map(n=>markNotificationRead(n.inboxSlug||n.publicSlug,n.id)));
+}
+function toggleNotifExpand(slug,id){
+  const n=notifications.find(x=>(x.inboxSlug||x.publicSlug)===slug&&x.id===id);
+  if(!n||!n.read)return;
+  const key=notifCardKey(slug,id);
+  if(notifExpandedIds.has(key))notifExpandedIds.delete(key);
+  else notifExpandedIds.add(key);
+  renderNotifications();
 }
 function toggleNotifReplyForm(slug,milestoneId,commentId){
   const el=document.getElementById('notif-form-'+slug+'-'+milestoneId+'-'+commentId);
@@ -11672,7 +11768,7 @@ async function bootTracker(){
   if(trackerBooted) return;
   trackerBooted=true;
 
-  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,markAllNotificationsRead,markNotificationRead,openNotificationOnBuild,toggleNotifReplyForm,toggleMilestoneComments,ownerLikeComment,ownerReplyToComment,toggleReplyForm,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
+  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,markAllNotificationsRead,markNotificationRead,openNotificationOnBuild,toggleNotifExpand,toggleNotifReplyForm,toggleMilestoneComments,ownerLikeComment,ownerReplyToComment,toggleReplyForm,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
   document.addEventListener('click',e=>{
     if(!e.target.closest('.tracker-nav-more-wrap'))closeMoreMenu();
     if(!e.target.closest('.tracker-nav-mobile-wrap'))closeMobileNavMenu();
