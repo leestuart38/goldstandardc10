@@ -2970,54 +2970,37 @@ button[onclick="logoutUser()"]:not(.top-logout-btn){
   border-color:rgba(241,209,122,.58);
 }
 
-/* ===== v139 garage multi-build ===== */
-.garage-wrap{position:relative;flex:0 0 auto}
-.garage-btn{
-  display:inline-flex;align-items:center;gap:7px;
-  border-radius:999px;border:1px solid rgba(241,209,122,.28);
-  background:rgba(0,0,0,.32);color:var(--gs-cream);
-  padding:8px 12px;font-size:10px;font-weight:900;
-  letter-spacing:.05em;text-transform:uppercase;cursor:pointer;
-  max-width:min(220px,42vw);min-width:0;
+/* ===== v140 garage page (vehicle panel) ===== */
+.garage-page-grid{display:grid;grid-template-columns:1fr;gap:18px}
+.garage-page-section{
+  padding:16px;border-radius:16px;
+  border:1px solid rgba(241,209,122,.16);
+  background:rgba(0,0,0,.18);
 }
-.garage-btn:hover{background:rgba(185,138,39,.22);border-color:rgba(241,209,122,.5)}
-.garage-btn-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-.garage-btn-caret{font-size:11px;opacity:.7;flex-shrink:0}
-.garage-menu{
-  display:none;position:absolute;top:calc(100% + 8px);right:0;z-index:120;
-  width:min(320px,calc(100vw - 24px));
-  border-radius:14px;border:1px solid rgba(241,209,122,.22);
-  background:linear-gradient(180deg,#1a1712,#0f0d0a);
-  box-shadow:0 18px 48px rgba(0,0,0,.55);padding:10px;
+.garage-page-section-title{
+  margin:0 0 12px;font-family:var(--gs-display);font-size:14px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--gs-gold);
 }
-.garage-menu.open{display:block}
-.garage-menu-hdr{padding:6px 8px 10px;border-bottom:1px solid rgba(241,209,122,.12);margin-bottom:8px}
-.garage-menu-title{display:block;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--gs-gold)}
-.garage-menu-sub{display:block;font-size:10px;opacity:.65;margin-top:3px}
-.garage-menu-list{display:flex;flex-direction:column;gap:4px;max-height:min(280px,42vh);overflow:auto;margin-bottom:8px}
-.garage-menu-item{
-  display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;
-  border:1px solid transparent;border-radius:10px;background:rgba(255,255,255,.03);
-  color:var(--gs-cream);padding:9px 10px;cursor:pointer;text-align:left;
+.garage-page-list{display:flex;flex-direction:column;gap:8px}
+.garage-page-item{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;
+  border:1px solid rgba(241,209,122,.14);border-radius:12px;background:rgba(255,255,255,.03);
+  color:var(--gs-cream);padding:12px 14px;cursor:pointer;text-align:left;
 }
-.garage-menu-item:hover{background:rgba(185,138,39,.14);border-color:rgba(241,209,122,.18)}
-.garage-menu-item.active{border-color:rgba(241,209,122,.42);background:rgba(185,138,39,.18)}
-.garage-menu-item.archived{opacity:.72}
-.garage-menu-item-name{font-size:12px;font-weight:800;line-height:1.2}
-.garage-menu-item-meta{font-size:10px;opacity:.62}
-.garage-menu-actions{display:flex;flex-direction:column;gap:6px;padding-top:8px;border-top:1px solid rgba(241,209,122,.12)}
-.garage-menu-action{
-  display:inline-flex;align-items:center;justify-content:center;gap:7px;width:100%;
-  border-radius:999px;border:1px solid rgba(241,209,122,.22);background:rgba(0,0,0,.28);
-  color:var(--gs-cream);padding:8px 10px;font-size:10px;font-weight:800;
-  letter-spacing:.05em;text-transform:uppercase;cursor:pointer;
+.garage-page-item:hover{background:rgba(185,138,39,.12);border-color:rgba(241,209,122,.24)}
+.garage-page-item.active{border-color:rgba(241,209,122,.42);background:rgba(185,138,39,.16)}
+.garage-page-item.archived{opacity:.72}
+.garage-page-item-main{display:flex;flex-direction:column;gap:3px;min-width:0}
+.garage-page-item-name{font-size:14px;font-weight:800;line-height:1.2}
+.garage-page-item-meta{font-size:11px;opacity:.62}
+.garage-page-item-badge{
+  flex-shrink:0;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+  padding:4px 8px;border-radius:999px;border:1px solid rgba(241,209,122,.22);color:var(--gs-gold);
 }
-.garage-menu-action.primary{background:rgba(185,138,39,.22);border-color:rgba(241,209,122,.36)}
-.garage-menu-action:hover{background:rgba(185,138,39,.28)}
-.top-bar-actions .garage-wrap{flex:0 0 auto}
-@media(max-width:480px){
-  .top-bar-actions .garage-wrap{flex:1 1 100%}
-  .garage-btn{width:100%;max-width:none;justify-content:space-between}
+.garage-page-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.garage-page-archived-hdr{
+  margin:10px 0 6px;font-size:10px;font-weight:800;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--gs-muted);
 }
 
 
@@ -5542,24 +5525,6 @@ body{margin:0}
     <button class="header-edit-vehicle-btn" type="button" onclick="openVehicleEditorModal('edit')" title="Edit vehicle details"><i class="ti ti-pencil"></i><span>Edit</span></button>
   </div>
   <div class="top-bar-actions">
-    <div class="garage-wrap">
-      <button class="garage-btn" id="garage-btn" type="button" onclick="toggleGarageMenu(event)" aria-expanded="false" aria-haspopup="true" aria-controls="garage-menu">
-        <i class="ti ti-car-garage" aria-hidden="true"></i>
-        <span class="garage-btn-label" id="garage-current-label">My Build</span>
-        <i class="ti ti-chevron-down garage-btn-caret" aria-hidden="true"></i>
-      </button>
-      <div class="garage-menu" id="garage-menu" role="menu">
-        <div class="garage-menu-hdr">
-          <span class="garage-menu-title">Garage</span>
-          <span class="garage-menu-sub">Switch between vehicle builds</span>
-        </div>
-        <div class="garage-menu-list" id="garage-menu-list"></div>
-        <div class="garage-menu-actions">
-          <button class="garage-menu-action primary" type="button" onclick="openGarageCreateModal()"><i class="ti ti-plus"></i>Create New Build</button>
-          <button class="garage-menu-action" type="button" onclick="archiveActiveBuild()"><i class="ti ti-archive"></i>Archive Build</button>
-        </div>
-      </div>
-    </div>
     <span class="save-indicator" id="save-ind"><i class="ti ti-cloud-check" aria-hidden="true" style="font-size:12px;margin-right:3px"></i>Auto-save on</span>
     <button class="share-build-btn" type="button" onclick="sharePublicBuild()"><i class="ti ti-copy"></i>Copy Public Link</button>
     <div class="top-account-row">
@@ -5582,7 +5547,7 @@ body{margin:0}
       <div class="tracker-nav-more-wrap">
       <button class="tracker-nav-more" id="tracker-nav-more-btn" type="button" onclick="toggleMoreMenu(event)" aria-expanded="false" aria-haspopup="true" aria-controls="tracker-nav-dropdown"><i class="ti ti-dots"></i><span>More</span><i class="ti ti-chevron-down tracker-nav-more-caret"></i></button>
       <div class="tracker-nav-dropdown" id="tracker-nav-dropdown" role="menu">
-        <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="showMorePanel('vehicle')"><i class="ti ti-arrows-exchange"></i><span>Change Vehicle</span></button>
+        <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="showMorePanel('vehicle')"><i class="ti ti-car-garage"></i><span>Garage</span></button>
         <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="showMorePanel('settings')"><i class="ti ti-settings"></i><span>Settings</span></button>
         <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="showMorePanel('billing')"><i class="ti ti-credit-card"></i><span>Billing</span></button>
         <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="showMorePanel('users')"><i class="ti ti-users"></i><span>Users</span></button>
@@ -5612,7 +5577,7 @@ body{margin:0}
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('decisions')"><i class="ti ti-search"></i><span>Research</span></button>
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('milestones')"><i class="ti ti-notebook"></i><span>Milestones</span></button>
           <div class="tracker-nav-mobile-divider" aria-hidden="true"></div>
-          <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('vehicle')"><i class="ti ti-arrows-exchange"></i><span>Change Vehicle</span></button>
+          <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('vehicle')"><i class="ti ti-car-garage"></i><span>Garage</span></button>
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('settings')"><i class="ti ti-settings"></i><span>Settings</span></button>
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('billing')"><i class="ti ti-credit-card"></i><span>Billing</span></button>
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('users')"><i class="ti ti-users"></i><span>Users</span></button>
@@ -5639,7 +5604,7 @@ body{margin:0}
     <div class="vehicle-image-head">
       <div>
         <div class="vehicle-image-title" id="vehicle-image-title">Gold Standard 38 Preview</div>
-        <div class="vehicle-image-sub" id="vehicle-image-meta">Add vehicle details in Change Vehicle</div>
+        <div class="vehicle-image-sub" id="vehicle-image-meta">Add vehicle details in Garage</div>
       </div>
       <button class="vehicle-dash-edit-btn" type="button" onclick="showPanel('vehicle',true);openVehicleEditorModal('edit')"><i class="ti ti-pencil"></i>Edit Vehicle</button>
     </div>
@@ -5648,7 +5613,7 @@ body{margin:0}
         <div class="vehicle-image-empty">
           <i class="ti ti-photo-up"></i>
           <strong>No vehicle image yet</strong>
-          <span>Add a rendering or photo in Change Vehicle.</span>
+          <span>Add a rendering or photo in Garage.</span>
         </div>
       </div>
     </div>
@@ -5736,10 +5701,10 @@ body{margin:0}
 <div id="panel-vehicle" class="panel">
   <div class="milestone-toolbar">
     <div>
-      <div class="milestone-toolbar-title">Change Vehicle</div>
-      <div class="milestone-toolbar-sub">Manage your active build profile — name, vehicle details, photos, cost, and budget.</div>
+      <div class="milestone-toolbar-title">Garage</div>
+      <div class="milestone-toolbar-sub">Create, switch, and manage your vehicle builds. Edit the active build's name, details, photos, cost, and budget.</div>
     </div>
-    <button class="vehicle-create-btn" type="button" onclick="openVehicleEditorModal('create')"><i class="ti ti-plus"></i>Create New Vehicle</button>
+    <button class="vehicle-create-btn" type="button" onclick="openGarageCreateModal()"><i class="ti ti-plus"></i>Create New Build</button>
   </div>
   <div id="vehicle-panel-content"></div>
 </div>
@@ -5747,10 +5712,10 @@ body{margin:0}
   <div class="milestone-toolbar">
     <div>
       <div class="milestone-toolbar-title">Settings</div>
-      <div class="milestone-toolbar-sub">App preferences and public page options. Vehicle details live in Change Vehicle.</div>
+      <div class="milestone-toolbar-sub">App preferences and public page options. Build management lives in Garage.</div>
     </div>
   </div>
-  <div class="subpanel-placeholder"><i class="ti ti-settings"></i><strong>Settings page is coming soon.</strong><span>Public page controls and app preferences will live here. Edit build name, vehicle details, cost, and budget in <button type="button" class="inline-link-btn" onclick="showPanel('vehicle',true)">Change Vehicle</button>.</span></div>
+  <div class="subpanel-placeholder"><i class="ti ti-settings"></i><strong>Settings page is coming soon.</strong><span>Public page controls and app preferences will live here. Manage builds in <button type="button" class="inline-link-btn" onclick="showPanel('vehicle',true)">Garage</button>.</span></div>
 </div>
 <div id="panel-billing" class="panel">
   <div class="milestone-toolbar">
@@ -6072,7 +6037,38 @@ let VEHICLE_YEAR='';
 let VEHICLE_MAKE='';
 let VEHICLE_MODEL='';
 let VEHICLE_NICKNAME='';
+const LEGACY_LOCAL_SAVE_KEY='c10tracker_v3';
 function localSaveKey(){return 'c10tracker_v3_'+(activeBuildId||LEGACY_BUILD_ID);}
+function fetchLegacyLocalPayload(){
+  try{
+    const raw=localStorage.getItem(LEGACY_LOCAL_SAVE_KEY);
+    return raw?JSON.parse(raw):null;
+  }catch(e){return null;}
+}
+function buildRichnessScore(state){
+  if(!state)return 0;
+  let score=0;
+  if(hasUsableSections(state.sections))score+=10000;
+  else if(Array.isArray(state.sections))score+=(state.sections||[]).reduce((n,sec)=>n+((sec&&sec.parts)||[]).length,0)*10;
+  if(state.vehicleImage)score+=500;
+  if(state.vehicleImageOriginal)score+=200;
+  score+=(state.milestones||[]).length*8;
+  score+=(state.workTasks||[]).length*5;
+  score+=(state.decisions||[]).length*3;
+  score+=(state.sponsors||[]).filter(s=>s&&s.logo).length*20;
+  score+=stateTime(state)/1e12;
+  return score;
+}
+function pickRicherState(){
+  let best=null,bestScore=-1;
+  for(let i=0;i<arguments.length;i++){
+    const c=arguments[i];
+    if(!c)continue;
+    const score=buildRichnessScore(c);
+    if(score>bestScore){best=c;bestScore=score;}
+  }
+  return best;
+}
 const BLANK_BUILD_SECTIONS=[
   {key:'engine',name:'Engine',budget:0,parts:[]},
   {key:'drivetrain',name:'Drivetrain',budget:0,parts:[]},
@@ -6207,7 +6203,7 @@ function packState(){
       vehicleNickname:VEHICLE_NICKNAME
     },
     meta:{
-      appVersion:'v139-garage-multibuild',
+      appVersion:'v140-garage-restore',
       updatedAt:now,
       buildId:activeBuildId,
       publicSlug:activePublicSlug
@@ -6331,6 +6327,51 @@ function applyCloudStateToApp(cloud){
   if(cloud.publicSlug)activePublicSlug=cloud.publicSlug;
   repairTrackerState();
 }
+async function fetchLegacyTrackerPayload(){
+  if(!firebaseDb)return null;
+  try{
+    const snap=await withTimeout(firebaseDb.collection(LEGACY_TRACKER_COLLECTION).doc(LEGACY_BUILD_ID).get(),12000,'Legacy C10 tracker load');
+    if(!snap.exists)return null;
+    const data=Object.assign({},snap.data());
+    await loadLegacyPrivateMedia(data);
+    return data;
+  }catch(e){
+    console.warn('Legacy tracker load failed:',e);
+    return null;
+  }
+}
+function wrapC10GarageDoc(source){
+  const now=new Date().toISOString();
+  const payload=Object.assign({},source);
+  return Object.assign({},payload,{
+    buildId:LEGACY_BUILD_ID,
+    publicSlug:LEGACY_BUILD_ID,
+    buildName:payload.settings?.buildName||payload.buildName||BUILD_NAME||'Gold Standard 38',
+    vehicleYear:payload.settings?.vehicleYear||payload.vehicleYear||'',
+    vehicleMake:payload.settings?.vehicleMake||payload.vehicleMake||'',
+    vehicleModel:payload.settings?.vehicleModel||payload.vehicleModel||'',
+    vehicleNickname:payload.settings?.vehicleNickname||payload.vehicleNickname||'',
+    archived:false,
+    template:payload.template||'custom-truck',
+    createdAt:payload.createdAt||now,
+    updatedAt:now,
+    meta:Object.assign({},payload.meta||{},{appVersion:'v140-garage-restore',buildId:LEGACY_BUILD_ID,publicSlug:LEGACY_BUILD_ID,updatedAt:now})
+  });
+}
+async function restoreC10BuildIfDamaged(userData){
+  const legacyCloud=await fetchLegacyTrackerPayload();
+  const legacyLocal=fetchLegacyLocalPayload();
+  const best=pickRicherState(legacyCloud,legacyLocal,userData);
+  if(!best||!hasUsableCloudState(best))return {restored:false,data:userData};
+  const userScore=buildRichnessScore(userData);
+  const bestScore=buildRichnessScore(best);
+  const missingImages=(!userData||!userData.vehicleImage)&&!!best.vehicleImage;
+  const missingOriginal=(!userData||!userData.vehicleImageOriginal)&&!!best.vehicleImageOriginal;
+  const needsRestore=bestScore>userScore+50||missingImages||missingOriginal||!hasUsableCloudState(userData);
+  if(!needsRestore)return {restored:false,data:userData};
+  console.log('Restoring C10 build from richer source (legacy tracker/local backup).');
+  return {restored:true,data:wrapC10GarageDoc(best)};
+}
 async function loadLegacyPrivateMedia(state){
   if(!firebaseDb||!state)return false;
   let loaded=false;
@@ -6365,10 +6406,10 @@ async function migrateLegacyBuildIfNeeded(){
   if(meta.legacyMigrated){
     return meta;
   }
-  const existing=await withTimeout(buildsCol.limit(1).get(),12000,'Garage builds probe');
-  if(!existing.empty){
-    await metaRef.set({legacyMigrated:true,activeBuildId:meta.activeBuildId||existing.docs[0].id},{merge:true});
-    return Object.assign({},meta,{legacyMigrated:true,activeBuildId:meta.activeBuildId||existing.docs[0].id});
+  const c10Snap=await withTimeout(buildsCol.doc(LEGACY_BUILD_ID).get(),12000,'C10 build probe');
+  if(c10Snap.exists&&hasUsableCloudState(c10Snap.data())){
+    await metaRef.set({legacyMigrated:true,activeBuildId:meta.activeBuildId||LEGACY_BUILD_ID},{merge:true});
+    return Object.assign({},meta,{legacyMigrated:true,activeBuildId:meta.activeBuildId||LEGACY_BUILD_ID});
   }
   const legacyRef=firebaseDb.collection(LEGACY_TRACKER_COLLECTION).doc(LEGACY_BUILD_ID);
   const legacySnap=await withTimeout(legacyRef.get(),12000,'Legacy build load');
@@ -6417,19 +6458,73 @@ async function saveUserGarageMeta(patch){
   if(!metaRef)return;
   await metaRef.set(Object.assign({},patch,{updatedAt:new Date().toISOString()}),{merge:true});
 }
+async function resolveActiveBuildId(meta){
+  await loadGarageBuildList();
+  let buildId=meta&&meta.activeBuildId;
+  if(!buildId||!garageBuilds.some(b=>b.buildId===buildId)){
+    const preferred=garageBuilds.find(b=>!b.archived);
+    return (preferred||garageBuilds[0]||{}).buildId||LEGACY_BUILD_ID;
+  }
+  if(buildId!==LEGACY_BUILD_ID){
+    const legacy=await fetchLegacyTrackerPayload();
+    const legacyLocal=fetchLegacyLocalPayload();
+    const bestLegacy=pickRicherState(legacy,legacyLocal);
+    if(bestLegacy&&hasUsableCloudState(bestLegacy)){
+      const col=getUserBuildsCol();
+      const activeSnap=await withTimeout(col.doc(buildId).get(),8000,'Active build probe');
+      const activeData=activeSnap.exists?activeSnap.data():null;
+      const c10Snap=await withTimeout(col.doc(LEGACY_BUILD_ID).get(),8000,'C10 build probe');
+      const c10Data=c10Snap.exists?c10Snap.data():null;
+      const activeScore=buildRichnessScore(activeData);
+      const legacyScore=buildRichnessScore(bestLegacy);
+      const c10Score=buildRichnessScore(c10Data);
+      if(legacyScore>activeScore+500||c10Score>activeScore+500||legacyScore>c10Score+200){
+        console.log('Auto-selecting gold-standard-c10 — richer legacy/C10 data detected.');
+        return LEGACY_BUILD_ID;
+      }
+    }
+  }
+  return buildId;
+}
 async function loadBuildById(buildId){
   if(!buildId||!currentUser)throw new Error('Invalid build.');
   const col=getUserBuildsCol();
   const snap=await withTimeout(col.doc(buildId).get(),12000,'Build load');
-  if(!snap.exists)throw new Error('Build not found.');
-  const data=snap.data();
+  let data;
+  let restored=false;
+  if(!snap.exists){
+    if(buildId!==LEGACY_BUILD_ID)throw new Error('Build not found.');
+    const legacy=await fetchLegacyTrackerPayload();
+    if(!legacy)throw new Error('Build not found.');
+    data=wrapC10GarageDoc(legacy);
+    restored=true;
+  }else{
+    data=Object.assign({buildId},snap.data());
+    if(buildId===LEGACY_BUILD_ID){
+      const fix=await restoreC10BuildIfDamaged(data);
+      data=fix.data;
+      restored=fix.restored;
+    }
+  }
   const slug=data.publicSlug||data.meta?.publicSlug||buildId;
   bindActiveBuildRefs(buildId,slug);
   await loadPrivateMedia(data);
+  if(buildId===LEGACY_BUILD_ID)await loadLegacyPrivateMedia(data);
   applyCloudStateToApp(data);
   saveLocalStateNow();
   safeBuild();
   repairAllSponsorLogos();
+  if(restored){
+    try{
+      setSaveInd('saving','Restoring C10 build data...');
+      await saveCloudState();
+      setSaveInd('saved','C10 build restored');
+      setTimeout(()=>setSaveInd('idle','Cloud sync on'),2200);
+    }catch(e){
+      console.warn('C10 restore save failed:',e);
+      showGarageToast('Loaded restored C10 data locally, but cloud restore save failed.');
+    }
+  }
   renderGarageUI();
   syncBuildMetaUI();
 }
@@ -6459,7 +6554,6 @@ async function switchGarageBuild(buildId){
     await saveUserGarageMeta({activeBuildId:buildId});
     await loadGarageBuildList();
     renderGarageUI();
-    closeGarageMenu();
     setSaveInd('saved','Build switched');
     setTimeout(()=>setSaveInd('idle','Cloud sync on'),1800);
   }catch(e){
@@ -6481,32 +6575,21 @@ function showGarageToast(msg){
   clearTimeout(showGarageToast._t);
   showGarageToast._t=setTimeout(()=>el.classList.remove('show'),4200);
 }
-function closeGarageMenu(){
-  garageMenuOpen=false;
-  const menu=document.getElementById('garage-menu');
-  const btn=document.getElementById('garage-btn');
-  if(menu)menu.classList.remove('open');
-  if(btn)btn.setAttribute('aria-expanded','false');
-}
-function toggleGarageMenu(e){
-  if(e)e.stopPropagation();
-  garageMenuOpen=!garageMenuOpen;
-  const menu=document.getElementById('garage-menu');
-  const btn=document.getElementById('garage-btn');
-  if(menu)menu.classList.toggle('open',garageMenuOpen);
-  if(btn)btn.setAttribute('aria-expanded',garageMenuOpen?'true':'false');
+function renderGarageBuildListHtml(){
+  const active=garageBuilds.filter(b=>!b.archived);
+  const archived=garageBuilds.filter(b=>b.archived);
+  let html=active.map(b=>`<button class="garage-page-item${b.buildId===activeBuildId?' active':''}" type="button" onclick="switchGarageBuild('${b.buildId}')"><span class="garage-page-item-main"><span class="garage-page-item-name">${esc(b.buildName||'Untitled build')}</span><span class="garage-page-item-meta">${esc(formatVehicleLabel(b.vehicleYear,b.vehicleMake,b.vehicleModel)||b.buildId)}</span></span>${b.buildId===activeBuildId?'<span class="garage-page-item-badge">Active</span>':''}</button>`).join('');
+  if(archived.length){
+    html+=`<div class="garage-page-archived-hdr">Archived builds</div>`;
+    html+=archived.map(b=>`<button class="garage-page-item archived" type="button" onclick="switchGarageBuild('${b.buildId}')"><span class="garage-page-item-main"><span class="garage-page-item-name">${esc(b.buildName||'Archived build')}</span><span class="garage-page-item-meta">Archived</span></span></button>`).join('');
+  }
+  if(!html)html='<div class="vehicle-panel-note" style="margin-top:0"><i class="ti ti-info-circle"></i><span>No builds yet. Create your first build above.</span></div>';
+  return html;
 }
 function renderGarageUI(){
-  const label=document.getElementById('garage-current-label');
-  if(label)label.textContent=BUILD_NAME||'My Build';
-  const menu=document.getElementById('garage-menu-list');
-  if(!menu)return;
-  const items=garageBuilds.filter(b=>!b.archived);
-  menu.innerHTML=items.map(b=>`<button class="garage-menu-item${b.buildId===activeBuildId?' active':''}" type="button" onclick="switchGarageBuild('${b.buildId}')"><span class="garage-menu-item-name">${esc(b.buildName||'Untitled build')}</span><span class="garage-menu-item-meta">${esc(formatVehicleLabel(b.vehicleYear,b.vehicleMake,b.vehicleModel)||b.buildId)}</span></button>`).join('')+
-    (garageBuilds.some(b=>b.archived)?garageBuilds.filter(b=>b.archived).map(b=>`<button class="garage-menu-item archived" type="button" onclick="switchGarageBuild('${b.buildId}')"><span class="garage-menu-item-name">${esc(b.buildName||'Archived build')}</span><span class="garage-menu-item-meta">Archived</span></button>`).join(''):'');
+  renderVehiclePanel();
 }
 function openGarageCreateModal(){
-  closeGarageMenu();
   const m=document.getElementById('garage-create-modal');
   if(m)m.classList.add('open');
   const n=document.getElementById('garage-create-name');
@@ -6737,7 +6820,7 @@ async function loadPrivateMedia(state){
         const v=vSnap.data();
         if(v.vehicleImage)state.vehicleImage=v.vehicleImage;
         if(v.vehicleImageOriginal)state.vehicleImageOriginal=v.vehicleImageOriginal;
-        loaded=true;
+        if(v.vehicleImage||v.vehicleImageOriginal)loaded=true;
       }
     }catch(e){
       console.warn('Vehicle media load failed:',e);
@@ -6754,7 +6837,7 @@ async function loadPrivateMedia(state){
     }
     cachedMediaMsShardCount=shardCount;
   }
-  if(!loaded&&activeBuildId===LEGACY_BUILD_ID){
+  if(activeBuildId===LEGACY_BUILD_ID){
     const legacyLoaded=await loadLegacyPrivateMedia(state);
     if(legacyLoaded)loaded=true;
   }
@@ -7146,6 +7229,17 @@ async function saveCloudState(){
       writeMediaShards(PUBLIC_COLLECTION,pubMsPrefix,publicPlan.shardPayloads,cachedPublicMediaMsShardCount)
     );
   }
+  if(activeBuildId===LEGACY_BUILD_ID){
+    const legacyCoreRef=firebaseDb.collection(LEGACY_TRACKER_COLLECTION).doc(LEGACY_BUILD_ID);
+    const legacyVehicleRef=firebaseDb.collection(LEGACY_TRACKER_COLLECTION).doc(LEGACY_BUILD_ID+'-media-vehicle');
+    ops.push(legacyCoreRef.set(corePayload,{merge:true}));
+    if(privateMediaChanged){
+      ops.push(
+        writeVehicleMediaDoc(legacyVehicleRef,privatePlan.vehiclePayload,'private'),
+        writeMediaShards(LEGACY_TRACKER_COLLECTION,LEGACY_MEDIA_MS_PREFIX,privatePlan.shardPayloads,cachedMediaMsShardCount)
+      );
+    }
+  }
   await Promise.all(ops);
   if(privateMediaChanged){
     cachedPrivateMediaPlanFingerprint=privateMediaFp;
@@ -7518,9 +7612,8 @@ function syncBuildMetaUI(){
   const vehicleMeta=document.getElementById('vehicle-image-meta');
   if(vehicleMeta){
     const label=formatVehicleLabel(VEHICLE_YEAR,VEHICLE_MAKE,VEHICLE_MODEL);
-    vehicleMeta.textContent=label||'Add year, make, and model in Change Vehicle';
+    vehicleMeta.textContent=label||'Add year, make, and model in Garage';
   }
-  renderGarageUI();
 }
 function updateBuildName(v){
   BUILD_NAME=String(v||'').trim()||'My Build';
@@ -7566,7 +7659,7 @@ function openVehicleEditorModal(mode){
   const title=document.getElementById('vehicle-editor-title');
   const sub=document.getElementById('vehicle-editor-sub');
   if(title)title.textContent=vehicleEditorMode==='create'?'Create New Vehicle':'Edit Vehicle';
-  if(sub)sub.textContent=vehicleEditorMode==='create'?'Set up vehicle details for the active build. Use Garage → Create New Build for a separate project.':'Update build name, vehicle details, photos, cost, and budget for the active build.';
+  if(sub)sub.textContent=vehicleEditorMode==='create'?'Set up vehicle details for the active build. Use the Garage page → Create New Build for a separate project.':'Update build name, vehicle details, photos, cost, and budget for the active build.';
   const buildEl=document.getElementById('veh-editor-build-name');
   if(buildEl)buildEl.value=vehicleEditorMode==='create'?'':(BUILD_NAME||'');
   const yearEl=document.getElementById('veh-editor-year');
@@ -7652,20 +7745,31 @@ function renderVehiclePanel(){
   const ymm=formatVehicleLabel(VEHICLE_YEAR,VEHICLE_MAKE,VEHICLE_MODEL);
   const hero=vehicleImage?`<img src="${vehicleImage}" alt="${esc(buildPreviewTitle())}">`:'<div class="vehicle-current-empty"><i class="ti ti-photo-up"></i><span>No hero image yet</span></div>';
   const originalBlock=vehicleImageOriginal?`<div class="vehicle-current-original"><label class="image-drop-field-label">Original photo</label><div class="vehicle-current-original-img"><img src="${vehicleImageOriginal}" alt="Original photo"></div></div>`:'';
-  el.innerHTML=`<div class="vehicle-current-card">
-    <div class="vehicle-current-hero">${hero}</div>
-    <div class="vehicle-current-body">
-      <div class="vehicle-current-name">${esc(BUILD_NAME||'My Build')}</div>
-      ${ymm?`<div class="vehicle-current-ymm">${esc(ymm)}</div>`:'<div class="vehicle-current-ymm" style="opacity:.55">Year, make, and model not set</div>'}
-      <div class="vehicle-current-stats">
-        <div><label>Vehicle cost</label><span>${fmtCAD(TRUCK_COST)}</span></div>
-        <div><label>Target budget</label><span>${fmtCAD(TARGET_BUDGET)}</span></div>
+  el.innerHTML=`<div class="garage-page-grid">
+    <section class="garage-page-section">
+      <h3 class="garage-page-section-title">Active Build</h3>
+      <div class="vehicle-current-card">
+        <div class="vehicle-current-hero">${hero}</div>
+        <div class="vehicle-current-body">
+          <div class="vehicle-current-name">${esc(BUILD_NAME||'My Build')}</div>
+          ${ymm?`<div class="vehicle-current-ymm">${esc(ymm)}</div>`:'<div class="vehicle-current-ymm" style="opacity:.55">Year, make, and model not set</div>'}
+          <div class="vehicle-current-stats">
+            <div><label>Vehicle cost</label><span>${fmtCAD(TRUCK_COST)}</span></div>
+            <div><label>Target budget</label><span>${fmtCAD(TARGET_BUDGET)}</span></div>
+          </div>
+          <div class="garage-page-actions">
+            <button class="vehicle-edit-btn" type="button" onclick="openVehicleEditorModal('edit')"><i class="ti ti-pencil"></i>Edit Vehicle</button>
+            <button class="vehicle-edit-btn" type="button" onclick="archiveActiveBuild()"><i class="ti ti-archive"></i>Archive Build</button>
+          </div>
+          ${originalBlock}
+        </div>
       </div>
-      <div style="margin-top:16px"><button class="vehicle-edit-btn" type="button" onclick="openVehicleEditorModal('edit')"><i class="ti ti-pencil"></i>Edit Vehicle</button></div>
-      ${originalBlock}
-    </div>
-  </div>
-  <div class="vehicle-panel-note"><i class="ti ti-info-circle"></i><span><strong>Garage builds</strong> — use the Garage menu in the header to create or switch builds. Edit Vehicle updates the active build only.</span></div>`;
+    </section>
+    <section class="garage-page-section">
+      <h3 class="garage-page-section-title">Your Builds</h3>
+      <div class="garage-page-list">${renderGarageBuildListHtml()}</div>
+    </section>
+  </div>`;
 }
 function updateTargetBudget(v){
   TARGET_BUDGET=parseMoneyInput(v);
@@ -7712,12 +7816,7 @@ async function initData(){
   if(firebaseReady&&currentUser){
     try{
       const meta=await migrateLegacyBuildIfNeeded();
-      await loadGarageBuildList();
-      let buildId=meta.activeBuildId;
-      if(!buildId||!garageBuilds.some(b=>b.buildId===buildId)){
-        const preferred=garageBuilds.find(b=>!b.archived);
-        buildId=(preferred||garageBuilds[0]||{}).buildId||LEGACY_BUILD_ID;
-      }
+      const buildId=await resolveActiveBuildId(meta);
       await loadBuildById(buildId);
       await saveUserGarageMeta({activeBuildId:buildId});
       setSaveInd('saved','Garage loaded');
@@ -7733,7 +7832,7 @@ async function initData(){
   }
 
   try{
-    const local=loadState();
+    const local=loadState()||fetchLegacyLocalPayload();
     if(local&&hasUsableSections(local.sections)){
       applySettingsFromState(local);
       vehicleImage=local.vehicleImage||'';
@@ -10037,7 +10136,7 @@ const NAV_LABELS={
   sponsorships:'Build Partners',
   decisions:'Research',
   milestones:'Milestones',
-  vehicle:'Change Vehicle',
+  vehicle:'Garage',
   settings:'Settings',
   billing:'Billing',
   users:'Users',
@@ -10234,11 +10333,10 @@ async function bootTracker(){
   if(trackerBooted) return;
   trackerBooted=true;
 
-  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,toggleGarageMenu,closeGarageMenu,switchGarageBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,archiveActiveBuild,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
+  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,switchGarageBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,archiveActiveBuild,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
   document.addEventListener('click',e=>{
     if(!e.target.closest('.tracker-nav-more-wrap'))closeMoreMenu();
     if(!e.target.closest('.tracker-nav-mobile-wrap'))closeMobileNavMenu();
-    if(!e.target.closest('.garage-wrap'))closeGarageMenu();
   });
 
   bindNavTouchGuard();
