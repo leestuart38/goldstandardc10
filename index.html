@@ -2985,8 +2985,35 @@ button[onclick="logoutUser()"]:not(.top-logout-btn){
 .garage-page-item{
   display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;
   border:1px solid rgba(241,209,122,.14);border-radius:12px;background:rgba(255,255,255,.03);
-  color:var(--gs-cream);padding:12px 14px;cursor:pointer;text-align:left;
+  color:var(--gs-cream);padding:10px 12px;cursor:pointer;text-align:left;
 }
+.garage-page-thumb{
+  width:64px;height:44px;border-radius:8px;overflow:hidden;flex-shrink:0;
+  border:1px solid rgba(241,209,122,.18);background:rgba(0,0,0,.38);
+  display:flex;align-items:center;justify-content:center;
+}
+.garage-page-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.garage-page-thumb.empty{color:var(--gs-muted);font-size:20px;opacity:.75}
+.garage-page-item-body{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.vehicle-edit-btn.danger{
+  border-color:rgba(248,113,113,.4);background:rgba(220,38,38,.14);color:#fca5a5;
+}
+.vehicle-edit-btn.danger:hover{background:rgba(220,38,38,.24);border-color:rgba(248,113,113,.55)}
+.garage-confirm-modal{
+  position:fixed;inset:0;z-index:100002;display:none;align-items:center;justify-content:center;
+  padding:20px;background:rgba(0,0,0,.78);backdrop-filter:blur(6px);
+}
+.garage-confirm-modal.open{display:flex}
+.garage-confirm-inner{
+  width:min(400px,100%);padding:20px;border-radius:18px;
+  border:1px solid rgba(241,209,122,.28);background:linear-gradient(180deg,#1c1812,#0e0c09);
+  box-shadow:0 24px 80px rgba(0,0,0,.62);
+}
+.garage-confirm-title{margin:0 0 8px;font-family:var(--gs-display);font-size:18px;font-weight:700;color:var(--gs-cream);text-transform:uppercase}
+.garage-confirm-text{margin:0 0 16px;font-size:13px;line-height:1.5;color:var(--gs-muted)}
+.garage-confirm-text strong{color:var(--gs-cream)}
+.garage-confirm-warn{color:#fca5a5;font-weight:700}
+.garage-confirm-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
 .garage-page-item:hover{background:rgba(185,138,39,.12);border-color:rgba(241,209,122,.24)}
 .garage-page-item.active{border-color:rgba(241,209,122,.42);background:rgba(185,138,39,.16)}
 .garage-page-item.archived{opacity:.72}
@@ -6254,7 +6281,9 @@ let activeBuildId=null;
 let activePublicSlug=null;
 let garageBuilds=[];
 let garageMenuOpen=false;
-let garageOp={active:false,cancelled:false,pct:0,label:'',id:0};
+let garageOp={active:false,cancelled:false,pct:0,label:'',id:0,allowCancel:true};
+let garageBuildThumbs={};
+let garageSwitchTargetId=null;
 let privateMediaMsPrefix='';
 let publicMediaMsPrefix='';
 let FIRESTORE_COLLECTION='';
@@ -6333,7 +6362,7 @@ function packState(){
       vehicleNickname:VEHICLE_NICKNAME
     },
     meta:{
-      appVersion:'v142-garage-per-build',
+      appVersion:'v143-garage-ux',
       updatedAt:now,
       buildId:activeBuildId,
       publicSlug:activePublicSlug
@@ -6432,12 +6461,44 @@ async function loadGarageBuildList(){
   if(!col)return [];
   const snap=await withTimeout(col.get(),12000,'Garage list load');
   const list=snap.docs.map(d=>buildMetaFromDoc(Object.assign({buildId:d.id},d.data()))).filter(Boolean);
-  list.sort((a,b)=>{
-    if(!!a.archived!==!!b.archived)return a.archived?1:-1;
-    return String(b.updatedAt||'').localeCompare(String(a.updatedAt||''));
-  });
+  list.sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
   garageBuilds=list;
   return list;
+}
+async function loadGarageBuildThumbnail(buildId){
+  if(!buildId)return '';
+  if(garageBuildThumbs[buildId])return garageBuildThumbs[buildId];
+  if(buildId===activeBuildId&&vehicleImage){
+    garageBuildThumbs[buildId]=vehicleImage;
+    return vehicleImage;
+  }
+  try{
+    const mediaCol=getUserMediaCol();
+    if(mediaCol){
+      const snap=await withTimeout(mediaCol.doc(buildId+'-vehicle').get(),6000,'Build thumb load');
+      if(snap.exists&&snap.data().vehicleImage){
+        garageBuildThumbs[buildId]=snap.data().vehicleImage;
+        return snap.data().vehicleImage;
+      }
+    }
+    if(buildId===LEGACY_BUILD_ID&&firebaseDb){
+      const legacy=await withTimeout(firebaseDb.collection(LEGACY_TRACKER_COLLECTION).doc(LEGACY_BUILD_ID+'-media-vehicle').get(),6000,'Legacy thumb');
+      if(legacy.exists&&legacy.data().vehicleImage){
+        garageBuildThumbs[buildId]=legacy.data().vehicleImage;
+        return legacy.data().vehicleImage;
+      }
+    }
+  }catch(e){console.warn('Thumb load failed:',buildId,e);}
+  return '';
+}
+async function loadGarageBuildThumbnails(){
+  if(activeBuildId&&vehicleImage)garageBuildThumbs[activeBuildId]=vehicleImage;
+  await Promise.all(garageBuilds.map(b=>loadGarageBuildThumbnail(b.buildId)));
+}
+function garageThumbHtml(buildId){
+  const src=garageBuildThumbs[buildId]||'';
+  if(src)return `<span class="garage-page-thumb"><img src="${src}" alt=""></span>`;
+  return `<span class="garage-page-thumb empty"><i class="ti ti-car" aria-hidden="true"></i></span>`;
 }
 function applyCloudStateToApp(cloud){
   applySettingsFromState(cloud);
@@ -6701,15 +6762,25 @@ function updateGarageOpUI(){
   if(lbl)lbl.textContent=garageOp.label||'Working...';
   if(pct)pct.textContent=Math.round(garageOp.pct)+'%';
 }
-function beginGarageOp(title){
+function beginGarageOp(title,options){
+  const opts=options||{};
   garageOp.id++;
   garageOp.active=true;
   garageOp.cancelled=false;
+  garageOp.allowCancel=opts.allowCancel!==false;
   garageOp.pct=0;
   garageOp.label=title||'Working...';
   document.body.classList.add('garage-op-active');
+  const root=document.getElementById('tracker-root');
+  if(root)root.classList.add('is-loading');
+  const loader=document.getElementById('cloud-loading');
+  if(loader)loader.style.display='none';
   const m=document.getElementById('garage-op-modal');
   if(m)m.classList.add('open');
+  const cancelWrap=document.getElementById('garage-op-cancel-wrap');
+  if(cancelWrap)cancelWrap.style.display=garageOp.allowCancel?'':'none';
+  const titleEl=document.getElementById('garage-op-title');
+  if(titleEl)titleEl.textContent=title||'Working...';
   updateGarageOpUI();
   return garageOp.id;
 }
@@ -6736,6 +6807,7 @@ function endGarageOp(){
   document.body.classList.remove('garage-op-active');
   const m=document.getElementById('garage-op-modal');
   if(m)m.classList.remove('open');
+  hideCloudLoading();
 }
 function isGarageOpCancelledError(e){
   return !!(e&&(e.code==='GARAGE_OP_CANCELLED'||(e.message&&e.message.includes('GARAGE_OP_CANCELLED'))));
@@ -6788,6 +6860,7 @@ async function loadBuildById(buildId,options){
       showGarageToast('Loaded restored C10 data locally, but cloud restore save failed.');
     }
   }
+  if(activeBuildId&&vehicleImage)garageBuildThumbs[activeBuildId]=vehicleImage;
   renderGarageUI();
   syncBuildMetaUI();
 }
@@ -6808,6 +6881,107 @@ async function tryFlushBeforeGarageAction(){
   saveTimer=null;
   return await saveCloudState();
 }
+function requestSwitchGarageBuild(buildId){
+  if(!buildId||buildId===activeBuildId||isGarageOpActive())return;
+  const b=garageBuilds.find(x=>x.buildId===buildId);
+  garageSwitchTargetId=buildId;
+  const nameEl=document.getElementById('garage-switch-name');
+  if(nameEl)nameEl.textContent=b?(b.buildName||'Untitled build'):'this build';
+  const modal=document.getElementById('garage-switch-modal');
+  if(modal)modal.classList.add('open');
+}
+function closeGarageSwitchModal(){
+  garageSwitchTargetId=null;
+  const modal=document.getElementById('garage-switch-modal');
+  if(modal)modal.classList.remove('open');
+}
+function confirmGarageSwitch(){
+  const id=garageSwitchTargetId;
+  closeGarageSwitchModal();
+  if(id)switchGarageBuild(id);
+}
+function openDeleteBuildModal(){
+  if(!activeBuildId||isGarageOpActive())return;
+  const nameEl=document.getElementById('garage-delete-name');
+  if(nameEl)nameEl.textContent=BUILD_NAME||'this build';
+  const modal=document.getElementById('garage-delete-modal');
+  if(modal)modal.classList.add('open');
+}
+function closeDeleteBuildModal(){
+  const modal=document.getElementById('garage-delete-modal');
+  if(modal)modal.classList.remove('open');
+}
+async function deleteBuildMediaShards(mediaCol,buildId,shardCount){
+  if(!mediaCol||!buildId)return;
+  const ops=[mediaCol.doc(buildId+'-vehicle').delete().catch(()=>{})];
+  const count=Math.max(shardCount||0,48);
+  for(let i=0;i<count;i++)ops.push(mediaCol.doc(buildId+'-ms-'+i).delete().catch(()=>{}));
+  await Promise.all(ops);
+}
+async function deletePublicBuildMedia(slug,shardCount){
+  if(!firebaseDb||!slug)return;
+  const ops=[
+    firebaseDb.collection(PUBLIC_COLLECTION).doc(slug).delete().catch(()=>{}),
+    firebaseDb.collection(PUBLIC_COLLECTION).doc(slug+'-media-vehicle').delete().catch(()=>{})
+  ];
+  const count=Math.max(shardCount||0,48);
+  for(let i=0;i<count;i++)ops.push(firebaseDb.collection(PUBLIC_COLLECTION).doc(slug+'-media-ms-'+i).delete().catch(()=>{}));
+  await Promise.all(ops);
+}
+async function confirmDeleteActiveBuild(){
+  if(!activeBuildId||isGarageOpActive())return;
+  const buildId=activeBuildId;
+  const slug=activePublicSlug||buildId;
+  const buildName=BUILD_NAME||'this build';
+  closeDeleteBuildModal();
+  beginGarageOp('Deleting build');
+  try{
+    setGarageOpProgress(12,'Removing build data from cloud...');
+    throwIfGarageOpCancelled();
+    const col=getUserBuildsCol();
+    const mediaCol=getUserMediaCol();
+    if(col)await col.doc(buildId).delete();
+    await deleteBuildMediaShards(mediaCol,buildId,cachedMediaMsShardCount);
+    await deletePublicBuildMedia(slug,cachedPublicMediaMsShardCount);
+    try{localStorage.removeItem(localSaveKey());}catch(e){}
+    delete garageBuildThumbs[buildId];
+    setGarageOpProgress(45,'Updating garage list...');
+    throwIfGarageOpCancelled();
+    await loadGarageBuildList();
+    const next=garageBuilds.find(b=>b.buildId!==buildId);
+    setGarageOpProgress(100,'Build deleted');
+    endGarageOp();
+    if(next){
+      showGarageToast('Deleted '+buildName+'. Loading next build...');
+      await switchGarageBuild(next.buildId);
+    }else{
+      activeBuildId=null;
+      activePublicSlug=null;
+      firestoreDocRef=null;
+      publicDocRef=null;
+      sections=cloneDefaultData(DEFAULT_SECTIONS);
+      sponsors=cloneDefaultData(DEFAULT_SPONSORS);
+      decisions=[];
+      milestones=[];
+      workTasks=[];
+      vehicleImage='';
+      vehicleImageOriginal='';
+      repairTrackerState();
+      safeBuild();
+      renderGarageUI();
+      syncBuildMetaUI();
+      showGarageToast('Build deleted. Create a new build to continue.');
+    }
+  }catch(e){
+    endGarageOp();
+    if(isGarageOpCancelledError(e)){
+      showGarageToast('Delete cancelled.');
+      return;
+    }
+    console.warn(e);
+    showGarageToast('Could not delete build.');
+  }
+}
 async function switchGarageBuild(buildId){
   if(!buildId||buildId===activeBuildId||isGarageOpActive())return;
   beginGarageOp('Switching build');
@@ -6824,6 +6998,7 @@ async function switchGarageBuild(buildId){
     throwIfGarageOpCancelled();
     await saveUserGarageMeta({activeBuildId:buildId});
     await loadGarageBuildList();
+    await loadGarageBuildThumbnails();
     renderGarageUI();
     setGarageOpProgress(100,'Build ready');
     setSaveInd('saved','Build switched');
@@ -6862,19 +7037,18 @@ function showGarageToast(msg){
   showGarageToast._t=setTimeout(()=>el.classList.remove('show'),4200);
 }
 function renderGarageBuildListHtml(){
-  const active=garageBuilds.filter(b=>!b.archived);
-  const archived=garageBuilds.filter(b=>b.archived);
   const lockCls=isGarageOpActive()?' is-locked':'';
-  let html=active.map(b=>`<button class="garage-page-item${b.buildId===activeBuildId?' active':''}${lockCls}" type="button"${isGarageOpActive()?' disabled':''} onclick="switchGarageBuild('${b.buildId}')"><span class="garage-page-item-main"><span class="garage-page-item-name">${esc(b.buildName||'Untitled build')}</span><span class="garage-page-item-meta">${esc(formatVehicleLabel(b.vehicleYear,b.vehicleMake,b.vehicleModel)||b.buildId)}</span></span>${b.buildId===activeBuildId?'<span class="garage-page-item-badge">Active</span>':''}</button>`).join('');
-  if(archived.length){
-    html+=`<div class="garage-page-archived-hdr">Archived builds</div>`;
-    html+=archived.map(b=>`<button class="garage-page-item archived${lockCls}" type="button"${isGarageOpActive()?' disabled':''} onclick="switchGarageBuild('${b.buildId}')"><span class="garage-page-item-main"><span class="garage-page-item-name">${esc(b.buildName||'Archived build')}</span><span class="garage-page-item-meta">Archived</span></span></button>`).join('');
-  }
+  let html=garageBuilds.map(b=>`<button class="garage-page-item${b.buildId===activeBuildId?' active':''}${lockCls}" type="button"${isGarageOpActive()?' disabled':''} onclick="requestSwitchGarageBuild('${b.buildId}')"><span class="garage-page-item-body">${garageThumbHtml(b.buildId)}<span class="garage-page-item-main"><span class="garage-page-item-name">${esc(b.buildName||'Untitled build')}</span><span class="garage-page-item-meta">${esc(formatVehicleLabel(b.vehicleYear,b.vehicleMake,b.vehicleModel)||b.buildId)}</span></span></span>${b.buildId===activeBuildId?'<span class="garage-page-item-badge">Active</span>':''}</button>`).join('');
   if(!html)html='<div class="vehicle-panel-note" style="margin-top:0"><i class="ti ti-info-circle"></i><span>No builds yet. Create your first build above.</span></div>';
   return html;
 }
 function renderGarageUI(){
+  if(activeBuildId&&vehicleImage)garageBuildThumbs[activeBuildId]=vehicleImage;
   renderVehiclePanel();
+  loadGarageBuildThumbnails().then(()=>{
+    const list=document.querySelector('.garage-page-list');
+    if(list)list.innerHTML=renderGarageBuildListHtml();
+  });
 }
 function openGarageCreateModal(){
   if(isGarageOpActive())return;
@@ -6889,21 +7063,6 @@ function openGarageCreateModal(){
 function closeGarageCreateModal(){
   const m=document.getElementById('garage-create-modal');
   if(m)m.classList.remove('open');
-}
-async function archiveActiveBuild(){
-  if(!activeBuildId||!confirm('Archive this build? It will stay in your garage but hidden from the main list.'))return;
-  try{
-    await flushCloudSave();
-    const col=getUserBuildsCol();
-    await col.doc(activeBuildId).set({archived:true,updatedAt:new Date().toISOString()},{merge:true});
-    await loadGarageBuildList();
-    const next=garageBuilds.find(b=>!b.archived&&b.buildId!==activeBuildId);
-    if(next)await switchGarageBuild(next.buildId);
-    else showGarageToast('Build archived. Create a new build to continue.');
-    renderGarageUI();
-  }catch(e){
-    showGarageToast('Could not archive build.');
-  }
 }
 async function confirmGarageCreateBuild(){
   if(isGarageOpActive())return;
@@ -6956,6 +7115,7 @@ async function confirmGarageCreateBuild(){
     throwIfGarageOpCancelled();
     await loadBuildById(buildId,{fastLoad:true});
     await loadGarageBuildList();
+    await loadGarageBuildThumbnails();
     renderGarageUI();
     scheduleSave();
     setGarageOpProgress(100,'Build created');
@@ -8102,7 +8262,7 @@ function renderVehiclePanel(){
           </div>
           <div class="garage-page-actions">
             <button class="vehicle-edit-btn" type="button" onclick="openVehicleEditorModal('edit')"><i class="ti ti-pencil"></i>Edit Vehicle</button>
-            <button class="vehicle-edit-btn" type="button" onclick="archiveActiveBuild()"><i class="ti ti-archive"></i>Archive Build</button>
+            <button class="vehicle-edit-btn danger" type="button" onclick="openDeleteBuildModal()"><i class="ti ti-trash"></i>Delete Build</button>
           </div>
           ${originalBlock}
         </div>
@@ -8154,28 +8314,38 @@ function safeBuild(){
 }
 
 async function initData(){
-  showCloudLoading('Loading your garage from Firestore...');
-  initFirebaseSync();
-
-  if(firebaseReady&&currentUser){
-    try{
-      const meta=await migrateLegacyBuildIfNeeded();
-      const buildId=await resolveActiveBuildId(meta);
-      await loadBuildById(buildId,{forceC10Restore:true});
-      await saveUserGarageMeta({activeBuildId:buildId});
-      setSaveInd('saved','Garage loaded');
-      setTimeout(()=>setSaveInd('idle','Cloud sync on'),1800);
-      return;
-    }catch(e){
-      console.warn('Garage load failed. Falling back to local backup:',e);
-      showCloudLoading('Cloud slow or unavailable. Loading local backup...');
-      setSaveInd('idle','Cloud error, local backup loaded');
-    }
-  }else{
-    showCloudLoading('Cloud unavailable. Loading local backup...');
-  }
-
+  beginGarageOp('Loading build tracker',{allowCancel:false});
   try{
+    setGarageOpProgress(5,'Connecting to cloud...');
+    initFirebaseSync();
+
+    if(firebaseReady&&currentUser){
+      try{
+        setGarageOpProgress(18,'Checking your garage...');
+        const meta=await migrateLegacyBuildIfNeeded();
+        setGarageOpProgress(32,'Selecting active build...');
+        const buildId=await resolveActiveBuildId(meta);
+        setGarageOpProgress(48,'Loading build data and media...');
+        await loadBuildById(buildId,{forceC10Restore:true});
+        setGarageOpProgress(72,'Loading garage previews...');
+        await loadGarageBuildList();
+        await loadGarageBuildThumbnails();
+        setGarageOpProgress(88,'Saving preferences...');
+        await saveUserGarageMeta({activeBuildId:buildId});
+        setGarageOpProgress(100,'Ready');
+        setSaveInd('saved','Garage loaded');
+        setTimeout(()=>setSaveInd('idle','Cloud sync on'),1800);
+        await new Promise(r=>setTimeout(r,240));
+        return;
+      }catch(e){
+        console.warn('Garage load failed. Falling back to local backup:',e);
+        setGarageOpProgress(40,'Cloud unavailable — loading local backup...');
+        setSaveInd('idle','Cloud error, local backup loaded');
+      }
+    }else{
+      setGarageOpProgress(20,'Cloud unavailable — loading local backup...');
+    }
+
     const local=pickRicherState.apply(null,collectAllLocalTrackerSnapshots().concat([loadState()]));
     if(local&&hasUsableSections(local.sections)){
       applySettingsFromState(local);
@@ -8201,6 +8371,7 @@ async function initData(){
       sponsors=cloneDefaultData(DEFAULT_SPONSORS);
       decisions=cloneDefaultData(DEFAULT_DECISIONS);
     }
+    setGarageOpProgress(85,'Rendering tracker...');
     repairTrackerState();
     safeBuild();
     repairAllSponsorLogos();
@@ -8208,11 +8379,15 @@ async function initData(){
       activeBuildId=LEGACY_BUILD_ID;
       activePublicSlug=LEGACY_BUILD_ID;
       ensureGarageRefs();
+      await loadGarageBuildList();
+      await loadGarageBuildThumbnails();
     }
     renderGarageUI();
+    setGarageOpProgress(100,'Ready');
     setSaveInd('idle','Loaded from local backup');
+    await new Promise(r=>setTimeout(r,240));
   }finally{
-    hideCloudLoading();
+    endGarageOp();
   }
 }
 
@@ -10682,7 +10857,7 @@ async function bootTracker(){
   if(trackerBooted) return;
   trackerBooted=true;
 
-  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,switchGarageBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,archiveActiveBuild,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
+  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
   document.addEventListener('click',e=>{
     if(!e.target.closest('.tracker-nav-more-wrap'))closeMoreMenu();
     if(!e.target.closest('.tracker-nav-mobile-wrap'))closeMobileNavMenu();
@@ -10807,8 +10982,30 @@ window.addEventListener('pageshow',()=>setTimeout(()=>{ if(!document.querySelect
     <p class="garage-op-status" id="garage-op-status">Working...</p>
     <div class="garage-op-track" aria-hidden="true"><div class="garage-op-bar-fill" id="garage-op-bar-fill"></div></div>
     <div class="garage-op-pct" id="garage-op-pct">0%</div>
-    <div class="garage-op-actions">
+    <div class="garage-op-actions" id="garage-op-cancel-wrap">
       <button class="garage-op-cancel-btn" type="button" onclick="cancelGarageOp()"><i class="ti ti-x"></i>Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="garage-confirm-modal" id="garage-switch-modal" onclick="closeGarageSwitchModal()">
+  <div class="garage-confirm-inner" onclick="event.stopPropagation()">
+    <h3 class="garage-confirm-title">Load build?</h3>
+    <p class="garage-confirm-text">Switch to <strong id="garage-switch-name">this build</strong>? Your current build will be saved first.</p>
+    <div class="garage-confirm-actions">
+      <button class="vehicle-edit-btn" type="button" onclick="closeGarageSwitchModal()">Cancel</button>
+      <button class="vehicle-edit-btn" type="button" onclick="confirmGarageSwitch()"><i class="ti ti-check"></i>Load Build</button>
+    </div>
+  </div>
+</div>
+
+<div class="garage-confirm-modal" id="garage-delete-modal" onclick="closeDeleteBuildModal()">
+  <div class="garage-confirm-inner" onclick="event.stopPropagation()">
+    <h3 class="garage-confirm-title">Delete build?</h3>
+    <p class="garage-confirm-text">Delete <strong id="garage-delete-name">this build</strong>? <span class="garage-confirm-warn">This permanently erases all parts, work log, milestones, research, sponsors, images, and public page data for this build.</span> This cannot be undone.</p>
+    <div class="garage-confirm-actions">
+      <button class="vehicle-edit-btn" type="button" onclick="closeDeleteBuildModal()">Cancel</button>
+      <button class="vehicle-edit-btn danger" type="button" onclick="confirmDeleteActiveBuild()"><i class="ti ti-trash"></i>Delete Build</button>
     </div>
   </div>
 </div>
