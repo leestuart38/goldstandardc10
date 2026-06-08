@@ -6363,7 +6363,7 @@ function packState(){
       vehicleNickname:VEHICLE_NICKNAME
     },
     meta:{
-      appVersion:'v144-garage-fast-delete',
+      appVersion:'v145-fast-load-fresh-build',
       updatedAt:now,
       buildId:activeBuildId,
       publicSlug:activePublicSlug
@@ -6514,9 +6514,9 @@ function applyCloudStateToApp(cloud){
   workTasks=Array.isArray(cloud.workTasks)?cloud.workTasks:[];
   workTaskCtr=parseInt(cloud.workTaskCtr||0)||workTasks.length||0;
   workHourCtr=parseInt(cloud.workHourCtr||0)||0;
-  sections=cloud.sections||cloneDefaultData(DEFAULT_SECTIONS);
-  sponsors=cloud.sponsors||cloneDefaultData(DEFAULT_SPONSORS);
-  decisions=cloud.decisions||cloneDefaultData(DEFAULT_DECISIONS);
+  sections=Array.isArray(cloud.sections)?cloud.sections:cloneDefaultData(DEFAULT_SECTIONS);
+  sponsors=Array.isArray(cloud.sponsors)?cloud.sponsors:cloneDefaultData(DEFAULT_SPONSORS);
+  decisions=Array.isArray(cloud.decisions)?cloud.decisions:cloneDefaultData(DEFAULT_DECISIONS);
   activeBuildTemplate=cloud.template||'custom-truck';
   activeBuildCreatedAt=cloud.createdAt||'';
   if(cloud.buildId)activeBuildId=cloud.buildId;
@@ -6835,7 +6835,7 @@ async function loadBuildById(buildId,options){
     restored=true;
   }else{
     data=Object.assign({buildId},snap.data());
-    if(buildId===LEGACY_BUILD_ID&&(forceC10Restore||(!fastLoad&&needsC10Repair(data)))){
+    if(buildId===LEGACY_BUILD_ID&&(forceC10Restore||needsC10Repair(data))){
       const fix=await restoreC10BuildCompletely(data);
       data=fix.data;
       restored=fix.restored||forceC10Restore;
@@ -7152,12 +7152,14 @@ async function confirmGarageCreateBuild(){
     const buildId=await uniqueBuildId(baseId);
     const publicSlug=buildId;
     const now=new Date().toISOString();
+    clearTimeout(saveTimer);
+    saveTimer=null;
     const newBuild={
       buildId,publicSlug,buildName:name,
       vehicleYear:year,vehicleMake:make,vehicleModel:model,vehicleNickname:nickname,
       archived:false,template,createdAt:now,updatedAt:now,
       sections:tpl.sections(),
-      sponsors:cloneDefaultData(DEFAULT_SPONSORS).map(s=>Object.assign({},s,{logo:'',status:'Prospect',publicVisible:false})),
+      sponsors:[],
       decisions:[],
       milestones:[],
       milestoneCtr:0,
@@ -7167,20 +7169,24 @@ async function confirmGarageCreateBuild(){
       vehicleImage:'',
       vehicleImageOriginal:'',
       settings:{targetBudget:0,truckCost:0,buildName:name,vehicleYear:year,vehicleMake:make,vehicleModel:model,vehicleNickname:nickname},
-      meta:{appVersion:'v142-garage-per-build',updatedAt:now,buildId,publicSlug}
+      meta:{appVersion:'v145-fast-load-fresh-build',updatedAt:now,buildId,publicSlug,mediaMsShardCount:0}
     };
     setGarageOpProgress(52,'Writing build to cloud...');
     throwIfGarageOpCancelled();
-    await buildsCol.doc(buildId).set(sanitizeForFirestore(newBuild),{merge:true});
+    await buildsCol.doc(buildId).set(sanitizeForFirestore(newBuild));
     setGarageOpProgress(68,'Activating new build...');
     throwIfGarageOpCancelled();
     await saveUserGarageMeta({activeBuildId:buildId});
     setGarageOpProgress(82,'Loading build workspace...');
     throwIfGarageOpCancelled();
-    await loadBuildById(buildId,{fastLoad:true});
+    bindActiveBuildRefs(buildId,publicSlug);
+    resetBuildSessionState();
+    applyCloudStateToApp(newBuild);
+    saveLocalStateNow();
+    safeBuild();
+    syncBuildMetaUI();
     await loadGarageBuildList();
     renderGarageUI();
-    scheduleSave();
     setGarageOpProgress(100,'Build created');
     setSaveInd('saved','New build created');
     setTimeout(()=>setSaveInd('idle','Cloud sync on'),1800);
@@ -7328,19 +7334,33 @@ function resolveMediaCollection(collectionRefOrName){
   if(collectionRefOrName&&typeof collectionRefOrName.doc==='function')return collectionRefOrName;
   return firebaseDb.collection(collectionRefOrName);
 }
+async function probeMilestoneShardCount(col,prefix,maxProbe){
+  const limit=maxProbe==null?48:maxProbe;
+  if(!col||limit<=0)return 0;
+  const batchSize=8;
+  let count=0;
+  for(let start=0;start<limit;start+=batchSize){
+    const size=Math.min(batchSize,limit-start);
+    let snaps;
+    try{
+      snaps=await Promise.all(Array.from({length:size},(_,j)=>
+        withTimeout(col.doc(prefix+(start+j)).get(),4000,'Shard probe')
+      ));
+    }catch(e){break;}
+    for(let j=0;j<snaps.length;j++){
+      if(snaps[j]&&snaps[j].exists)count=start+j+1;
+      else return count;
+    }
+  }
+  return count;
+}
 async function probeMilestoneShards(collectionRefOrName,prefix,state,onlyIfMissing,maxProbe){
   if(!firebaseDb||!state)return 0;
   const col=resolveMediaCollection(collectionRefOrName);
   let count=Number(state.meta&&state.meta.mediaMsShardCount)||0;
   const limit=maxProbe==null?48:maxProbe;
   if(!count&&limit>0){
-    for(let i=0;i<limit;i++){
-      try{
-        const snap=await col.doc(prefix+i).get();
-        if(!snap.exists)break;
-        count=i+1;
-      }catch(e){break;}
-    }
+    count=await probeMilestoneShardCount(col,prefix,limit);
   }
   if(count>0){
     const photoMap=await loadMilestonePhotoShards(collectionRefOrName,prefix,count);
@@ -7847,16 +7867,25 @@ function cloneDefaultData(x){ return JSON.parse(JSON.stringify(x)); }
 function hasUsableSections(arr){
   return Array.isArray(arr) && arr.length >= 5 && arr.some(s => s && Array.isArray(s.parts) && s.parts.length > 0);
 }
+function hasSectionStructure(arr){
+  return Array.isArray(arr)&&arr.length>=5&&arr.every(s=>s&&s.key&&Array.isArray(s.parts));
+}
 
 function repairSections(savedSections){
   const defaults = cloneDefaultData(DEFAULT_SECTIONS);
-  if(!hasUsableSections(savedSections)) return defaults;
+  if(!hasSectionStructure(savedSections)){
+    if(!hasUsableSections(savedSections)) return defaults;
+  }
   const savedByKey = new Map(savedSections.filter(Boolean).map(s => [s.key, s]));
-  const repaired = defaults.map(defSec => {
+  const baseKeys=hasSectionStructure(savedSections)
+    ?savedSections.filter(Boolean).map(s=>s.key)
+    :defaults.map(d=>d.key);
+  const repaired = baseKeys.map(key=>{
+    const defSec=defaults.find(d=>d.key===key)||savedByKey.get(key)||{key,name:key,budget:0,parts:[]};
     const savedSec = savedByKey.get(defSec.key) || {};
     const mergedSec = Object.assign({}, defSec, savedSec);
     const savedParts = Array.isArray(savedSec.parts) ? savedSec.parts : [];
-    if(savedParts.length === 0){ mergedSec.parts = defSec.parts; return mergedSec; }
+    if(savedParts.length === 0){ mergedSec.parts = []; return mergedSec; }
     const savedPartsById = new Map(savedParts.filter(Boolean).map(p => [p.id, p]));
     const used = new Set();
     const mergedParts = defSec.parts.map(defPart => {
@@ -7909,8 +7938,9 @@ function normalizeSponsor(raw){
   return s;
 }
 function repairSponsors(savedSponsors){
-  const list=Array.isArray(savedSponsors)&&savedSponsors.length?savedSponsors:cloneDefaultData(DEFAULT_SPONSORS);
-  return list.filter(Boolean).map(normalizeSponsor).filter(Boolean);
+  if(!Array.isArray(savedSponsors))return cloneDefaultData(DEFAULT_SPONSORS);
+  if(!savedSponsors.length)return [];
+  return savedSponsors.filter(Boolean).map(normalizeSponsor).filter(Boolean);
 }
 function sponsorNeedsPublicSetup(s){
   return s&&s.status==='Confirmed'&&(!s.logo||!String(s.website||'').trim()||!s.tier||!s.publicVisible);
@@ -7965,8 +7995,9 @@ function normalizeResearchItem(raw){
   return r;
 }
 function repairDecisions(savedDecisions){
-  const list=Array.isArray(savedDecisions)&&savedDecisions.length?savedDecisions:cloneDefaultData(DEFAULT_DECISIONS);
-  return list.filter(Boolean).map(normalizeResearchItem).filter(Boolean);
+  if(!Array.isArray(savedDecisions))return cloneDefaultData(DEFAULT_DECISIONS);
+  if(!savedDecisions.length)return [];
+  return savedDecisions.filter(Boolean).map(normalizeResearchItem).filter(Boolean);
 }
 function researchSectionKeyForCategory(cat){
   return RESEARCH_CATEGORY_TO_SECTION[cat]||null;
@@ -8160,8 +8191,8 @@ function applySettingsFromState(state){
     if(state.vehicleNickname!=null)VEHICLE_NICKNAME=String(state.vehicleNickname||'');
   }
   if(state&&state.settings){
-    TARGET_BUDGET=parseFloat(state.settings.targetBudget)||TARGET_BUDGET;
-    TRUCK_COST=parseFloat(state.settings.truckCost)||TRUCK_COST;
+    if(state.settings.targetBudget!=null)TARGET_BUDGET=parseFloat(state.settings.targetBudget)||0;
+    if(state.settings.truckCost!=null)TRUCK_COST=parseFloat(state.settings.truckCost)||0;
     BUILD_NAME=state.settings.buildName||BUILD_NAME;
     VEHICLE_YEAR=state.settings.vehicleYear!=null?String(state.settings.vehicleYear):VEHICLE_YEAR;
     VEHICLE_MAKE=state.settings.vehicleMake!=null?String(state.settings.vehicleMake):VEHICLE_MAKE;
@@ -8401,16 +8432,19 @@ async function initData(){
         const meta=await migrateLegacyBuildIfNeeded();
         setGarageOpProgress(32,'Selecting active build...');
         const buildId=await resolveActiveBuildId(meta);
-        setGarageOpProgress(48,'Loading build data and media...');
-        await loadBuildById(buildId,{forceC10Restore:true});
-        setGarageOpProgress(72,'Loading garage previews...');
+        setGarageOpProgress(48,'Loading build...');
+        await loadBuildById(buildId,{fastLoad:true});
+        setGarageOpProgress(72,'Loading garage...');
         await loadGarageBuildList();
-        await loadGarageBuildThumbnails();
         setGarageOpProgress(88,'Saving preferences...');
         await saveUserGarageMeta({activeBuildId:buildId});
         setGarageOpProgress(100,'Ready');
         setSaveInd('saved','Garage loaded');
         setTimeout(()=>setSaveInd('idle','Cloud sync on'),1800);
+        const thumbGen=++garageThumbGen;
+        loadGarageBuildThumbnails(true).then(()=>{
+          if(thumbGen===garageThumbGen)renderGarageUI();
+        }).catch(e=>console.warn('Garage thumb preload failed:',e));
         await new Promise(r=>setTimeout(r,240));
         return;
       }catch(e){
