@@ -94,7 +94,23 @@ body{
   display:flex;flex-direction:column;align-items:flex-end;justify-content:flex-start;gap:8px;flex-shrink:0;
 }
 .public-part-name{font-size:13px;font-weight:900;color:var(--cream);line-height:1.25}
-.public-part-meta{margin-top:5px;display:flex;flex-wrap:wrap;gap:6px}
+.public-part-details{margin-top:10px}
+.public-part-details-title{
+  font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:8px;
+}
+.public-part-details-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 12px;
+}
+.public-part-detail label{
+  display:block;font-size:8px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:4px;
+}
+.public-part-detail-value{
+  font-size:11px;font-weight:800;color:var(--cream);line-height:1.25;
+  text-transform:uppercase;letter-spacing:.03em;
+}
+.public-part-detail .pub-pill{margin-top:0}
 .pub-part-link-btn{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
   padding:12px 16px;min-width:168px;
@@ -115,8 +131,8 @@ body{
   min-width:0;width:100%;padding:8px 10px;font-size:10px;gap:6px;
 }
 .pub-part-link-kicker{
-  display:block;margin-top:8px;font-size:9px;font-weight:900;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--gold-light);
+  display:block;font-size:9px;font-weight:900;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--gold-light);text-align:right;
 }
 .pub-sec-link-count{
   display:inline-flex;align-items:center;gap:5px;
@@ -192,6 +208,7 @@ body{
   .public-tabs{grid-template-columns:1fr}
   .public-part-side{align-items:stretch;width:100%}
   .pub-part-link-btn{width:100%;min-width:0}
+  .public-part-details-grid{grid-template-columns:1fr}
 }
 
 
@@ -647,8 +664,30 @@ function publicPartLinkBtn(p,compact){
   const href=publicPartUrl(p&&p.link);
   if(!href)return '';
   const cls=compact?'pub-part-link-btn pub-part-link-btn-compact':'pub-part-link-btn';
-  const kicker=compact?'':'<span class="pub-part-link-kicker">Shop / affiliate link</span>';
-  return `${kicker}<a class="${cls}" href="${esc(href)}" target="_blank" rel="noopener noreferrer sponsored" aria-label="Open shop link for part"><i class="ti ti-shopping-cart" aria-hidden="true"></i><span>Open shop link</span><i class="ti ti-external-link" aria-hidden="true"></i></a>`;
+  return `<a class="${cls}" href="${esc(href)}" target="_blank" rel="noopener noreferrer sponsored" aria-label="Open shop link for part"><i class="ti ti-shopping-cart" aria-hidden="true"></i><span>Open shop link</span><i class="ti ti-external-link" aria-hidden="true"></i></a>`;
+}
+function publicPartDetailsHtml(p){
+  const vendorRaw=String((p&&p.vendor)||'').trim();
+  const vendor=vendorRaw?esc(vendorRaw):'Not set';
+  const priority=esc((p&&p.priority)||'Medium');
+  const status=esc((p&&p.status)||'Need to Buy');
+  return `<div class="public-part-details">
+    <div class="public-part-details-title">Part details</div>
+    <div class="public-part-details-grid">
+      <div class="public-part-detail">
+        <label>Manufacturer</label>
+        <div class="public-part-detail-value">${vendor}</div>
+      </div>
+      <div class="public-part-detail">
+        <label>Priority</label>
+        <span class="pub-pill">${priority}</span>
+      </div>
+      <div class="public-part-detail">
+        <label>Status</label>
+        <span class="pub-pill status-pill ${statusClass(p.status)}">${status}</span>
+      </div>
+    </div>
+  </div>`;
 }
 function publicSectionLinkCount(parts){
   return (parts||[]).filter(publicPartHasLink).length;
@@ -884,13 +923,10 @@ function render(data){
           ${parts.map(p=>{const hasLink=publicPartHasLink(p);return `<div class="public-part${hasLink?' has-part-link':''}">
             <div class="public-part-main">
               <div class="public-part-name">${esc(p.name||'Untitled part')}</div>
-              <div class="public-part-meta">
-                ${p.vendor?`<span class="pub-pill">${esc(p.vendor)}</span>`:''}
-                <span class="pub-pill">${esc(p.priority||'Medium')}</span>
-              </div>
+              ${publicPartDetailsHtml(p)}
             </div>
             <div class="public-part-side">
-              <span class="pub-pill status-pill ${statusClass(p.status)}">${esc(p.status||'Need to Buy')}</span>
+              ${hasLink?'<span class="pub-part-link-kicker">Shop / affiliate link</span>':''}
               ${publicPartLinkBtn(p)}
             </div>
           </div>`}).join('')}
