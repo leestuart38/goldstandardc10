@@ -218,75 +218,43 @@ body{
   .public-part-details-grid{grid-template-columns:1fr;gap:10px}
 }
 
-/* ===== v131 public build partners ===== */
+/* ===== v135 public dashboard build partners (unified tier layout) ===== */
 .pub-partners-wrap{margin-top:16px}
-.pub-partners-gold{display:grid;gap:14px;margin-bottom:14px}
-.pub-partner-gold{
-  display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;
-  padding:18px;border-radius:20px;border:1px solid rgba(241,209,122,.34);
-  background:linear-gradient(135deg,rgba(185,138,39,.16),rgba(0,0,0,.24));
-  text-decoration:none;color:inherit;
+.pub-partners-dash-list{display:grid;gap:10px}
+.pub-partner-dash-card{
+  display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center;
+  padding:14px 16px;border-radius:16px;border:1px solid rgba(241,209,122,.28);
+  background:rgba(0,0,0,.34);text-decoration:none;color:inherit;
+  transition:border-color .15s,transform .15s;
 }
-.pub-partner-gold:hover{border-color:rgba(241,209,122,.52);transform:translateY(-1px)}
-.pub-partner-gold-logo{
-  width:min(160px,34vw);aspect-ratio:1/1;box-sizing:border-box;padding:12px;
-  border-radius:14px;border:1px solid rgba(241,209,122,.18);
-  background:#080808;display:flex;align-items:center;justify-content:center;overflow:hidden;
+.pub-partner-dash-card:hover{border-color:rgba(241,209,122,.48);transform:translateY(-1px)}
+.pub-partner-dash-card.is-tier-gold{border-color:rgba(241,209,122,.42);background:linear-gradient(135deg,rgba(185,138,39,.14),rgba(0,0,0,.34))}
+.pub-partner-dash-card.is-tier-silver{border-color:rgba(192,192,192,.32)}
+.pub-partner-dash-card.is-tier-bronze{border-color:rgba(180,120,60,.32)}
+.pub-partner-dash-logo{
+  width:min(120px,28vw);aspect-ratio:1/1;box-sizing:border-box;padding:12px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  background:transparent;border:none;border-radius:0;
 }
-.pub-partner-gold-logo img{width:100%;height:100%;object-fit:contain;display:block}
-.pub-partner-gold-name{
-  font-family:var(--gs-display);font-size:clamp(24px,4vw,34px);font-weight:700;
-  letter-spacing:var(--gs-tracking-tight);text-transform:uppercase;line-height:1;
+.pub-partner-dash-logo img{width:100%;height:100%;object-fit:contain;display:block}
+.pub-partner-dash-fallback{
+  font-family:var(--gs-display);font-size:12px;font-weight:700;letter-spacing:var(--gs-tracking-tight);
+  text-transform:uppercase;color:var(--muted);text-align:center;line-height:1.2;
 }
-.pub-partner-gold-tier{font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-light);margin-bottom:6px}
-.pub-partners-tier-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:14px}
-.pub-partner-mid{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
-  min-height:120px;padding:14px;border-radius:18px;border:1px solid rgba(241,209,122,.2);
-  background:rgba(0,0,0,.22);text-decoration:none;color:inherit;text-align:center;
+.pub-partner-dash-tier{
+  font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gold-light);margin-bottom:5px;
 }
-.pub-partner-mid:hover{border-color:rgba(241,209,122,.42)}
-.pub-partner-mid-logo{
-  width:100%;max-width:88px;aspect-ratio:1/1;box-sizing:border-box;padding:10px;
-  display:flex;align-items:center;justify-content:center;
+.pub-partner-dash-name{
+  font-family:var(--gs-display);font-size:clamp(18px,3vw,26px);font-weight:700;
+  letter-spacing:var(--gs-tracking-tight);text-transform:uppercase;line-height:1.05;
 }
-.pub-partner-mid-logo img{width:100%;height:100%;object-fit:contain}
-.pub-partner-mid-name{font-family:var(--gs-display);font-size:16px;font-weight:700;letter-spacing:var(--gs-tracking-tight);text-transform:uppercase}
-.pub-partner-mid-tier{font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.pub-partners-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
-.pub-partner-grid-item{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
-  min-height:96px;padding:12px;border-radius:16px;border:1px solid rgba(241,209,122,.14);
-  background:rgba(0,0,0,.2);text-decoration:none;color:inherit;text-align:center;
-}
-.pub-partner-grid-item:hover{border-color:rgba(241,209,122,.34)}
-.pub-partner-grid-logo{
-  width:56px;height:56px;aspect-ratio:1/1;box-sizing:border-box;padding:8px;
-  display:flex;align-items:center;justify-content:center;
-}
-.pub-partner-grid-logo img{width:100%;height:100%;object-fit:contain}
-.pub-partner-text{font-family:var(--gs-display);font-size:12px;font-weight:700;letter-spacing:var(--gs-tracking-tight);text-transform:uppercase;line-height:1.15}
-@media(max-width:700px){
-  .pub-partner-gold{grid-template-columns:1fr;text-align:center}
-  .pub-partner-gold-logo{margin:0 auto}
-}
-
-/* ===== v133 compact dashboard + partners tab ===== */
 .pub-partners-wrap--dash{padding:14px!important;margin-top:12px!important}
 .pub-partners-wrap--dash .card-title{font-size:22px!important;margin-bottom:10px!important}
-.pub-partners-wrap--dash .pub-partners-gold{gap:10px;margin-bottom:10px}
-.pub-partners-wrap--dash .pub-partner-gold{padding:12px 14px;gap:12px;border-radius:16px}
-.pub-partners-wrap--dash .pub-partner-gold-logo{width:min(120px,30vw);padding:10px;border-radius:12px}
-.pub-partners-wrap--dash .pub-partner-gold-name{font-size:clamp(18px,3vw,24px)!important}
-.pub-partners-wrap--dash .pub-partner-gold-tier{font-size:9px;margin-bottom:4px}
-.pub-partners-wrap--dash .pub-partners-tier-row{gap:8px;margin-bottom:10px}
-.pub-partners-wrap--dash .pub-partner-mid{min-height:96px;padding:10px;border-radius:14px}
-.pub-partners-wrap--dash .pub-partner-mid-logo{max-width:72px;padding:8px}
-.pub-partners-wrap--dash .pub-partner-mid-name{font-size:13px}
-.pub-partners-wrap--dash .pub-partners-grid{gap:8px}
-.pub-partners-wrap--dash .pub-partner-grid-item{min-height:76px;padding:8px;border-radius:12px}
-.pub-partners-wrap--dash .pub-partner-grid-logo{width:48px;height:48px;padding:6px}
-.pub-partners-wrap--dash .pub-partner-text{font-size:10px}
+@media(max-width:700px){
+  .pub-partner-dash-card{grid-template-columns:1fr;text-align:center}
+  .pub-partner-dash-logo{margin:0 auto}
+}
 .pub-partners-detail-list{display:grid;gap:16px}
 .pub-partner-profile{
   display:grid;grid-template-columns:minmax(120px,200px) minmax(0,1fr);gap:18px;align-items:start;
@@ -298,7 +266,7 @@ body{
 .pub-partner-profile-logo{
   width:100%;max-width:200px;aspect-ratio:1/1;box-sizing:border-box;padding:14px;
   border-radius:16px;border:1px solid rgba(241,209,122,.18);
-  background:#080808;display:flex;align-items:center;justify-content:center;overflow:hidden;
+  background:transparent;display:flex;align-items:center;justify-content:center;overflow:hidden;
 }
 .pub-partner-profile-logo img{width:100%;height:100%;object-fit:contain;display:block}
 .pub-partner-profile-logo-fallback{
@@ -854,17 +822,23 @@ function sortPublicPartners(list){
     return String(a.name||'').localeCompare(String(b.name||''));
   });
 }
-function publicPartnerCard(s,kind){
+function publicPartnerDashTierClass(tier){
+  return {
+    'Gold Sponsor':' is-tier-gold',
+    'Silver Sponsor':' is-tier-silver',
+    'Bronze Sponsor':' is-tier-bronze'
+  }[tier]||' is-tier-support';
+}
+function publicPartnerDashCard(s){
   const name=esc(String(s.name||'Partner').trim()||'Partner');
   const href=publicPartnerUrl(s.website);
   const logo=String(s.logo||'').trim();
   const tier=esc(String(s.tier||'Supporting Partner'));
-  const innerLogo=logo?`<div class="${kind==='gold'?'pub-partner-gold-logo':kind==='mid'?'pub-partner-mid-logo':'pub-partner-grid-logo'}"><img src="${logo}" alt="${name} logo"></div>`:'';
-  const innerText=!logo?`<div class="pub-partner-text">${name}</div>`:'';
-  const tierHtml=kind==='gold'?`<div class="pub-partner-gold-tier">${tier}</div>`:kind==='mid'?`<div class="pub-partner-mid-tier">${tier}</div>`:'';
-  const nameHtml=logo?(kind==='gold'?`<div class="pub-partner-gold-name">${name}</div>`:kind==='mid'?`<div class="pub-partner-mid-name">${name}</div>`:''):'';
-  const cls=kind==='gold'?'pub-partner-gold':kind==='mid'?'pub-partner-mid':'pub-partner-grid-item';
-  const body=kind==='gold'?`${innerLogo}<div>${tierHtml}${nameHtml}</div>`:`${tierHtml}${innerLogo}${innerText}${nameHtml}`;
+  const logoHtml=logo
+    ?`<div class="pub-partner-dash-logo"><img src="${logo}" alt="${name} logo"></div>`
+    :`<div class="pub-partner-dash-logo"><span class="pub-partner-dash-fallback">${name}</span></div>`;
+  const body=`${logoHtml}<div><div class="pub-partner-dash-tier">${tier}</div><div class="pub-partner-dash-name">${name}</div></div>`;
+  const cls='pub-partner-dash-card'+publicPartnerDashTierClass(s.tier);
   return href?`<a class="${cls}" href="${esc(href)}" target="_blank" rel="noopener noreferrer">${body}</a>`:`<div class="${cls}">${body}</div>`;
 }
 function renderPublicPartners(sponsors){
@@ -874,15 +848,7 @@ function renderPublicPartners(sponsors){
   const list=sortPublicPartners((sponsors||[]).filter(s=>s&&String(s.name||'').trim()));
   if(!list.length){wrap.hidden=true;el.innerHTML='';return;}
   wrap.hidden=false;
-  const gold=list.filter(s=>s.tier==='Gold Sponsor');
-  const silver=list.filter(s=>s.tier==='Silver Sponsor');
-  const bronze=list.filter(s=>s.tier==='Bronze Sponsor');
-  const supporting=list.filter(s=>!['Gold Sponsor','Silver Sponsor','Bronze Sponsor'].includes(s.tier));
-  const mid=silver.concat(bronze);
-  el.innerHTML=`
-    ${gold.length?`<div class="pub-partners-gold">${gold.map(s=>publicPartnerCard(s,'gold')).join('')}</div>`:''}
-    ${mid.length?`<div class="pub-partners-tier-row">${mid.map(s=>publicPartnerCard(s,'mid')).join('')}</div>`:''}
-    ${supporting.length?`<div class="pub-partners-grid">${supporting.map(s=>publicPartnerCard(s,'grid')).join('')}</div>`:''}`;
+  el.innerHTML=`<div class="pub-partners-dash-list">${list.map(publicPartnerDashCard).join('')}</div>`;
 }
 function publicPartnerSocialButtons(s){
   const links=[
