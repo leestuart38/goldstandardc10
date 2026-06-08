@@ -229,7 +229,8 @@ body{
 }
 .pub-partner-gold:hover{border-color:rgba(241,209,122,.52);transform:translateY(-1px)}
 .pub-partner-gold-logo{
-  width:min(220px,42vw);height:88px;border-radius:14px;border:1px solid rgba(241,209,122,.18);
+  width:min(160px,34vw);aspect-ratio:1/1;box-sizing:border-box;padding:12px;
+  border-radius:14px;border:1px solid rgba(241,209,122,.18);
   background:#080808;display:flex;align-items:center;justify-content:center;overflow:hidden;
 }
 .pub-partner-gold-logo img{width:100%;height:100%;object-fit:contain;display:block}
@@ -245,8 +246,11 @@ body{
   background:rgba(0,0,0,.22);text-decoration:none;color:inherit;text-align:center;
 }
 .pub-partner-mid:hover{border-color:rgba(241,209,122,.42)}
-.pub-partner-mid-logo{width:100%;max-width:150px;height:64px;display:flex;align-items:center;justify-content:center}
-.pub-partner-mid-logo img{max-width:100%;max-height:64px;object-fit:contain}
+.pub-partner-mid-logo{
+  width:100%;max-width:88px;aspect-ratio:1/1;box-sizing:border-box;padding:10px;
+  display:flex;align-items:center;justify-content:center;
+}
+.pub-partner-mid-logo img{width:100%;height:100%;object-fit:contain}
 .pub-partner-mid-name{font-family:var(--gs-display);font-size:16px;font-weight:700;letter-spacing:var(--gs-tracking-tight);text-transform:uppercase}
 .pub-partner-mid-tier{font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .pub-partners-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
@@ -256,8 +260,11 @@ body{
   background:rgba(0,0,0,.2);text-decoration:none;color:inherit;text-align:center;
 }
 .pub-partner-grid-item:hover{border-color:rgba(241,209,122,.34)}
-.pub-partner-grid-logo{width:100%;height:48px;display:flex;align-items:center;justify-content:center}
-.pub-partner-grid-logo img{max-width:100%;max-height:48px;object-fit:contain}
+.pub-partner-grid-logo{
+  width:56px;height:56px;aspect-ratio:1/1;box-sizing:border-box;padding:8px;
+  display:flex;align-items:center;justify-content:center;
+}
+.pub-partner-grid-logo img{width:100%;height:100%;object-fit:contain}
 .pub-partner-text{font-family:var(--gs-display);font-size:12px;font-weight:700;letter-spacing:var(--gs-tracking-tight);text-transform:uppercase;line-height:1.15}
 @media(max-width:700px){
   .pub-partner-gold{grid-template-columns:1fr;text-align:center}
@@ -269,18 +276,16 @@ body{
 .pub-partners-wrap--dash .card-title{font-size:22px!important;margin-bottom:10px!important}
 .pub-partners-wrap--dash .pub-partners-gold{gap:10px;margin-bottom:10px}
 .pub-partners-wrap--dash .pub-partner-gold{padding:12px 14px;gap:12px;border-radius:16px}
-.pub-partners-wrap--dash .pub-partner-gold-logo{width:min(150px,34vw);height:60px;border-radius:12px}
+.pub-partners-wrap--dash .pub-partner-gold-logo{width:min(120px,30vw);padding:10px;border-radius:12px}
 .pub-partners-wrap--dash .pub-partner-gold-name{font-size:clamp(18px,3vw,24px)!important}
 .pub-partners-wrap--dash .pub-partner-gold-tier{font-size:9px;margin-bottom:4px}
 .pub-partners-wrap--dash .pub-partners-tier-row{gap:8px;margin-bottom:10px}
 .pub-partners-wrap--dash .pub-partner-mid{min-height:96px;padding:10px;border-radius:14px}
-.pub-partners-wrap--dash .pub-partner-mid-logo{max-width:120px;height:52px}
-.pub-partners-wrap--dash .pub-partner-mid-logo img{max-height:52px}
+.pub-partners-wrap--dash .pub-partner-mid-logo{max-width:72px;padding:8px}
 .pub-partners-wrap--dash .pub-partner-mid-name{font-size:13px}
 .pub-partners-wrap--dash .pub-partners-grid{gap:8px}
 .pub-partners-wrap--dash .pub-partner-grid-item{min-height:76px;padding:8px;border-radius:12px}
-.pub-partners-wrap--dash .pub-partner-grid-logo{height:38px}
-.pub-partners-wrap--dash .pub-partner-grid-logo img{max-height:38px}
+.pub-partners-wrap--dash .pub-partner-grid-logo{width:48px;height:48px;padding:6px}
 .pub-partners-wrap--dash .pub-partner-text{font-size:10px}
 .pub-partners-detail-list{display:grid;gap:16px}
 .pub-partner-profile{
@@ -291,7 +296,8 @@ body{
 }
 .pub-partner-profile.is-gold{border-color:rgba(241,209,122,.42);background:linear-gradient(135deg,rgba(185,138,39,.14),rgba(0,0,0,.22))}
 .pub-partner-profile-logo{
-  width:100%;aspect-ratio:5/3;border-radius:16px;border:1px solid rgba(241,209,122,.18);
+  width:100%;max-width:200px;aspect-ratio:1/1;box-sizing:border-box;padding:14px;
+  border-radius:16px;border:1px solid rgba(241,209,122,.18);
   background:#080808;display:flex;align-items:center;justify-content:center;overflow:hidden;
 }
 .pub-partner-profile-logo img{width:100%;height:100%;object-fit:contain;display:block}
@@ -311,11 +317,6 @@ body{
 .pub-partner-profile-desc{
   font-size:14px;line-height:1.6;font-weight:550;color:var(--cream);margin-bottom:12px;white-space:pre-wrap;
 }
-.pub-partner-sponsored-title{
-  font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;
-}
-.pub-partner-sponsored-list{margin:0 0 14px;padding-left:18px;color:var(--cream);font-size:13px;line-height:1.55}
-.pub-partner-sponsored-list li{margin-bottom:4px}
 .pub-partner-profile-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .pub-partner-social-btn{
   display:inline-flex;align-items:center;justify-content:center;gap:6px;
@@ -896,11 +897,6 @@ function publicPartnerSocialButtons(s){
     return `<a class="pub-partner-social-btn" href="${esc(href)}" target="_blank" rel="noopener noreferrer"><i class="ti ${l.icon}"></i>${l.label}</a>`;
   }).filter(Boolean).join('');
 }
-function publicSponsoredItemsHtml(raw){
-  const items=String(raw||'').split(/\r?\n/).map(x=>x.replace(/^[-•*]\s*/,'').trim()).filter(Boolean);
-  if(!items.length)return '';
-  return `<div class="pub-partner-sponsored-title">Sponsored items</div><ul class="pub-partner-sponsored-list">${items.map(item=>`<li>${esc(item)}</li>`).join('')}</ul>`;
-}
 function publicPartnerProfileCard(s){
   const name=esc(String(s.name||'Partner').trim()||'Partner');
   const tier=esc(String(s.tier||'Supporting Partner'));
@@ -917,7 +913,6 @@ function publicPartnerProfileCard(s){
       <span class="pub-partner-profile-tier">${tier}</span>
       <h2 class="pub-partner-profile-name">${name}</h2>
       ${desc?`<div class="pub-partner-profile-desc">${esc(desc)}</div>`:''}
-      ${publicSponsoredItemsHtml(s.sponsoredItems)}
       <div class="pub-partner-profile-actions">${websiteBtn}${socials}</div>
     </div>
   </article>`;
