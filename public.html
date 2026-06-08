@@ -218,6 +218,52 @@ body{
   .public-part-details-grid{grid-template-columns:1fr;gap:10px}
 }
 
+/* ===== v131 public build partners ===== */
+.pub-partners-wrap{margin-top:16px}
+.pub-partners-gold{display:grid;gap:14px;margin-bottom:14px}
+.pub-partner-gold{
+  display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;
+  padding:18px;border-radius:20px;border:1px solid rgba(241,209,122,.34);
+  background:linear-gradient(135deg,rgba(185,138,39,.16),rgba(0,0,0,.24));
+  text-decoration:none;color:inherit;
+}
+.pub-partner-gold:hover{border-color:rgba(241,209,122,.52);transform:translateY(-1px)}
+.pub-partner-gold-logo{
+  width:min(220px,42vw);height:88px;border-radius:14px;border:1px solid rgba(241,209,122,.18);
+  background:#080808;display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+.pub-partner-gold-logo img{width:100%;height:100%;object-fit:contain;display:block}
+.pub-partner-gold-name{
+  font-family:var(--gs-display);font-size:clamp(24px,4vw,34px);font-weight:700;
+  letter-spacing:var(--gs-tracking-tight);text-transform:uppercase;line-height:1;
+}
+.pub-partner-gold-tier{font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-light);margin-bottom:6px}
+.pub-partners-tier-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:14px}
+.pub-partner-mid{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  min-height:120px;padding:14px;border-radius:18px;border:1px solid rgba(241,209,122,.2);
+  background:rgba(0,0,0,.22);text-decoration:none;color:inherit;text-align:center;
+}
+.pub-partner-mid:hover{border-color:rgba(241,209,122,.42)}
+.pub-partner-mid-logo{width:100%;max-width:150px;height:64px;display:flex;align-items:center;justify-content:center}
+.pub-partner-mid-logo img{max-width:100%;max-height:64px;object-fit:contain}
+.pub-partner-mid-name{font-family:var(--gs-display);font-size:16px;font-weight:700;letter-spacing:var(--gs-tracking-tight);text-transform:uppercase}
+.pub-partner-mid-tier{font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pub-partners-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.pub-partner-grid-item{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  min-height:96px;padding:12px;border-radius:16px;border:1px solid rgba(241,209,122,.14);
+  background:rgba(0,0,0,.2);text-decoration:none;color:inherit;text-align:center;
+}
+.pub-partner-grid-item:hover{border-color:rgba(241,209,122,.34)}
+.pub-partner-grid-logo{width:100%;height:48px;display:flex;align-items:center;justify-content:center}
+.pub-partner-grid-logo img{max-width:100%;max-height:48px;object-fit:contain}
+.pub-partner-text{font-family:var(--gs-display);font-size:12px;font-weight:700;letter-spacing:var(--gs-tracking-tight);text-transform:uppercase;line-height:1.15}
+@media(max-width:700px){
+  .pub-partner-gold{grid-template-columns:1fr;text-align:center}
+  .pub-partner-gold-logo{margin:0 auto}
+}
+
 
 /* ===== v86 public page sync with main app ===== */
 :root{
@@ -606,6 +652,10 @@ body{margin:0}
       <div class="pub-dash-sub"><span id="milestone-count">0</span> published milestones</div>
     </div>
     <div class="pub-news" id="pub-news"></div>
+    <div class="sections-card pub-partners-wrap" id="pub-partners-wrap" hidden>
+      <div class="card-title">Build Partners</div>
+      <div id="pub-partners"></div>
+    </div>
     <div class="sections-card">
       <div class="card-title">Section Progress</div>
       <div id="section-progress" class="pub-sec-grid"></div>
@@ -700,6 +750,43 @@ function publicPartDetailsHtml(p){
 }
 function publicSectionLinkCount(parts){
   return (parts||[]).filter(publicPartHasLink).length;
+}
+function publicPartnerUrl(url){
+  const u=String(url||'').trim();
+  if(!u)return '';
+  if(/^https?:\/\//i.test(u))return u;
+  if(/^www\./i.test(u))return 'https://'+u;
+  return 'https://'+u;
+}
+function publicPartnerCard(s,kind){
+  const name=esc(String(s.name||'Sponsor').trim()||'Sponsor');
+  const href=publicPartnerUrl(s.website);
+  const logo=String(s.logo||'').trim();
+  const tier=esc(String(s.tier||'Supporting Partner'));
+  const innerLogo=logo?`<div class="${kind==='gold'?'pub-partner-gold-logo':kind==='mid'?'pub-partner-mid-logo':'pub-partner-grid-logo'}"><img src="${logo}" alt="${name} logo"></div>`:'';
+  const innerText=!logo?`<div class="pub-partner-text">${name}</div>`:'';
+  const tierHtml=kind==='gold'?`<div class="pub-partner-gold-tier">${tier}</div>`:kind==='mid'?`<div class="pub-partner-mid-tier">${tier}</div>`:'';
+  const nameHtml=logo?(kind==='gold'?`<div class="pub-partner-gold-name">${name}</div>`:kind==='mid'?`<div class="pub-partner-mid-name">${name}</div>`:''):'';
+  const cls=kind==='gold'?'pub-partner-gold':kind==='mid'?'pub-partner-mid':'pub-partner-grid-item';
+  const body=kind==='gold'?`${innerLogo}<div>${tierHtml}${nameHtml}</div>`:`${tierHtml}${innerLogo}${innerText}${nameHtml}`;
+  return href?`<a class="${cls}" href="${esc(href)}" target="_blank" rel="noopener noreferrer">${body}</a>`:`<div class="${cls}">${body}</div>`;
+}
+function renderPublicPartners(sponsors){
+  const wrap=document.getElementById('pub-partners-wrap');
+  const el=document.getElementById('pub-partners');
+  if(!wrap||!el)return;
+  const list=(sponsors||[]).filter(s=>s&&String(s.name||'').trim());
+  if(!list.length){wrap.hidden=true;el.innerHTML='';return;}
+  wrap.hidden=false;
+  const gold=list.filter(s=>s.tier==='Gold Sponsor');
+  const silver=list.filter(s=>s.tier==='Silver Sponsor');
+  const bronze=list.filter(s=>s.tier==='Bronze Sponsor');
+  const supporting=list.filter(s=>!['Gold Sponsor','Silver Sponsor','Bronze Sponsor'].includes(s.tier));
+  const mid=silver.concat(bronze);
+  el.innerHTML=`
+    ${gold.length?`<div class="pub-partners-gold">${gold.map(s=>publicPartnerCard(s,'gold')).join('')}</div>`:''}
+    ${mid.length?`<div class="pub-partners-tier-row">${mid.map(s=>publicPartnerCard(s,'mid')).join('')}</div>`:''}
+    ${supporting.length?`<div class="pub-partners-grid">${supporting.map(s=>publicPartnerCard(s,'grid')).join('')}</div>`:''}`;
 }
 function publicSectionToggleMeta(parts,completion){
   const linkCount=publicSectionLinkCount(parts);
@@ -946,6 +1033,7 @@ function render(data){
 
   const milestones=(data.milestones||[]).slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
   renderPublicNews(milestones);
+  renderPublicPartners(data.sponsors||[]);
   document.getElementById('milestone-count').textContent=milestones.length;
   document.getElementById('milestone-list').innerHTML=milestones.length?milestones.map(m=>{
     const sec=sectionName(data,m.relatedSection);
