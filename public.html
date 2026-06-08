@@ -170,6 +170,29 @@ body{
 .ms-photo{grid-column:span 4;border-radius:18px;overflow:hidden;border:1px solid rgba(241,209,122,.14);background:#080808;aspect-ratio:4/3;cursor:pointer}
 .ms-photo:first-child{grid-column:span 8;aspect-ratio:16/9}
 .ms-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.ms-engagement{padding:0 20px 20px;border-top:1px solid rgba(241,209,122,.10)}
+.ms-engagement-actions{display:flex;flex-wrap:wrap;gap:8px;padding-top:16px;margin-bottom:12px}
+.ms-engage-btn{
+  display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;
+  border:1px solid rgba(241,209,122,.22);background:rgba(0,0,0,.24);color:var(--cream);
+  font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;
+}
+.ms-engage-btn:hover{border-color:rgba(241,209,122,.42);background:rgba(185,138,39,.14)}
+.ms-engage-btn.liked{border-color:rgba(248,113,113,.45);color:#fecaca}
+.ms-comment-form{display:grid;gap:8px;margin-top:10px}
+.ms-comment-form input,.ms-comment-form textarea{
+  border-radius:12px;border:1px solid rgba(241,209,122,.18);background:rgba(0,0,0,.28);
+  color:var(--cream);padding:10px 12px;font:inherit;
+}
+.ms-comment-form textarea{min-height:84px;resize:vertical}
+.ms-comment-list{display:grid;gap:10px;margin-top:12px}
+.ms-comment{padding:12px 14px;border-radius:14px;border:1px solid rgba(241,209,122,.14);background:rgba(0,0,0,.22)}
+.ms-comment.owner{border-color:rgba(241,209,122,.34);background:rgba(185,138,39,.08)}
+.ms-comment-reply{margin-left:18px}
+.ms-comment-head{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:6px}
+.ms-comment-author{font-size:11px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:var(--gold-light)}
+.ms-comment-time{font-size:10px;color:var(--muted)}
+.ms-comment-body{font-size:13px;line-height:1.5;white-space:pre-wrap}
 .empty{padding:32px;text-align:center;color:var(--muted);font-weight:900;letter-spacing:.07em;text-transform:uppercase}
 .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;display:none;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(8px)}
 .lightbox.open{display:flex}
@@ -969,7 +992,147 @@ function publicSectionToggleMeta(parts,completion){
   return `<span class="public-section-toggle-stat">${parts.length} parts</span><span class="public-section-toggle-stat">${parseInt(completion||0)||0}% complete</span>${linkHtml}`;
 }
 function fmtDate(iso){try{return new Date(iso).toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'})}catch(e){return iso||''}}
+function fmtDateTime(iso){try{return new Date(iso).toLocaleString('en-CA',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}catch(e){return iso||''}}
 function sectionName(data,key){const s=(data.sections||[]).find(x=>x.key===key);return s?s.name:''}
+const ENGAGEMENT_INBOX_SUB='engagementInbox';
+let pubEngagementCache={};
+let pubCommentsCache={};
+function getPublicGuestId(){
+  const key='pubGuestId';
+  let id=localStorage.getItem(key);
+  if(!id){id='guest-'+Math.random().toString(36).slice(2,12)+Date.now().toString(36);localStorage.setItem(key,id);}
+  return id;
+}
+function getPublicGuestName(){
+  return String(localStorage.getItem('pubGuestName')||'').trim();
+}
+function setPublicGuestName(name){
+  localStorage.setItem('pubGuestName',String(name||'').trim());
+}
+function msEngagementRef(milestoneId){
+  return db.collection(PUBLIC_COLLECTION).doc(activePublicSlug).collection('milestoneEngagement').doc(milestoneId);
+}
+async function createEngagementInboxItem(payload){
+  if(!db||!activePublicSlug)return;
+  await db.collection(PUBLIC_COLLECTION).doc(activePublicSlug).collection(ENGAGEMENT_INBOX_SUB).add(Object.assign({
+    read:false,createdAt:new Date().toISOString(),publicSlug:activePublicSlug
+  },payload));
+}
+async function loadPubEngagementSummary(milestoneId){
+  const key=activePublicSlug+'::'+milestoneId;
+  if(pubEngagementCache[key])return pubEngagementCache[key];
+  try{
+    const snap=await msEngagementRef(milestoneId).get();
+    const data=snap.exists?snap.data():{};
+    const out={likeCount:Number(data.likeCount)||0,commentCount:Number(data.commentCount)||0};
+    pubEngagementCache[key]=out;
+    return out;
+  }catch(e){return {likeCount:0,commentCount:0}}
+}
+async function publicGuestLiked(milestoneId){
+  try{
+    const snap=await msEngagementRef(milestoneId).collection('likes').doc(getPublicGuestId()).get();
+    return snap.exists;
+  }catch(e){return false}
+}
+async function togglePublicMilestoneLike(milestoneId){
+  if(!db||!activePublicSlug)return;
+  const guestId=getPublicGuestId();
+  const likeRef=msEngagementRef(milestoneId).collection('likes').doc(guestId);
+  const sumRef=msEngagementRef(milestoneId);
+  try{
+    const existing=await likeRef.get();
+    if(existing.exists){
+      await likeRef.delete();
+      await sumRef.set({likeCount:firebase.firestore.FieldValue.increment(-1),milestoneId},{merge:true});
+    }else{
+      await likeRef.set({createdAt:new Date().toISOString(),guestId});
+      await sumRef.set({likeCount:firebase.firestore.FieldValue.increment(1),milestoneId},{merge:true});
+      await createEngagementInboxItem({type:'milestone_like',milestoneId,actorName:'Someone',preview:'Liked your milestone post'});
+    }
+    delete pubEngagementCache[activePublicSlug+'::'+milestoneId];
+    await refreshPublicMilestoneEngagement(milestoneId);
+  }catch(e){console.warn(e);alert('Could not update like. Try again.');}
+}
+async function loadPublicComments(milestoneId){
+  const key=activePublicSlug+'::'+milestoneId;
+  if(pubCommentsCache[key])return pubCommentsCache[key];
+  try{
+    const snap=await msEngagementRef(milestoneId).collection('comments').orderBy('createdAt','asc').get();
+    const list=snap.docs.map(d=>Object.assign({id:d.id},d.data()));
+    pubCommentsCache[key]=list;
+    return list;
+  }catch(e){return []}
+}
+function renderPublicComments(milestoneId,comments){
+  const top=comments.filter(c=>!c.parentId);
+  const replies=comments.filter(c=>c.parentId);
+  const one=(c,isReply)=>`<div class="ms-comment${c.isOwnerReply?' owner':''}${isReply?' ms-comment-reply':''}">
+    <div class="ms-comment-head"><span class="ms-comment-author">${esc(c.authorName||'Guest')}${c.isOwnerReply?' · Builder':''}</span><span class="ms-comment-time">${esc(fmtDateTime(c.createdAt))}</span></div>
+    <div class="ms-comment-body">${esc(c.body||'')}</div>
+  </div>`;
+  const html=top.map(c=>one(c,false)+replies.filter(r=>r.parentId===c.id).map(r=>one(r,true)).join('')).join('');
+  return html||'<div class="empty" style="padding:12px 0">No comments yet. Be the first.</div>';
+}
+async function togglePublicComments(milestoneId,forceOpen){
+  const panel=document.getElementById('pub-ms-comments-'+milestoneId);
+  if(!panel)return;
+  const open=forceOpen||panel.hidden;
+  panel.hidden=!open;
+  if(open){
+    const comments=await loadPublicComments(milestoneId);
+    const name=getPublicGuestName();
+    panel.innerHTML=`<div class="ms-comment-list">${renderPublicComments(milestoneId,comments)}</div>
+      <div class="ms-comment-form">
+        <input id="pub-comment-name-${milestoneId}" type="text" maxlength="60" placeholder="Your name" value="${esc(name)}">
+        <textarea id="pub-comment-body-${milestoneId}" maxlength="1200" placeholder="Write a comment..."></textarea>
+        <button class="ms-engage-btn" type="button" onclick="submitPublicComment('${milestoneId}')"><i class="ti ti-send"></i>Post comment</button>
+      </div>`;
+  }
+}
+async function submitPublicComment(milestoneId){
+  const nameEl=document.getElementById('pub-comment-name-'+milestoneId);
+  const bodyEl=document.getElementById('pub-comment-body-'+milestoneId);
+  const authorName=String((nameEl&&nameEl.value)||'').trim();
+  const body=String((bodyEl&&bodyEl.value)||'').trim();
+  if(!authorName){alert('Please enter your name.');return;}
+  if(!body){alert('Please write a comment.');return;}
+  setPublicGuestName(authorName);
+  try{
+    const ref=msEngagementRef(milestoneId).collection('comments').doc();
+    await ref.set({authorName,body,parentId:null,likeCount:0,isOwnerReply:false,createdAt:new Date().toISOString()});
+    await msEngagementRef(milestoneId).set({commentCount:firebase.firestore.FieldValue.increment(1),milestoneId},{merge:true});
+    await createEngagementInboxItem({type:'milestone_comment',milestoneId,commentId:ref.id,actorName:authorName,preview:body.slice(0,160)});
+    delete pubCommentsCache[activePublicSlug+'::'+milestoneId];
+    delete pubEngagementCache[activePublicSlug+'::'+milestoneId];
+    if(bodyEl)bodyEl.value='';
+    await togglePublicComments(milestoneId,true);
+    await refreshPublicMilestoneEngagement(milestoneId);
+  }catch(e){console.warn(e);alert('Could not post comment.');}
+}
+async function refreshPublicMilestoneEngagement(milestoneId){
+  const summary=await loadPubEngagementSummary(milestoneId);
+  const liked=await publicGuestLiked(milestoneId);
+  const host=document.getElementById('pub-ms-engage-'+milestoneId);
+  if(!host)return;
+  host.innerHTML=`<div class="ms-engagement-actions">
+    <button class="ms-engage-btn${liked?' liked':''}" type="button" onclick="togglePublicMilestoneLike('${milestoneId}')"><i class="ti ti-heart"></i>${summary.likeCount||0}</button>
+    <button class="ms-engage-btn" type="button" onclick="togglePublicComments('${milestoneId}')"><i class="ti ti-message"></i>${summary.commentCount||0} comments</button>
+  </div>
+  <div class="ms-engage-comments" id="pub-ms-comments-${milestoneId}" hidden></div>`;
+}
+function renderPublicMilestoneEngagement(milestoneId){
+  return `<div class="ms-engagement" id="pub-ms-engage-${milestoneId}">
+    <div class="ms-engagement-actions">
+      <button class="ms-engage-btn" type="button" onclick="togglePublicMilestoneLike('${milestoneId}')"><i class="ti ti-heart"></i>0</button>
+      <button class="ms-engage-btn" type="button" onclick="togglePublicComments('${milestoneId}')"><i class="ti ti-message"></i>0 comments</button>
+    </div>
+    <div class="ms-engage-comments" id="pub-ms-comments-${milestoneId}" hidden></div>
+  </div>`;
+}
+function prefetchPublicMilestoneEngagement(milestones){
+  (milestones||[]).forEach(m=>{if(m&&m.id)refreshPublicMilestoneEngagement(m.id);});
+}
 
 function showPublicPanel(name,push=true,scrollTop=false){
   if(!['dashboard','buildlist','worklog','milestones','partners'].includes(name))name='dashboard';
@@ -1214,7 +1377,7 @@ function render(data){
   document.getElementById('milestone-list').innerHTML=milestones.length?milestones.map(m=>{
     const sec=sectionName(data,m.relatedSection);
     const photos=Array.isArray(m.photos)?m.photos:[];
-    return `<article class="milestone">
+    return `<article class="milestone" data-ms-id="${esc(m.id||'')}">
       <div class="ms-head">
         <div class="ms-kicker">
           ${m.status?`<span class="ms-pill">${esc(m.status)}</span>`:''}
@@ -1227,8 +1390,10 @@ function render(data){
         <div class="ms-copy">${m.body?esc(m.body):''}</div>
         ${photos.length?`<div class="ms-gallery">${photos.map(src=>`<button class="ms-photo" type="button" onclick="openLightbox('${src}')"><img src="${src}" alt="Milestone image"></button>`).join('')}</div>`:''}
       </div>
+      ${m.id?renderPublicMilestoneEngagement(m.id):''}
     </article>`;
   }).join(''):`<div class="empty">No milestones published yet.</div>`;
+  prefetchPublicMilestoneEngagement(milestones);
 
   renderPublicWorkLog(data.workLog||{});
 }
@@ -1249,15 +1414,21 @@ async function mergePublicMedia(data,slug){
     }
     if(shardCount>0){
       const photoMap=new Map();
-      for(let i=0;i<shardCount;i++){
-        const sSnap=await db.collection(PUBLIC_COLLECTION).doc(mediaIds.msPrefix+i).get();
-        if(sSnap.exists){
-          (sSnap.data().milestones||[]).forEach(m=>{
-            const prev=photoMap.get(m.id)||[];
-            const next=Array.isArray(m.photos)?m.photos:[];
-            if(next.length)photoMap.set(m.id,prev.concat(next));
-          });
-        }
+      const batchSize=6;
+      for(let start=0;start<shardCount;start+=batchSize){
+        const end=Math.min(start+batchSize,shardCount);
+        const snaps=await Promise.all(Array.from({length:end-start},(_,j)=>
+          db.collection(PUBLIC_COLLECTION).doc(mediaIds.msPrefix+(start+j)).get()
+        ));
+        snaps.forEach(sSnap=>{
+          if(sSnap.exists){
+            (sSnap.data().milestones||[]).forEach(m=>{
+              const prev=photoMap.get(m.id)||[];
+              const next=Array.isArray(m.photos)?m.photos:[];
+              if(next.length)photoMap.set(m.id,prev.concat(next));
+            });
+          }
+        });
       }
       if(photoMap.size&&Array.isArray(data.milestones)){
         data.milestones=data.milestones.map(m=>{
