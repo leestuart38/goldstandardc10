@@ -93,7 +93,10 @@ body{
 .public-part-side{
   display:flex;flex-direction:column;align-items:flex-end;justify-content:flex-start;gap:8px;flex-shrink:0;
 }
-.public-part-name{font-size:13px;font-weight:900;color:var(--cream);line-height:1.25}
+.public-part-name{
+  font-family:var(--gs-display);font-size:clamp(18px,2.5vw,26px);font-weight:700;
+  letter-spacing:.03em;text-transform:uppercase;color:var(--cream);line-height:1.1;
+}
 .public-part-details{margin-top:10px}
 .public-part-details-title{
   font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;
@@ -695,7 +698,7 @@ function publicSectionLinkCount(parts){
 function publicSectionToggleMeta(parts,completion){
   const linkCount=publicSectionLinkCount(parts);
   const linkHtml=linkCount?`<span class="public-section-toggle-stat pub-sec-link-count"><i class="ti ti-link"></i>${linkCount} shop link${linkCount===1?'':'s'}</span>`:'';
-  return `<span class="public-section-toggle-stat">${parts.length} parts</span>${linkHtml}<span class="public-section-toggle-stat">${parseInt(completion||0)||0}% complete</span>`;
+  return `<span class="public-section-toggle-stat">${parts.length} parts</span><span class="public-section-toggle-stat">${parseInt(completion||0)||0}% complete</span>${linkHtml}`;
 }
 function fmtDate(iso){try{return new Date(iso).toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'})}catch(e){return iso||''}}
 function sectionName(data,key){const s=(data.sections||[]).find(x=>x.key===key);return s?s.name:''}
