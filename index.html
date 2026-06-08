@@ -2556,29 +2556,97 @@ button,.tab,.section-hdr,.chip,.chip-opt,.ss-card{touch-action:manipulation;-web
   background:rgba(0,0,0,.28);font-size:14px;line-height:1.55;color:var(--gs-cream);
   display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
 }
-.notif-thread{padding-top:8px;border-top:1px solid rgba(241,209,122,.1)}
+.notif-thread{padding-top:10px;border-top:1px solid rgba(241,209,122,.12)}
+.notif-thread-head{display:grid;gap:6px;margin-bottom:10px}
 .notif-thread-label{
   font-size:10px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;
-  color:var(--gs-muted);margin-bottom:8px;
+  color:var(--gs-gold-light);
 }
-.notif-convo{display:grid;gap:0;margin-bottom:12px}
+.notif-thread-legend{
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+  padding:8px 10px;border-radius:10px;border:1px solid rgba(241,209,122,.14);
+  background:rgba(0,0,0,.2);
+}
+.notif-legend-item{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
+}
+.notif-legend-item.guest{color:#cbd5e1}
+.notif-legend-item.you{color:var(--gs-gold-light)}
+.notif-legend-arrow{color:var(--gs-muted);font-size:12px;opacity:.8}
+.notif-convo{
+  border:1px solid rgba(241,209,122,.18);border-radius:14px;
+  background:rgba(0,0,0,.2);overflow:hidden;margin-bottom:10px;
+}
 .notif-convo:last-child{margin-bottom:0}
-.notif-convo-replies{
-  margin:6px 0 0 12px;padding:8px 0 2px 14px;
-  border-left:2px solid rgba(241,209,122,.28);
-  display:grid;gap:8px;
+.notif-role-chip{
+  display:inline-flex;align-items:center;gap:5px;width:fit-content;
+  padding:4px 9px;border-radius:999px;
+  font-size:9px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;
+  margin-bottom:8px;
 }
-.notif-thread .ms-comment{padding:10px 12px;border-radius:12px}
-.notif-thread .ms-comment-head{margin-bottom:5px}
-.notif-thread .ms-comment-author{font-size:11px}
-.notif-thread .ms-comment-time{font-size:10px}
-.notif-thread .ms-comment-body{font-size:14px;line-height:1.55}
-.notif-thread .ms-comment.owner{
-  border-color:rgba(241,209,122,.36);
+.notif-role-chip.guest{
+  color:#dbe4f0;background:rgba(148,163,184,.14);border:1px solid rgba(148,163,184,.28);
+}
+.notif-role-chip.you{
+  color:var(--gs-gold-light);background:rgba(185,138,39,.14);border:1px solid rgba(241,209,122,.32);
+}
+.notif-convo-root{padding:12px 14px 14px}
+.notif-convo-branch{
+  padding:0 14px 14px;
+  border-top:1px dashed rgba(241,209,122,.16);
+  background:linear-gradient(180deg,rgba(185,138,39,.04),transparent 28px);
+}
+.notif-branch-label{
+  display:flex;align-items:center;gap:7px;
+  padding:10px 0 8px;font-size:10px;font-weight:800;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--gs-muted);
+}
+.notif-flow-line{
+  flex:0 0 18px;height:2px;border-radius:999px;
+  background:linear-gradient(90deg,rgba(241,209,122,.45),rgba(241,209,122,.12));
+}
+.notif-convo-replies{
+  display:grid;gap:10px;margin-left:6px;
+  padding-left:16px;border-left:2px solid rgba(241,209,122,.34);
+}
+.notif-thread-node{position:relative}
+.notif-thread-node::before{
+  content:'';position:absolute;left:-18px;top:20px;
+  width:14px;height:2px;background:rgba(241,209,122,.34);
+}
+.notif-thread-node::after{
+  content:'';position:absolute;left:-23px;top:15px;
+  width:9px;height:9px;border-radius:50%;
+  border:2px solid rgba(148,163,184,.45);background:rgba(0,0,0,.45);
+}
+.notif-thread-node.you::after{
+  border-color:rgba(241,209,122,.65);background:rgba(185,138,39,.22);
+}
+.notif-bubble{
+  padding:11px 13px;border-radius:12px;border:1px solid rgba(241,209,122,.14);
+  background:rgba(0,0,0,.24);
+}
+.notif-bubble.guest{border-left:3px solid rgba(148,163,184,.55)}
+.notif-bubble.you{
+  border-color:rgba(241,209,122,.32);border-left:3px solid var(--gs-gold);
   background:rgba(185,138,39,.1);
 }
-.notif-thread .ms-comment-actions{margin-top:7px;gap:6px}
-.notif-thread .ms-engage-btn{padding:6px 10px;font-size:10px}
+.notif-bubble-head{
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+  margin-bottom:6px;
+}
+.notif-bubble-name{
+  font-size:12px;font-weight:800;color:var(--gs-gold-light);
+  letter-spacing:.02em;
+}
+.notif-bubble.you .notif-bubble-name{color:var(--gs-gold-light)}
+.notif-bubble-time{font-size:10px;color:var(--gs-muted);white-space:nowrap}
+.notif-bubble-body{
+  font-size:14px;line-height:1.55;color:var(--gs-cream);white-space:pre-wrap;
+}
+.notif-bubble-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.notif-bubble-actions .ms-engage-btn{padding:6px 10px;font-size:10px}
 .notif-thread .ms-reply-form{
   display:flex;flex-direction:column;gap:6px;margin-top:8px;align-items:stretch;
 }
@@ -5936,7 +6004,7 @@ body{margin:0}
   <div class="milestone-toolbar">
     <div>
       <div class="milestone-toolbar-title">Notifications</div>
-      <div class="milestone-toolbar-sub">New alerts stay open — tap read items to expand again.</div>
+      <div class="milestone-toolbar-sub">Visitor comments appear first — your replies branch below in the thread.</div>
     </div>
   </div>
   <div class="notif-toolbar">
@@ -10320,23 +10388,74 @@ function notifPreviewText(n,max){
   if(n.type==='milestone_like')return 'Liked milestone post';
   return '';
 }
+function renderNotifThreadActions(slug,milestoneId,c){
+  const canReply=!c.isOwnerReply;
+  const replyId=notifReplyInputId(slug,milestoneId,c.id);
+  const formId='notif-form-'+slug+'-'+milestoneId+'-'+c.id;
+  const likeFn=`ownerLikeComment('${slug}','${milestoneId}','${c.id}','notif')`;
+  const replyFn=`toggleNotifReplyForm('${slug}','${milestoneId}','${c.id}')`;
+  const postFn=`ownerReplyToComment('${slug}','${milestoneId}','${c.id}','notif')`;
+  const replyBtn=canReply?`<button class="ms-engage-btn" type="button" onclick="${replyFn}"><i class="ti ti-message-reply"></i>Reply</button>`:'';
+  const replyForm=canReply?`<div class="ms-reply-form" id="${formId}" hidden>
+      <textarea id="${replyId}" placeholder="Write your reply…"></textarea>
+      <button class="ms-btn post" type="button" onclick="${postFn}"><i class="ti ti-send"></i>Post reply</button>
+    </div>`:'';
+  return `<div class="notif-bubble-actions">
+      <button class="ms-engage-btn" type="button" onclick="${likeFn}"><i class="ti ti-heart"></i>${Number(c.likeCount)||0}</button>
+      ${replyBtn}
+    </div>
+    ${replyForm}`;
+}
+function renderNotifThreadBubble(slug,milestoneId,c,role){
+  const roleCls=role==='you'?'you':'guest';
+  const name=role==='you'?'You':esc(c.authorName||'Guest');
+  return `<div class="notif-bubble ${roleCls}">
+    <div class="notif-bubble-head">
+      <span class="notif-bubble-name">${name}</span>
+      <span class="notif-bubble-time">${esc(fmtNotifTime(c.createdAt))}</span>
+    </div>
+    <div class="notif-bubble-body">${esc(c.body||'')}</div>
+    ${renderNotifThreadActions(slug,milestoneId,c)}
+  </div>`;
+}
+function renderNotifThreadHtml(slug,milestoneId,comments){
+  const top=comments.filter(c=>!c.parentId);
+  const replies=comments.filter(c=>c.parentId&&c.parentId!==c.id);
+  if(!top.length)return '<div class="milestone-empty" style="padding:14px 0">No comments yet.</div>';
+  return top.map(c=>{
+    const childReplies=replies.filter(r=>r.parentId===c.id);
+    const branchLabel=childReplies.length
+      ?`<div class="notif-branch-label"><span class="notif-flow-line"></span><i class="ti ti-corner-down-right"></i>${childReplies.length===1?'Your reply':'Your replies ('+childReplies.length+')'}</div>`
+      :'';
+    const replyNodes=childReplies.map(r=>{
+      const role=r.isOwnerReply?'you':'guest';
+      const chipLabel=r.isOwnerReply?'Your reply':'Follow-up';
+      return `<div class="notif-thread-node ${role}">
+        <div class="notif-role-chip ${role}"><i class="ti ti-${r.isOwnerReply?'hammer':'message-circle'}"></i>${chipLabel}</div>
+        ${renderNotifThreadBubble(slug,milestoneId,r,role)}
+      </div>`;
+    }).join('');
+    return `<div class="notif-convo">
+      <div class="notif-convo-root">
+        <div class="notif-role-chip guest"><i class="ti ti-message-circle"></i>Visitor comment</div>
+        ${renderNotifThreadBubble(slug,milestoneId,c,'guest')}
+      </div>
+      ${childReplies.length?`<div class="notif-convo-branch">${branchLabel}<div class="notif-convo-replies">${replyNodes}</div></div>`:''}
+    </div>`;
+  }).join('');
+}
 function renderEngagementCommentsHtml(slug,milestoneId,comments,context){
   const top=comments.filter(c=>!c.parentId);
   const replies=comments.filter(c=>c.parentId&&c.parentId!==c.id);
   const ctx=context||'notif';
+  if(ctx==='notif')return renderNotifThreadHtml(slug,milestoneId,comments);
   const renderOne=(c,isReply)=>{
     const canReply=!c.isOwnerReply;
-    const replyId=ctx==='notif'?notifReplyInputId(slug,milestoneId,c.id):'reply-input-'+milestoneId+'-'+c.id;
-    const formId=ctx==='notif'?'notif-form-'+slug+'-'+milestoneId+'-'+c.id:'reply-form-'+milestoneId+'-'+c.id;
-    const likeFn=ctx==='notif'
-      ?`ownerLikeComment('${slug}','${milestoneId}','${c.id}','notif')`
-      :`ownerLikeComment('${slug}','${milestoneId}','${c.id}','milestone')`;
-    const replyFn=ctx==='notif'
-      ?`toggleNotifReplyForm('${slug}','${milestoneId}','${c.id}')`
-      :`toggleReplyForm('${milestoneId}','${c.id}')`;
-    const postFn=ctx==='notif'
-      ?`ownerReplyToComment('${slug}','${milestoneId}','${c.id}','notif')`
-      :`ownerReplyToComment('${slug}','${milestoneId}','${c.id}','milestone')`;
+    const replyId='reply-input-'+milestoneId+'-'+c.id;
+    const formId='reply-form-'+milestoneId+'-'+c.id;
+    const likeFn=`ownerLikeComment('${slug}','${milestoneId}','${c.id}','milestone')`;
+    const replyFn=`toggleReplyForm('${milestoneId}','${c.id}')`;
+    const postFn=`ownerReplyToComment('${slug}','${milestoneId}','${c.id}','milestone')`;
     const replyBtn=canReply?`<button class="ms-engage-btn" type="button" onclick="${replyFn}"><i class="ti ti-message-reply"></i>Reply</button>`:'';
     const replyForm=canReply?`<div class="ms-reply-form" id="${formId}" hidden>
         <textarea id="${replyId}" placeholder="Write a reply as the builder..."></textarea>
@@ -10355,19 +10474,8 @@ function renderEngagementCommentsHtml(slug,milestoneId,comments,context){
       ${replyForm}
     </div>`;
   };
-  let html='';
-  if(ctx==='notif'){
-    html=top.map(c=>{
-      const childReplies=replies.filter(r=>r.parentId===c.id);
-      return `<div class="notif-convo">
-        ${renderOne(c,false)}
-        ${childReplies.length?`<div class="notif-convo-replies">${childReplies.map(r=>renderOne(r,true)).join('')}</div>`:''}
-      </div>`;
-    }).join('');
-  }else{
-    html=top.map(c=>renderOne(c,false)+replies.filter(r=>r.parentId===c.id).map(r=>renderOne(r,true)).join('')).join('');
-  }
-  if(!html)html='<div class="milestone-empty" style="padding:14px 0">No comments yet.</div>';
+  const html=top.map(c=>renderOne(c,false)+replies.filter(r=>r.parentId===c.id).map(r=>renderOne(r,true)).join('')).join('');
+  if(!html)return '<div class="milestone-empty" style="padding:14px 0">No comments yet.</div>';
   return html;
 }
 function renderNotifCardShell(n,showThread,expanded){
@@ -10390,11 +10498,21 @@ function renderNotifCardShell(n,showThread,expanded){
   let body='';
   if(expanded){
     const quoteBody=notifCommentBody(n);
-    const quote=(n.type==='milestone_comment'||n.type==='comment_reply')&&quoteBody
+    const quote=!showThread&&(n.type==='milestone_comment'||n.type==='comment_reply')&&quoteBody
       ?`<div class="notif-quote">"${esc(quoteBody)}"</div>`:'';
-    const likeOnly=n.type==='milestone_like'&&!quoteBody?'<div class="notif-quote">Someone liked this milestone post.</div>':'';
+    const likeOnly=!showThread&&n.type==='milestone_like'&&!quoteBody?'<div class="notif-quote">Someone liked this milestone post.</div>':'';
     const thread=showThread&&notifHasThread(n)
-      ?`<div class="notif-thread" id="notif-thread-${esc(slug)}-${esc(n.milestoneId)}"><div class="notif-thread-label">Conversation</div><div class="milestone-empty" style="padding:6px 0;font-size:11px">Loading…</div></div>`
+      ?`<div class="notif-thread" id="notif-thread-${esc(slug)}-${esc(n.milestoneId)}">
+        <div class="notif-thread-head">
+          <div class="notif-thread-label">Conversation thread</div>
+          <div class="notif-thread-legend">
+            <span class="notif-legend-item guest"><i class="ti ti-message-circle"></i>Visitor comment</span>
+            <i class="ti ti-arrow-right notif-legend-arrow"></i>
+            <span class="notif-legend-item you"><i class="ti ti-hammer"></i>Your reply</span>
+          </div>
+        </div>
+        <div class="milestone-empty" style="padding:6px 0;font-size:12px">Loading conversation…</div>
+      </div>`
       :'';
     body=`<div class="notif-body">
       ${quote||likeOnly}
@@ -10441,7 +10559,14 @@ async function renderNotifications(){
     if(gen!==notifRenderGen)return;
     const host=document.getElementById('notif-thread-'+slug+'-'+milestoneId);
     if(host){
-      host.innerHTML=`<div class="notif-thread-label">Conversation</div>${renderEngagementCommentsHtml(slug,milestoneId,comments,'notif')}`;
+      host.innerHTML=`<div class="notif-thread-head">
+        <div class="notif-thread-label">Conversation thread</div>
+        <div class="notif-thread-legend">
+          <span class="notif-legend-item guest"><i class="ti ti-message-circle"></i>Visitor comment</span>
+          <i class="ti ti-arrow-right notif-legend-arrow"></i>
+          <span class="notif-legend-item you"><i class="ti ti-hammer"></i>Your reply</span>
+        </div>
+      </div>${renderEngagementCommentsHtml(slug,milestoneId,comments,'notif')}`;
     }
   }));
 }
