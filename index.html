@@ -3331,6 +3331,10 @@ body{margin:0}
   border:2px dashed rgba(241,209,122,.24);
   background:rgba(0,0,0,.14);
   transition:border-color .15s,background .15s,box-shadow .15s;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-height:76px;
 }
 .ms-photo-drop-zone.drag-over{
   border-color:rgba(241,209,122,.62);
@@ -3340,8 +3344,12 @@ body{margin:0}
 .ms-photo-drop-zone .milestone-gallery{
   margin-top:0;
 }
+.ms-photo-drop-zone .milestone-gallery:empty{
+  display:none;
+}
 .ms-photo-drop-hint{
-  margin-top:12px;
+  margin-top:0;
+  min-height:48px;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -3352,6 +3360,10 @@ body{margin:0}
   font-weight:700;
   letter-spacing:var(--gs-tracking-tight)!important;
   text-transform:uppercase;
+}
+.ms-photo-drop-zone .milestone-gallery:not(:empty)+.ms-photo-drop-hint{
+  margin-top:12px;
+  min-height:0;
 }
 .ms-photo-drop-zone.drag-over .ms-photo-drop-hint,
 .ms-photo-drop-hint i{
@@ -5526,6 +5538,8 @@ let mediaVehicleDocRef=null;
 let publicMediaVehicleDocRef=null;
 let cachedMediaMsShardCount=0;
 let cachedPublicMediaMsShardCount=0;
+let cachedPrivateVehicleFingerprint='';
+let cachedPublicVehicleFingerprint='';
 let firebaseReady=false;
 let authReady=false;
 let currentUser=null;
@@ -5562,7 +5576,7 @@ function packState(){
       vehicleModel:VEHICLE_MODEL
     },
     meta:{
-      appVersion:'v128-milestone-ux',
+      appVersion:'v129-sync-polish',
       updatedAt:new Date().toISOString()
     }
   };
@@ -5794,19 +5808,37 @@ function planMediaWrites(media){
   });
   return {vehiclePayload,shardPayloads};
 }
+function vehicleMediaFingerprint(payload){
+  const a=String((payload&&payload.vehicleImage)||'');
+  const b=String((payload&&payload.vehicleImageOriginal)||'');
+  return 'v:'+a.length+':'+b.length+':'+(a?a.slice(0,48):'')+':'+(b?b.slice(0,48):'');
+}
+async function writeVehicleMediaDoc(docRef,payload,cacheKey){
+  if(!docRef)return false;
+  const fp=vehicleMediaFingerprint(payload);
+  const cache=cacheKey==='public'?cachedPublicVehicleFingerprint:cachedPrivateVehicleFingerprint;
+  if(fp===cache)return false;
+  const doc=Object.assign({},payload,{savedAt:firebase.firestore.FieldValue.serverTimestamp()});
+  await docRef.set(doc,{merge:true});
+  if(cacheKey==='public')cachedPublicVehicleFingerprint=fp;
+  else cachedPrivateVehicleFingerprint=fp;
+  return true;
+}
 async function writeMediaShards(collection,prefix,shardPayloads,prevCount){
+  const ops=[];
   for(let i=0;i<shardPayloads.length;i++){
     const ref=firebaseDb.collection(collection).doc(prefix+i);
     const payload=Object.assign({},shardPayloads[i],{savedAt:firebase.firestore.FieldValue.serverTimestamp()});
-    await ref.set(payload,{merge:true});
+    ops.push(ref.set(payload,{merge:true}));
   }
   for(let i=shardPayloads.length;i<prevCount;i++){
-    try{
-      await firebaseDb.collection(collection).doc(prefix+i).delete();
-    }catch(e){
-      console.warn('Media shard delete failed:',e);
-    }
+    ops.push(
+      firebaseDb.collection(collection).doc(prefix+i).delete().catch(e=>{
+        console.warn('Media shard delete failed:',e);
+      })
+    );
   }
+  if(ops.length)await Promise.all(ops);
   return shardPayloads.length;
 }
 async function prepareMediaForCloudSave(media){
@@ -5847,9 +5879,11 @@ async function shrinkMediaForCloud(media){
 }
 async function savePrivateMedia(media){
   const plan=planMediaWrites(media);
-  const vehicleDoc=Object.assign({},plan.vehiclePayload,{savedAt:firebase.firestore.FieldValue.serverTimestamp()});
-  if(mediaVehicleDocRef)await mediaVehicleDocRef.set(vehicleDoc,{merge:true});
-  return writeMediaShards(FIRESTORE_COLLECTION,FIRESTORE_MEDIA_MS_PREFIX,plan.shardPayloads,cachedMediaMsShardCount);
+  await Promise.all([
+    writeVehicleMediaDoc(mediaVehicleDocRef,plan.vehiclePayload,'private'),
+    writeMediaShards(FIRESTORE_COLLECTION,FIRESTORE_MEDIA_MS_PREFIX,plan.shardPayloads,cachedMediaMsShardCount)
+  ]);
+  return plan.shardPayloads.length;
 }
 function splitPublicPayload(payload){
   const media={
@@ -5864,12 +5898,15 @@ function splitPublicPayload(payload){
   });
   return {core,media};
 }
-async function savePublicMedia(media){
-  const cloudMedia=await prepareMediaForCloudSave(media);
+async function savePublicMedia(media,options){
+  const skipPrepare=options&&options.prepared;
+  const cloudMedia=skipPrepare?media:await prepareMediaForCloudSave(media);
   const plan=planMediaWrites(cloudMedia);
-  const vehicleDoc=Object.assign({},plan.vehiclePayload,{savedAt:firebase.firestore.FieldValue.serverTimestamp()});
-  if(publicMediaVehicleDocRef)await publicMediaVehicleDocRef.set(vehicleDoc,{merge:true});
-  return writeMediaShards(PUBLIC_COLLECTION,PUBLIC_MEDIA_MS_PREFIX,plan.shardPayloads,cachedPublicMediaMsShardCount);
+  await Promise.all([
+    writeVehicleMediaDoc(publicMediaVehicleDocRef,plan.vehiclePayload,'public'),
+    writeMediaShards(PUBLIC_COLLECTION,PUBLIC_MEDIA_MS_PREFIX,plan.shardPayloads,cachedPublicMediaMsShardCount)
+  ]);
+  return plan.shardPayloads.length;
 }
 async function loadCloudState(){
   if(!firebaseReady||!firestoreDocRef)return null;
@@ -6059,23 +6096,31 @@ async function saveCloudState(){
   const full=packState();
   const {core,media}=splitCloudPayload(full);
   const cloudMedia=await prepareMediaForCloudSave(media);
-  const mediaMsShardCount=await savePrivateMedia(cloudMedia);
+  const privatePlan=planMediaWrites(cloudMedia);
   const corePayload=sanitizeForFirestore(core);
-  corePayload.meta=Object.assign({},corePayload.meta||{},{mediaMsShardCount});
+  corePayload.meta=Object.assign({},corePayload.meta||{},{mediaMsShardCount:privatePlan.shardPayloads.length});
   corePayload.savedAt=firebase.firestore.FieldValue.serverTimestamp();
   const coreBytes=estimatePayloadBytes(corePayload);
   if(coreBytes>CLOUD_DOC_BYTE_LIMIT)throw new Error('Build data is too large ('+coreBytes+' bytes). Try shortening long notes.');
-  await firestoreDocRef.set(corePayload,{merge:true});
-  cachedMediaMsShardCount=mediaMsShardCount;
-  try{
-    await savePublicState();
-  }catch(e){
-    console.warn('Public publish failed after private cloud save:',e);
-    const err=new Error('Private data saved, but public page publish failed.');
-    err.privateSaved=true;
-    throw err;
-  }
-  console.log('Saved to Firestore', full.meta.updatedAt,'core='+coreBytes+'b mediaShards='+mediaMsShardCount);
+  const {core:pubCore,media:pubMedia}=splitPublicPayload(publicPayload());
+  const pubCloudMedia=await prepareMediaForCloudSave(pubMedia);
+  const publicPlan=planMediaWrites(pubCloudMedia);
+  const pubCorePayload=sanitizeForFirestore(pubCore);
+  pubCorePayload.mediaMsShardCount=publicPlan.shardPayloads.length;
+  pubCorePayload.savedAt=firebase.firestore.FieldValue.serverTimestamp();
+  const pubCoreBytes=estimatePayloadBytes(pubCorePayload);
+  if(pubCoreBytes>CLOUD_DOC_BYTE_LIMIT)throw new Error('Public build data is too large ('+pubCoreBytes+' bytes).');
+  await Promise.all([
+    firestoreDocRef.set(corePayload,{merge:true}),
+    writeVehicleMediaDoc(mediaVehicleDocRef,privatePlan.vehiclePayload,'private'),
+    writeMediaShards(FIRESTORE_COLLECTION,FIRESTORE_MEDIA_MS_PREFIX,privatePlan.shardPayloads,cachedMediaMsShardCount),
+    writeVehicleMediaDoc(publicMediaVehicleDocRef,publicPlan.vehiclePayload,'public'),
+    writeMediaShards(PUBLIC_COLLECTION,PUBLIC_MEDIA_MS_PREFIX,publicPlan.shardPayloads,cachedPublicMediaMsShardCount),
+    publicDocRef.set(pubCorePayload,{merge:true})
+  ]);
+  cachedMediaMsShardCount=privatePlan.shardPayloads.length;
+  cachedPublicMediaMsShardCount=publicPlan.shardPayloads.length;
+  console.log('Saved to Firestore', full.meta.updatedAt,'core='+coreBytes+'b mediaShards='+privatePlan.shardPayloads.length);
   return true;
 }
 
