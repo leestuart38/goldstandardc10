@@ -5445,10 +5445,12 @@ const FIREBASE_CONFIG={
 };
 const FIRESTORE_COLLECTION='tracker';
 const FIRESTORE_DOC='gold-standard-c10';
+const FIRESTORE_MEDIA_DOC='gold-standard-c10-media';
 const PUBLIC_COLLECTION='publicBuilds';
 const PUBLIC_DOC='gold-standard-c10';
 let firebaseDb=null;
 let firestoreDocRef=null;
+let mediaDocRef=null;
 let firebaseReady=false;
 let authReady=false;
 let currentUser=null;
@@ -5485,7 +5487,7 @@ function packState(){
       vehicleModel:VEHICLE_MODEL
     },
     meta:{
-      appVersion:'v117-vehicle-editor',
+      appVersion:'v125-milestone-cloud-save',
       updatedAt:new Date().toISOString()
     }
   };
@@ -5518,6 +5520,7 @@ function initFirebaseSync(){
     firebaseAuth=firebase.auth();
     firebaseDb=firebase.firestore();
     firestoreDocRef=firebaseDb.collection(FIRESTORE_COLLECTION).doc(FIRESTORE_DOC);
+    mediaDocRef=firebaseDb.collection(FIRESTORE_COLLECTION).doc(FIRESTORE_MEDIA_DOC);
     publicDocRef=firebaseDb.collection(PUBLIC_COLLECTION).doc(PUBLIC_DOC);
     firebaseReady=true;
     return true;
@@ -5535,11 +5538,56 @@ function withTimeout(promise,ms,label){
   ]);
 }
 
+function sanitizeForFirestore(obj){
+  return JSON.parse(JSON.stringify(obj));
+}
+function estimatePayloadBytes(obj){
+  try{return new Blob([JSON.stringify(obj)]).size}catch(e){return JSON.stringify(obj).length;}
+}
+function splitCloudPayload(full){
+  const media={
+    vehicleImage:full.vehicleImage||'',
+    vehicleImageOriginal:full.vehicleImageOriginal||'',
+    milestones:(full.milestones||[]).map(m=>({id:m.id,photos:Array.isArray(m.photos)?m.photos:[]})),
+    meta:{updatedAt:(full.meta&&full.meta.updatedAt)||new Date().toISOString()}
+  };
+  const core=Object.assign({},full,{
+    vehicleImage:'',
+    vehicleImageOriginal:'',
+    milestones:(full.milestones||[]).map(m=>{
+      const c=Object.assign({},m);
+      c.photos=[];
+      return c;
+    })
+  });
+  return {core,media};
+}
+function applyCloudMedia(state,media){
+  if(!state||!media)return;
+  if(media.vehicleImage)state.vehicleImage=media.vehicleImage;
+  if(media.vehicleImageOriginal)state.vehicleImageOriginal=media.vehicleImageOriginal;
+  const photoMap=new Map((media.milestones||[]).map(m=>[m.id,Array.isArray(m.photos)?m.photos:[]]));
+  if(Array.isArray(state.milestones)){
+    state.milestones=state.milestones.map(m=>{
+      const photos=photoMap.get(m.id);
+      if(photos&&photos.length)return Object.assign({},m,{photos});
+      return m;
+    });
+  }
+}
 async function loadCloudState(){
   if(!firebaseReady||!firestoreDocRef)return null;
   const snap=await withTimeout(firestoreDocRef.get(),12000,'Cloud load');
   if(!snap.exists)return null;
   const data=snap.data();
+  if(mediaDocRef){
+    try{
+      const mediaSnap=await withTimeout(mediaDocRef.get(),8000,'Cloud media load');
+      if(mediaSnap.exists)applyCloudMedia(data,mediaSnap.data());
+    }catch(e){
+      console.warn('Cloud media load failed:',e);
+    }
+  }
   console.log('Loaded Firestore document', data);
   return hasUsableCloudState(data)?data:null;
 }
@@ -5711,11 +5759,27 @@ async function sharePublicBuild(){
 
 async function saveCloudState(){
   if(!firebaseReady||!firestoreDocRef)return false;
-  const payload=packState();
-  payload.savedAt=firebase.firestore.FieldValue.serverTimestamp();
-  await firestoreDocRef.set(payload,{merge:true});
-  await savePublicState();
-  console.log('Saved to Firestore', payload.meta.updatedAt);
+  const full=packState();
+  const {core,media}=splitCloudPayload(full);
+  const corePayload=sanitizeForFirestore(core);
+  const mediaPayload=sanitizeForFirestore(media);
+  corePayload.savedAt=firebase.firestore.FieldValue.serverTimestamp();
+  mediaPayload.savedAt=firebase.firestore.FieldValue.serverTimestamp();
+  const coreBytes=estimatePayloadBytes(corePayload);
+  const mediaBytes=estimatePayloadBytes(mediaPayload);
+  if(coreBytes>980000)throw new Error('Core build data is too large for Firestore ('+coreBytes+' bytes).');
+  if(mediaBytes>980000)throw new Error('Build photos are too large for Firestore ('+mediaBytes+' bytes). Try fewer or smaller milestone images.');
+  await firestoreDocRef.set(corePayload,{merge:true});
+  if(mediaDocRef)await mediaDocRef.set(mediaPayload,{merge:true});
+  try{
+    await savePublicState();
+  }catch(e){
+    console.warn('Public publish failed after private cloud save:',e);
+    const err=new Error('Private data saved, but public page publish failed.');
+    err.privateSaved=true;
+    throw err;
+  }
+  console.log('Saved to Firestore', full.meta.updatedAt,'core='+coreBytes+'b media='+mediaBytes+'b');
   return true;
 }
 
@@ -6264,7 +6328,15 @@ async function doSave(){
     setTimeout(()=>setSaveInd('idle','Cloud sync on'),1800);
   }catch(e){
     console.warn('Cloud save failed:',e);
-    setSaveInd('idle','Cloud save failed');
+    if(e&&e.privateSaved){
+      setSaveInd('idle','Saved privately; public publish failed');
+      return;
+    }
+    const msg=e&&e.message?String(e.message):'';
+    const hint=msg.includes('too large')||msg.includes('longer than')||estimatePayloadBytes(packState())>950000
+      ?'Cloud save failed: build data too large. Try fewer milestone photos.'
+      :(msg?'Cloud save failed: '+msg:'Cloud save failed');
+    setSaveInd('idle',hint);
   }
 }
 
@@ -7264,9 +7336,15 @@ function addMilestone(){
 
 function updateMilestone(id,field,value){
   const m=milestones.find(x=>x.id===id);
-  if(!m)return;
+  if(!m||m.posted)return;
   m[field]=value;
-  renderMilestones();
+  if(field==='status'){
+    const card=document.querySelector(`#milestone-grid .milestone-card[data-ms-id="${id}"] .ms-status-badge`);
+    if(card){
+      card.textContent=value||'Planned';
+      card.className='ms-status-badge '+milestoneStatusClass(value);
+    }
+  }
   scheduleSave();
 }
 
@@ -7298,7 +7376,7 @@ function compressMilestoneImage(file){
         ctx.drawImage(img,0,0,w,h);
         let quality=.74;
         let data=canvas.toDataURL('image/jpeg',quality);
-        while(data.length>520000&&quality>.42){
+        while(data.length>280000&&quality>.38){
           quality-=.08;
           data=canvas.toDataURL('image/jpeg',quality);
         }
@@ -7325,7 +7403,6 @@ async function handleMilestonePhotos(id,e){
       m.photos.push(data);
     }
     renderMilestones();
-    scheduleSave();
     doSave();
   }catch(err){
     console.warn(err);
@@ -7355,7 +7432,7 @@ function postMilestone(id){
   m.posted=true;
   if(!m.status||m.status==='Planned')m.status='Complete';
   renderMilestones();
-  scheduleSave();
+  setSaveInd('saving','Posting milestone to cloud...');
   doSave();
 }
 
@@ -7429,7 +7506,7 @@ function renderMilestones(){
   grid.innerHTML=milestones.map(m=>{
     if(m.posted)return renderPostedMilestone(m);
     const photos=Array.isArray(m.photos)?m.photos:[];
-    return `<div class="milestone-card">
+    return `<div class="milestone-card" data-ms-id="${m.id}">
       <div class="milestone-head">
         <input class="ms-title-input" value="${esc(m.title||'')}" onchange="updateMilestone('${m.id}','title',this.value)" placeholder="Milestone title">
         <input class="ms-date-input" type="date" value="${esc(m.date||todayISO())}" onchange="updateMilestone('${m.id}','date',this.value)">
