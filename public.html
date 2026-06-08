@@ -97,17 +97,20 @@ body{
   font-family:var(--gs-display);font-size:clamp(18px,2.5vw,26px);font-weight:700;
   letter-spacing:.03em;text-transform:uppercase;color:var(--cream);line-height:1.1;
 }
-.public-part-details{margin-top:10px}
+.public-part-details{margin-top:8px}
 .public-part-details-title{
   font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--muted);margin-bottom:8px;
+  color:var(--muted);margin-bottom:5px;
 }
 .public-part-details-grid{
-  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 12px;
+  display:inline-flex;flex-wrap:wrap;align-items:flex-end;gap:4px 14px;max-width:100%;
+}
+.public-part-detail{
+  flex:0 0 auto;min-width:0;
 }
 .public-part-detail label{
   display:block;font-size:8px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;
-  color:var(--muted);margin-bottom:4px;
+  color:var(--muted);margin-bottom:2px;
 }
 .public-part-detail-value{
   font-size:11px;font-weight:800;color:var(--cream);line-height:1.25;
@@ -211,7 +214,7 @@ body{
   .public-tabs{grid-template-columns:1fr}
   .public-part-side{align-items:stretch;width:100%}
   .pub-part-link-btn{width:100%;min-width:0}
-  .public-part-details-grid{grid-template-columns:1fr}
+  .public-part-details-grid{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
 }
 
 
@@ -930,10 +933,10 @@ function render(data){
               <div class="public-part-name">${esc(p.name||'Untitled part')}</div>
               ${publicPartDetailsHtml(p)}
             </div>
-            <div class="public-part-side">
-              ${hasLink?'<span class="pub-part-link-kicker">Shop / affiliate link</span>':''}
+            ${hasLink?`<div class="public-part-side">
+              <span class="pub-part-link-kicker">Shop / affiliate link</span>
               ${publicPartLinkBtn(p)}
-            </div>
+            </div>`:''}
           </div>`}).join('')}
         </div>
       </div>`;
