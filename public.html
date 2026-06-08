@@ -81,24 +81,51 @@ body{
 .parts-card{margin-top:16px}
 .public-parts-list{display:grid;gap:9px}
 .public-part{
-  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:start;
   padding:12px;border-radius:16px;border:1px solid rgba(241,209,122,.12);background:rgba(0,0,0,.22);
 }
-.public-part-name{font-size:13px;font-weight:900;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.public-part-link{
-  display:inline-flex;align-items:center;gap:6px;max-width:100%;
-  color:var(--gold-light);text-decoration:none;
+.public-part.has-part-link{
+  border-color:rgba(241,209,122,.42);
+  background:linear-gradient(180deg,rgba(185,138,39,.14),rgba(0,0,0,.24));
+  box-shadow:inset 0 1px 0 rgba(241,209,122,.16),0 10px 24px rgba(0,0,0,.18);
 }
-.public-part-link:hover{color:#fff;text-decoration:underline}
-.public-part-link i{font-size:12px;opacity:.85;flex-shrink:0}
-.pub-part-shop{
-  display:inline-flex;align-items:center;gap:5px;
-  color:#fff!important;border-color:rgba(197,155,53,.45)!important;
-  background:linear-gradient(135deg,rgba(111,79,18,.85),rgba(185,138,39,.75))!important;
+.public-part-main{min-width:0}
+.public-part-side{
+  display:flex;flex-direction:column;align-items:flex-end;justify-content:flex-start;gap:8px;flex-shrink:0;
 }
-.pub-part-shop:hover{filter:brightness(1.08)}
+.public-part-name{font-size:13px;font-weight:900;color:var(--cream);line-height:1.25}
 .public-part-meta{margin-top:5px;display:flex;flex-wrap:wrap;gap:6px}
-.pub-wl-part-name .public-part-link{font-size:12px}
+.pub-part-link-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:12px 16px;min-width:168px;
+  border-radius:12px;border:2px solid rgba(255,255,255,.35);
+  background:linear-gradient(135deg,#6f4f12 0%,#b98a27 42%,#f1d17a 100%);
+  color:#120f08;font-family:var(--gs-display);font-size:12px;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;text-decoration:none;white-space:nowrap;
+  box-shadow:0 12px 28px rgba(185,138,39,.38),inset 0 1px 0 rgba(255,255,255,.34);
+  transition:transform .15s,filter .15s,box-shadow .15s;
+}
+.pub-part-link-btn:hover{
+  filter:brightness(1.08);
+  transform:translateY(-1px);
+  box-shadow:0 16px 32px rgba(185,138,39,.48),inset 0 1px 0 rgba(255,255,255,.4);
+}
+.pub-part-link-btn i{font-size:15px;line-height:1}
+.pub-part-link-btn-compact{
+  min-width:0;width:100%;padding:8px 10px;font-size:10px;gap:6px;
+}
+.pub-part-link-kicker{
+  display:block;margin-top:8px;font-size:9px;font-weight:900;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--gold-light);
+}
+.pub-sec-link-count{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 9px;border-radius:999px;
+  border:1px solid rgba(241,209,122,.42);
+  background:rgba(185,138,39,.18);
+  color:var(--gold-light);font-weight:900;
+}
+.pub-sec-link-count i{font-size:11px}
 .pub-pill{
   display:inline-flex;align-items:center;padding:5px 8px;border-radius:999px;
   font-size:10px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;
@@ -130,6 +157,8 @@ body{
   .kpi-grid{grid-template-columns:1fr}
   .hero-img{min-height:280px}
   .public-part{grid-template-columns:1fr}
+  .public-part-side{align-items:stretch}
+  .pub-part-link-btn{width:100%;min-width:0}
   .ms-gallery{grid-template-columns:repeat(2,1fr)}
   .ms-photo,.ms-photo:first-child{grid-column:auto;aspect-ratio:4/3}
 }
@@ -141,20 +170,28 @@ body{
 }
 .public-section-toggle{
   width:100%;border:0;background:linear-gradient(135deg,rgba(185,138,39,.12),rgba(216,216,214,.035));
-  color:var(--cream);display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;
+  color:var(--cream);display:flex;align-items:center;gap:12px;
   padding:14px 16px;cursor:pointer;text-align:left;
 }
 .public-section-toggle:hover{background:rgba(185,138,39,.13)}
+.public-section-toggle-pm{
+  flex-shrink:0;width:42px;text-align:center;
+  font-family:Inter,system-ui,sans-serif;font-size:43px;font-weight:900;line-height:1;
+  color:var(--gold-light);text-shadow:0 2px 8px rgba(0,0,0,.45);
+}
+.public-section-toggle-copy{min-width:0;flex:1}
 .public-section-toggle-title{font-family:Oswald,sans-serif;font-size:22px;line-height:1;letter-spacing:.035em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.public-section-toggle-meta{color:var(--muted);font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
-.public-section-toggle-icon{color:var(--gold-light);font-size:22px}
+.public-section-toggle-meta{
+  display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:6px;
+  color:var(--muted);font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;
+}
+.public-section-toggle-stat{white-space:nowrap}
 .public-section-drop-body{display:none;padding:12px}
 .public-section-drop.open .public-section-drop-body{display:grid;gap:9px}
-.public-section-drop.open .public-section-toggle-icon{transform:rotate(180deg)}
 @media(max-width:620px){
   .public-tabs{grid-template-columns:1fr}
-  .public-section-toggle{grid-template-columns:1fr auto}
-  .public-section-toggle-meta{grid-column:1/-1}
+  .public-part-side{align-items:stretch;width:100%}
+  .pub-part-link-btn{width:100%;min-width:0}
 }
 
 
@@ -605,16 +642,21 @@ function publicPartUrl(url){
   if(/^www\./i.test(u))return 'https://'+u;
   return '';
 }
-function publicPartNameHtml(p,fallback){
-  const name=esc(p.name||fallback||'Untitled part');
-  const href=publicPartUrl(p.link);
-  if(!href)return name;
-  return `<a class="public-part-link" href="${esc(href)}" target="_blank" rel="noopener noreferrer sponsored">${name}<i class="ti ti-external-link" aria-hidden="true"></i></a>`;
-}
-function publicPartShopPill(p){
-  const href=publicPartUrl(p.link);
+function publicPartHasLink(p){return !!publicPartUrl(p&&p.link)}
+function publicPartLinkBtn(p,compact){
+  const href=publicPartUrl(p&&p.link);
   if(!href)return '';
-  return `<a class="pub-pill pub-part-shop" href="${esc(href)}" target="_blank" rel="noopener noreferrer sponsored"><i class="ti ti-shopping-cart"></i>Shop</a>`;
+  const cls=compact?'pub-part-link-btn pub-part-link-btn-compact':'pub-part-link-btn';
+  const kicker=compact?'':'<span class="pub-part-link-kicker">Shop / affiliate link</span>';
+  return `${kicker}<a class="${cls}" href="${esc(href)}" target="_blank" rel="noopener noreferrer sponsored" aria-label="Open shop link for part"><i class="ti ti-shopping-cart" aria-hidden="true"></i><span>Open shop link</span><i class="ti ti-external-link" aria-hidden="true"></i></a>`;
+}
+function publicSectionLinkCount(parts){
+  return (parts||[]).filter(publicPartHasLink).length;
+}
+function publicSectionToggleMeta(parts,completion){
+  const linkCount=publicSectionLinkCount(parts);
+  const linkHtml=linkCount?`<span class="public-section-toggle-stat pub-sec-link-count"><i class="ti ti-link"></i>${linkCount} shop link${linkCount===1?'':'s'}</span>`:'';
+  return `<span class="public-section-toggle-stat">${parts.length} parts</span>${linkHtml}<span class="public-section-toggle-stat">${parseInt(completion||0)||0}% complete</span>`;
 }
 function fmtDate(iso){try{return new Date(iso).toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'})}catch(e){return iso||''}}
 function sectionName(data,key){const s=(data.sections||[]).find(x=>x.key===key);return s?s.name:''}
@@ -643,7 +685,11 @@ window.addEventListener('hashchange',()=>showPublicPanel(publicPanelFromHash(),f
 
 function togglePublicSection(btn){
   const card=btn.closest('.public-section-drop');
-  if(card)card.classList.toggle('open');
+  if(!card)return;
+  const isOpen=card.classList.toggle('open');
+  btn.setAttribute('aria-expanded',isOpen?'true':'false');
+  const pm=btn.querySelector('.public-section-toggle-pm');
+  if(pm)pm.textContent=isOpen?'−':'+';
 }
 
 function statusClass(status){
@@ -667,7 +713,8 @@ function prioClass(p){return {'Critical':'prio-critical','High':'prio-high','Med
 function buildPublicWorkLogCard(task){
   const parts=(task.linkedParts||[]).map(p=>`<div class="pub-wl-part">
     <div class="pub-wl-part-left">
-      <div class="pub-wl-part-name">${publicPartNameHtml(p,'Part')}</div>
+      <div class="pub-wl-part-name">${esc(p.name||'Part')}</div>
+      ${publicPartLinkBtn(p,true)}
       <div class="pub-wl-part-sec">${esc(p.sectionName||'')}</div>
     </div>
     <div class="pub-wl-part-meta">
@@ -826,23 +873,27 @@ function render(data){
       const parts=(s.parts||[]).slice().sort((a,b)=>priorityRank(a.priority)-priorityRank(b.priority)||String(a.name).localeCompare(String(b.name)));
       if(!parts.length)return '';
       return `<div class="public-section-drop">
-        <button class="public-section-toggle" type="button" onclick="togglePublicSection(this)">
-          <span class="public-section-toggle-title">${esc(s.name)}</span>
-          <span class="public-section-toggle-meta">${parts.length} parts • ${parseInt(s.completion||0)||0}% complete</span>
-          <i class="ti ti-chevron-down public-section-toggle-icon"></i>
+        <button class="public-section-toggle" type="button" onclick="togglePublicSection(this)" aria-expanded="false">
+          <span class="public-section-toggle-pm" aria-hidden="true">+</span>
+          <span class="public-section-toggle-copy">
+            <span class="public-section-toggle-title">${esc(s.name)}</span>
+            <span class="public-section-toggle-meta">${publicSectionToggleMeta(parts,s.completion)}</span>
+          </span>
         </button>
         <div class="public-section-drop-body">
-          ${parts.map(p=>`<div class="public-part">
-            <div>
-              <div class="public-part-name">${publicPartNameHtml(p)}</div>
+          ${parts.map(p=>{const hasLink=publicPartHasLink(p);return `<div class="public-part${hasLink?' has-part-link':''}">
+            <div class="public-part-main">
+              <div class="public-part-name">${esc(p.name||'Untitled part')}</div>
               <div class="public-part-meta">
                 ${p.vendor?`<span class="pub-pill">${esc(p.vendor)}</span>`:''}
                 <span class="pub-pill">${esc(p.priority||'Medium')}</span>
-                ${publicPartShopPill(p)}
               </div>
             </div>
-            <span class="pub-pill status-pill ${statusClass(p.status)}">${esc(p.status||'Need to Buy')}</span>
-          </div>`).join('')}
+            <div class="public-part-side">
+              <span class="pub-pill status-pill ${statusClass(p.status)}">${esc(p.status||'Need to Buy')}</span>
+              ${publicPartLinkBtn(p)}
+            </div>
+          </div>`}).join('')}
         </div>
       </div>`;
     }).join(''):`<div class="empty">No build list published yet.</div>`;
