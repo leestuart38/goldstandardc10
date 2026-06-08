@@ -829,6 +829,64 @@ function publicPartnerDashTierClass(tier){
     'Bronze Sponsor':' is-tier-bronze'
   }[tier]||' is-tier-support';
 }
+const pubLogoMatteCache=new Map();
+function sponsorLogoMattePixel(r,g,b,a){
+  if(a<10)return true;
+  const max=Math.max(r,g,b),min=Math.min(r,g,b);
+  const chroma=max-min;
+  if(chroma>40)return false;
+  if(max<=95)return true;
+  if(max<=125&&chroma<=14)return true;
+  return false;
+}
+function flattenSponsorLogoMatte(src){
+  const raw=String(src||'');
+  if(!raw.startsWith('data:image'))return Promise.resolve(raw);
+  if(pubLogoMatteCache.has(raw))return Promise.resolve(pubLogoMatteCache.get(raw));
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onload=()=>{
+      let w=img.naturalWidth||img.width||1;
+      let h=img.naturalHeight||img.height||1;
+      const cap=640;
+      if(Math.max(w,h)>cap){
+        const s=cap/Math.max(w,h);
+        w=Math.max(1,Math.round(w*s));
+        h=Math.max(1,Math.round(h*s));
+      }
+      const canvas=document.createElement('canvas');
+      canvas.width=w;
+      canvas.height=h;
+      const ctx=canvas.getContext('2d',{alpha:true});
+      ctx.imageSmoothingEnabled=true;
+      ctx.imageSmoothingQuality='high';
+      ctx.clearRect(0,0,w,h);
+      ctx.drawImage(img,0,0,w,h);
+      const id=ctx.getImageData(0,0,w,h);
+      const d=id.data;
+      for(let i=0;i<d.length;i+=4){
+        const r=d[i],g=d[i+1],b=d[i+2],a=d[i+3];
+        if(sponsorLogoMattePixel(r,g,b,a)){
+          d[i]=0;d[i+1]=0;d[i+2]=0;d[i+3]=0;
+        }
+      }
+      ctx.putImageData(id,0,0);
+      const out=canvas.toDataURL('image/png');
+      pubLogoMatteCache.set(raw,out);
+      resolve(out);
+    };
+    img.onerror=()=>reject(new Error('Could not process sponsor logo.'));
+    img.src=raw;
+  });
+}
+function applyPublicPartnerLogoNormalize(root){
+  if(!root)return;
+  root.querySelectorAll('.pub-partner-dash-logo img,.pub-partner-profile-logo img').forEach(img=>{
+    const src=img.getAttribute('src')||'';
+    if(!src.startsWith('data:image'))return;
+    flattenSponsorLogoMatte(src).then(out=>{if(out)img.src=out;}).catch(()=>{});
+  });
+}
 function publicPartnerDashCard(s){
   const name=esc(String(s.name||'Partner').trim()||'Partner');
   const href=publicPartnerUrl(s.website);
@@ -849,6 +907,7 @@ function renderPublicPartners(sponsors){
   if(!list.length){wrap.hidden=true;el.innerHTML='';return;}
   wrap.hidden=false;
   el.innerHTML=`<div class="pub-partners-dash-list">${list.map(publicPartnerDashCard).join('')}</div>`;
+  applyPublicPartnerLogoNormalize(el);
 }
 function publicPartnerSocialButtons(s){
   const links=[
@@ -888,6 +947,7 @@ function renderPublicPartnerProfiles(sponsors){
   if(!el)return;
   const list=sortPublicPartners((sponsors||[]).filter(s=>s&&String(s.name||'').trim()));
   el.innerHTML=list.length?list.map(publicPartnerProfileCard).join(''):`<div class="empty">No public build partners published yet.</div>`;
+  applyPublicPartnerLogoNormalize(el);
 }
 function publicSectionToggleMeta(parts,completion){
   const linkCount=publicSectionLinkCount(parts);
