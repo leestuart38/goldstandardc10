@@ -2492,16 +2492,20 @@ button,.tab,.section-hdr,.chip,.chip-opt,.ss-card{touch-action:manipulation;-web
 .ms-comment-body{font-size:13px;line-height:1.5;color:var(--gs-cream);white-space:pre-wrap}
 .ms-comment-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
 .ms-comment-reply{margin-left:18px}
-.ms-reply-form{display:grid;gap:8px;margin-top:10px}
+.ms-reply-form{display:flex;flex-direction:column;gap:8px;margin-top:10px;align-items:stretch}
 .ms-reply-form textarea{
   min-height:72px;border-radius:12px;border:1px solid rgba(241,209,122,.18);background:rgba(0,0,0,.28);
   color:var(--gs-cream);padding:10px 12px;font:inherit;resize:vertical;
+}
+.ms-reply-form .ms-btn.post{
+  align-self:flex-end;width:auto;max-width:fit-content;
+  padding:10px 12px;font-size:10px;letter-spacing:.05em;gap:5px;
 }
 .notif-badge{
   display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;
   border-radius:999px;background:#dc2626;color:#fff;font-size:10px;font-weight:900;margin-left:6px;
 }
-.notif-list{display:grid;gap:6px}
+.notif-list{display:grid;gap:8px}
 .notif-card{
   border-radius:14px;border:1px solid rgba(241,209,122,.14);
   background:rgba(0,0,0,.22);overflow:hidden;
@@ -2510,67 +2514,86 @@ button,.tab,.section-hdr,.chip,.chip-opt,.ss-card{touch-action:manipulation;-web
 .notif-card.read{opacity:.9}
 .notif-card.read.expanded{opacity:1}
 .notif-summary-row{
-  display:flex;align-items:center;gap:8px;width:100%;
-  padding:8px 12px;text-align:left;font:inherit;color:inherit;
+  display:flex;align-items:center;gap:10px;width:100%;
+  padding:10px 14px;text-align:left;font:inherit;color:inherit;
   border:none;background:transparent;
 }
 .notif-card.read .notif-summary-row{cursor:pointer}
 .notif-card.read .notif-summary-row:hover{background:rgba(185,138,39,.06)}
 .notif-build-badge{
-  display:inline-flex;align-items:center;gap:4px;flex-shrink:0;
-  padding:3px 8px;border-radius:999px;border:1px solid rgba(241,209,122,.28);
+  display:inline-flex;align-items:center;gap:5px;flex-shrink:0;
+  padding:4px 9px;border-radius:999px;border:1px solid rgba(241,209,122,.28);
   background:rgba(185,138,39,.12);color:var(--gs-gold-light);
-  font-size:9px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;
-  max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-size:10px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;
+  max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.notif-summary-main{flex:1;min-width:0;display:grid;gap:1px}
+.notif-summary-main{flex:1;min-width:0;display:grid;gap:2px}
 .notif-summary-title{
-  font-size:11px;font-weight:800;letter-spacing:.03em;color:var(--gs-gold-light);
+  font-size:13px;font-weight:800;letter-spacing:.02em;color:var(--gs-gold-light);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .notif-summary-ms{
-  font-size:10px;font-weight:600;color:var(--gs-cream);opacity:.85;
+  font-size:12px;font-weight:600;color:var(--gs-cream);opacity:.9;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .notif-summary-preview{
-  font-size:10px;color:var(--gs-muted);font-style:italic;
+  font-size:12px;color:var(--gs-muted);font-style:italic;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .notif-item-meta{
-  flex-shrink:0;font-size:9px;color:var(--gs-muted);
-  letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;
+  flex-shrink:0;font-size:10px;color:var(--gs-muted);
+  letter-spacing:.03em;text-transform:uppercase;white-space:nowrap;
 }
-.notif-expand-icon{flex-shrink:0;color:var(--gs-muted);font-size:13px;line-height:1}
+.notif-expand-icon{flex-shrink:0;color:var(--gs-muted);font-size:15px;line-height:1}
 .notif-card.unread .notif-expand-icon{display:none}
-.notif-body{display:grid;gap:6px;padding:0 12px 10px}
+.notif-body{display:grid;gap:8px;padding:0 14px 12px}
 .notif-card.read .notif-body{
-  padding-top:8px;border-top:1px solid rgba(241,209,122,.1);
+  padding-top:10px;border-top:1px solid rgba(241,209,122,.1);
 }
-.notif-card.unread .notif-summary-row{padding-bottom:2px}
+.notif-card.unread .notif-summary-row{padding-bottom:4px}
 .notif-quote{
-  padding:8px 10px;border-radius:10px;border-left:2px solid rgba(241,209,122,.45);
-  background:rgba(0,0,0,.28);font-size:12px;line-height:1.45;color:var(--gs-cream);
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  padding:10px 12px;border-radius:10px;border-left:3px solid rgba(241,209,122,.45);
+  background:rgba(0,0,0,.28);font-size:14px;line-height:1.55;color:var(--gs-cream);
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
 }
-.notif-thread{padding-top:6px;border-top:1px solid rgba(241,209,122,.1)}
+.notif-thread{padding-top:8px;border-top:1px solid rgba(241,209,122,.1)}
 .notif-thread-label{
-  font-size:9px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;
-  color:var(--gs-muted);margin-bottom:6px;
+  font-size:10px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--gs-muted);margin-bottom:8px;
 }
-.notif-thread .ms-comment{padding:8px 10px;border-radius:10px}
-.notif-thread .ms-comment-head{margin-bottom:3px}
-.notif-thread .ms-comment-author{font-size:10px}
-.notif-thread .ms-comment-body{font-size:12px;line-height:1.4}
-.notif-thread .ms-comment-actions{margin-top:5px;gap:5px}
-.notif-thread .ms-engage-btn{padding:4px 8px;font-size:9px}
-.notif-thread .ms-comment-reply{margin-left:10px}
-.notif-thread .ms-reply-form{gap:6px;margin-top:6px}
-.notif-thread .ms-reply-form textarea{min-height:48px;padding:8px 10px;font-size:12px}
-.notif-card-actions{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
-.notif-card-actions .ms-btn{padding:5px 10px;font-size:10px}
+.notif-convo{display:grid;gap:0;margin-bottom:12px}
+.notif-convo:last-child{margin-bottom:0}
+.notif-convo-replies{
+  margin:6px 0 0 12px;padding:8px 0 2px 14px;
+  border-left:2px solid rgba(241,209,122,.28);
+  display:grid;gap:8px;
+}
+.notif-thread .ms-comment{padding:10px 12px;border-radius:12px}
+.notif-thread .ms-comment-head{margin-bottom:5px}
+.notif-thread .ms-comment-author{font-size:11px}
+.notif-thread .ms-comment-time{font-size:10px}
+.notif-thread .ms-comment-body{font-size:14px;line-height:1.55}
+.notif-thread .ms-comment.owner{
+  border-color:rgba(241,209,122,.36);
+  background:rgba(185,138,39,.1);
+}
+.notif-thread .ms-comment-actions{margin-top:7px;gap:6px}
+.notif-thread .ms-engage-btn{padding:6px 10px;font-size:10px}
+.notif-thread .ms-reply-form{
+  display:flex;flex-direction:column;gap:6px;margin-top:8px;align-items:stretch;
+}
+.notif-thread .ms-reply-form textarea{
+  min-height:48px;padding:10px 12px;font-size:14px;line-height:1.45;
+}
+.notif-thread .ms-reply-form .ms-btn.post{
+  align-self:flex-end;width:auto;max-width:fit-content;
+  padding:10px 12px;font-size:10px;letter-spacing:.05em;gap:5px;
+}
+.notif-card-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.notif-card-actions .ms-btn{padding:7px 12px;font-size:11px}
 .notif-toolbar{display:flex;justify-content:flex-end;margin-bottom:10px}
 .notif-section-label{
-  font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;
+  font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;
   color:var(--gs-muted);padding:10px 4px 4px;
 }
 .notif-section-label:first-child{padding-top:2px}
@@ -10302,6 +10325,7 @@ function renderEngagementCommentsHtml(slug,milestoneId,comments,context){
   const replies=comments.filter(c=>c.parentId&&c.parentId!==c.id);
   const ctx=context||'notif';
   const renderOne=(c,isReply)=>{
+    const canReply=!c.isOwnerReply;
     const replyId=ctx==='notif'?notifReplyInputId(slug,milestoneId,c.id):'reply-input-'+milestoneId+'-'+c.id;
     const formId=ctx==='notif'?'notif-form-'+slug+'-'+milestoneId+'-'+c.id:'reply-form-'+milestoneId+'-'+c.id;
     const likeFn=ctx==='notif'
@@ -10313,23 +10337,36 @@ function renderEngagementCommentsHtml(slug,milestoneId,comments,context){
     const postFn=ctx==='notif'
       ?`ownerReplyToComment('${slug}','${milestoneId}','${c.id}','notif')`
       :`ownerReplyToComment('${slug}','${milestoneId}','${c.id}','milestone')`;
+    const replyBtn=canReply?`<button class="ms-engage-btn" type="button" onclick="${replyFn}"><i class="ti ti-message-reply"></i>Reply</button>`:'';
+    const replyForm=canReply?`<div class="ms-reply-form" id="${formId}" hidden>
+        <textarea id="${replyId}" placeholder="Write a reply as the builder..."></textarea>
+        <button class="ms-btn post" type="button" onclick="${postFn}"><i class="ti ti-send"></i>Post reply</button>
+      </div>`:'';
     return `<div class="ms-comment${c.isOwnerReply?' owner':''}${isReply?' ms-comment-reply':''}">
       <div class="ms-comment-head">
-        <span class="ms-comment-author">${esc(c.authorName||'Guest')}${c.isOwnerReply?' · Builder':''}</span>
+        <span class="ms-comment-author">${esc(c.authorName||'Guest')}${c.isOwnerReply?' · You':''}</span>
         <span class="ms-comment-time">${esc(fmtNotifTime(c.createdAt))}</span>
       </div>
       <div class="ms-comment-body">${esc(c.body||'')}</div>
       <div class="ms-comment-actions">
         <button class="ms-engage-btn" type="button" onclick="${likeFn}"><i class="ti ti-heart"></i>${Number(c.likeCount)||0}</button>
-        <button class="ms-engage-btn" type="button" onclick="${replyFn}"><i class="ti ti-message-reply"></i>Reply</button>
+        ${replyBtn}
       </div>
-      <div class="ms-reply-form" id="${formId}" hidden>
-        <textarea id="${replyId}" placeholder="Write a reply as the builder..."></textarea>
-        <button class="ms-btn post" type="button" onclick="${postFn}"><i class="ti ti-send"></i>Post reply</button>
-      </div>
+      ${replyForm}
     </div>`;
   };
-  let html=top.map(c=>renderOne(c,false)+replies.filter(r=>r.parentId===c.id).map(r=>renderOne(r,true)).join('')).join('');
+  let html='';
+  if(ctx==='notif'){
+    html=top.map(c=>{
+      const childReplies=replies.filter(r=>r.parentId===c.id);
+      return `<div class="notif-convo">
+        ${renderOne(c,false)}
+        ${childReplies.length?`<div class="notif-convo-replies">${childReplies.map(r=>renderOne(r,true)).join('')}</div>`:''}
+      </div>`;
+    }).join('');
+  }else{
+    html=top.map(c=>renderOne(c,false)+replies.filter(r=>r.parentId===c.id).map(r=>renderOne(r,true)).join('')).join('');
+  }
   if(!html)html='<div class="milestone-empty" style="padding:14px 0">No comments yet.</div>';
   return html;
 }
@@ -10538,6 +10575,12 @@ async function ownerReplyToComment(slug,milestoneId,parentCommentId,context){
   const input=document.getElementById(inputId);
   const body=String((input&&input.value)||'').trim();
   if(!ref||!body)return;
+  const thread=await loadMilestoneComments(slug,milestoneId);
+  const parent=thread.find(c=>c.id===parentCommentId);
+  if(parent&&parent.isOwnerReply){
+    showGarageToast('Reply to the original comment instead.');
+    return;
+  }
   const buildName=buildLabelForSlug(slug)||BUILD_NAME||'Builder';
   try{
     const commentRef=ref.collection('comments').doc();
