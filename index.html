@@ -5578,7 +5578,8 @@ function publicSectionsPayload(){
         name:p.name||'Untitled part',
         vendor:p.vendor||'',
         priority:p.priority||'Medium',
-        status:p.status||'Need to Buy'
+        status:p.status||'Need to Buy',
+        link:String(p.link||'').trim()
       }))
   }));
 }
@@ -5627,7 +5628,8 @@ function publicWorkLogPayload(){
           name:p?p.name:'Unknown part',
           sectionName:sectionNameByKey(l.secKey)||'',
           status:p?p.status:'Need to Buy',
-          priority:p?p.priority:'Medium'
+          priority:p?p.priority:'Medium',
+          link:p?String(p.link||'').trim():''
         };
       })
     }))
@@ -5661,7 +5663,7 @@ function publicPayload(){
     milestones:publicMilestonesPayload(),
     workLog:publicWorkLogPayload(),
     updatedAt:new Date().toISOString(),
-    publicVersion:'v3-vehicle-profile'
+    publicVersion:'v4-part-links'
   };
 }
 

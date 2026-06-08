@@ -85,7 +85,20 @@ body{
   padding:12px;border-radius:16px;border:1px solid rgba(241,209,122,.12);background:rgba(0,0,0,.22);
 }
 .public-part-name{font-size:13px;font-weight:900;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.public-part-link{
+  display:inline-flex;align-items:center;gap:6px;max-width:100%;
+  color:var(--gold-light);text-decoration:none;
+}
+.public-part-link:hover{color:#fff;text-decoration:underline}
+.public-part-link i{font-size:12px;opacity:.85;flex-shrink:0}
+.pub-part-shop{
+  display:inline-flex;align-items:center;gap:5px;
+  color:#fff!important;border-color:rgba(197,155,53,.45)!important;
+  background:linear-gradient(135deg,rgba(111,79,18,.85),rgba(185,138,39,.75))!important;
+}
+.pub-part-shop:hover{filter:brightness(1.08)}
 .public-part-meta{margin-top:5px;display:flex;flex-wrap:wrap;gap:6px}
+.pub-wl-part-name .public-part-link{font-size:12px}
 .pub-pill{
   display:inline-flex;align-items:center;padding:5px 8px;border-radius:999px;
   font-size:10px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;
@@ -585,6 +598,24 @@ const PUBLIC_DOC='gold-standard-c10';
 let db,docRef;
 
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function publicPartUrl(url){
+  const u=String(url||'').trim();
+  if(!u)return '';
+  if(/^https?:\/\//i.test(u))return u;
+  if(/^www\./i.test(u))return 'https://'+u;
+  return '';
+}
+function publicPartNameHtml(p,fallback){
+  const name=esc(p.name||fallback||'Untitled part');
+  const href=publicPartUrl(p.link);
+  if(!href)return name;
+  return `<a class="public-part-link" href="${esc(href)}" target="_blank" rel="noopener noreferrer sponsored">${name}<i class="ti ti-external-link" aria-hidden="true"></i></a>`;
+}
+function publicPartShopPill(p){
+  const href=publicPartUrl(p.link);
+  if(!href)return '';
+  return `<a class="pub-pill pub-part-shop" href="${esc(href)}" target="_blank" rel="noopener noreferrer sponsored"><i class="ti ti-shopping-cart"></i>Shop</a>`;
+}
 function fmtDate(iso){try{return new Date(iso).toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'})}catch(e){return iso||''}}
 function sectionName(data,key){const s=(data.sections||[]).find(x=>x.key===key);return s?s.name:''}
 
@@ -636,7 +667,7 @@ function prioClass(p){return {'Critical':'prio-critical','High':'prio-high','Med
 function buildPublicWorkLogCard(task){
   const parts=(task.linkedParts||[]).map(p=>`<div class="pub-wl-part">
     <div class="pub-wl-part-left">
-      <div class="pub-wl-part-name">${esc(p.name||'Part')}</div>
+      <div class="pub-wl-part-name">${publicPartNameHtml(p,'Part')}</div>
       <div class="pub-wl-part-sec">${esc(p.sectionName||'')}</div>
     </div>
     <div class="pub-wl-part-meta">
@@ -803,10 +834,11 @@ function render(data){
         <div class="public-section-drop-body">
           ${parts.map(p=>`<div class="public-part">
             <div>
-              <div class="public-part-name">${esc(p.name||'Untitled part')}</div>
+              <div class="public-part-name">${publicPartNameHtml(p)}</div>
               <div class="public-part-meta">
                 ${p.vendor?`<span class="pub-pill">${esc(p.vendor)}</span>`:''}
                 <span class="pub-pill">${esc(p.priority||'Medium')}</span>
+                ${publicPartShopPill(p)}
               </div>
             </div>
             <span class="pub-pill status-pill ${statusClass(p.status)}">${esc(p.status||'Need to Buy')}</span>
