@@ -6283,6 +6283,7 @@ let garageBuilds=[];
 let garageMenuOpen=false;
 let garageOp={active:false,cancelled:false,pct:0,label:'',id:0,allowCancel:true};
 let garageBuildThumbs={};
+let garageThumbGen=0;
 let garageSwitchTargetId=null;
 let privateMediaMsPrefix='';
 let publicMediaMsPrefix='';
@@ -6362,7 +6363,7 @@ function packState(){
       vehicleNickname:VEHICLE_NICKNAME
     },
     meta:{
-      appVersion:'v143-garage-ux',
+      appVersion:'v144-garage-fast-delete',
       updatedAt:now,
       buildId:activeBuildId,
       publicSlug:activePublicSlug
@@ -6475,14 +6476,14 @@ async function loadGarageBuildThumbnail(buildId){
   try{
     const mediaCol=getUserMediaCol();
     if(mediaCol){
-      const snap=await withTimeout(mediaCol.doc(buildId+'-vehicle').get(),6000,'Build thumb load');
+      const snap=await withTimeout(mediaCol.doc(buildId+'-vehicle').get(),4000,'Build thumb load');
       if(snap.exists&&snap.data().vehicleImage){
         garageBuildThumbs[buildId]=snap.data().vehicleImage;
         return snap.data().vehicleImage;
       }
     }
     if(buildId===LEGACY_BUILD_ID&&firebaseDb){
-      const legacy=await withTimeout(firebaseDb.collection(LEGACY_TRACKER_COLLECTION).doc(LEGACY_BUILD_ID+'-media-vehicle').get(),6000,'Legacy thumb');
+      const legacy=await withTimeout(firebaseDb.collection(LEGACY_TRACKER_COLLECTION).doc(LEGACY_BUILD_ID+'-media-vehicle').get(),4000,'Legacy thumb');
       if(legacy.exists&&legacy.data().vehicleImage){
         garageBuildThumbs[buildId]=legacy.data().vehicleImage;
         return legacy.data().vehicleImage;
@@ -6491,9 +6492,13 @@ async function loadGarageBuildThumbnail(buildId){
   }catch(e){console.warn('Thumb load failed:',buildId,e);}
   return '';
 }
-async function loadGarageBuildThumbnails(){
+async function loadGarageBuildThumbnails(onlyMissing){
   if(activeBuildId&&vehicleImage)garageBuildThumbs[activeBuildId]=vehicleImage;
-  await Promise.all(garageBuilds.map(b=>loadGarageBuildThumbnail(b.buildId)));
+  const targets=onlyMissing?garageBuilds.filter(b=>!garageBuildThumbs[b.buildId]):garageBuilds;
+  const batchSize=4;
+  for(let i=0;i<targets.length;i+=batchSize){
+    await Promise.all(targets.slice(i,i+batchSize).map(b=>loadGarageBuildThumbnail(b.buildId)));
+  }
 }
 function garageThumbHtml(buildId){
   const src=garageBuildThumbs[buildId]||'';
@@ -6840,8 +6845,10 @@ async function loadBuildById(buildId,options){
   const slug=data.publicSlug||data.meta?.publicSlug||buildId;
   bindActiveBuildRefs(buildId,slug);
   resetBuildSessionState();
-  await loadPrivateMedia(data);
-  if(buildId===LEGACY_BUILD_ID&&(forceC10Restore||!fastLoad||(!data.vehicleImage&&!data.vehicleImageOriginal))){
+  await loadPrivateMedia(data,fastLoad);
+  if(buildId===LEGACY_BUILD_ID&&!fastLoad&&(forceC10Restore||(!data.vehicleImage&&!data.vehicleImageOriginal))){
+    await loadLegacyPrivateMedia(data);
+  }else if(buildId===LEGACY_BUILD_ID&&fastLoad&&!data.vehicleImage&&!data.vehicleImageOriginal){
     await loadLegacyPrivateMedia(data);
   }
   throwIfGarageOpCancelled();
@@ -6861,7 +6868,7 @@ async function loadBuildById(buildId,options){
     }
   }
   if(activeBuildId&&vehicleImage)garageBuildThumbs[activeBuildId]=vehicleImage;
-  renderGarageUI();
+  if(!opts.skipGarageRender)renderGarageUI();
   syncBuildMetaUI();
 }
 async function flushCloudSave(){
@@ -6911,54 +6918,100 @@ function closeDeleteBuildModal(){
   const modal=document.getElementById('garage-delete-modal');
   if(modal)modal.classList.remove('open');
 }
+async function deleteMediaShardDocs(collectionRef,prefix,shardCount){
+  if(!collectionRef||!firebaseDb)return;
+  const col=resolveMediaCollection(collectionRef);
+  const max=Math.min(Math.max(Number(shardCount)||0,0)+2,32);
+  const ops=[];
+  for(let i=0;i<max;i++)ops.push(col.doc(prefix+i).delete());
+  await Promise.all(ops.map(p=>p.catch(e=>console.warn('Shard delete failed:',e))));
+}
 async function deleteBuildMediaShards(mediaCol,buildId,shardCount){
   if(!mediaCol||!buildId)return;
-  const ops=[mediaCol.doc(buildId+'-vehicle').delete().catch(()=>{})];
-  const count=Math.max(shardCount||0,48);
-  for(let i=0;i<count;i++)ops.push(mediaCol.doc(buildId+'-ms-'+i).delete().catch(()=>{}));
-  await Promise.all(ops);
+  await mediaCol.doc(buildId+'-vehicle').delete().catch(e=>console.warn('Vehicle media delete:',e));
+  await deleteMediaShardDocs(mediaCol,buildId+'-ms-',shardCount);
 }
 async function deletePublicBuildMedia(slug,shardCount){
   if(!firebaseDb||!slug)return;
-  const ops=[
-    firebaseDb.collection(PUBLIC_COLLECTION).doc(slug).delete().catch(()=>{}),
-    firebaseDb.collection(PUBLIC_COLLECTION).doc(slug+'-media-vehicle').delete().catch(()=>{})
-  ];
-  const count=Math.max(shardCount||0,48);
-  for(let i=0;i<count;i++)ops.push(firebaseDb.collection(PUBLIC_COLLECTION).doc(slug+'-media-ms-'+i).delete().catch(()=>{}));
-  await Promise.all(ops);
+  await firebaseDb.collection(PUBLIC_COLLECTION).doc(slug).delete().catch(e=>console.warn('Public build delete:',e));
+  await firebaseDb.collection(PUBLIC_COLLECTION).doc(slug+'-media-vehicle').delete().catch(e=>console.warn('Public vehicle delete:',e));
+  await deleteMediaShardDocs(PUBLIC_COLLECTION,slug+'-media-ms-',shardCount);
+}
+async function deleteLegacyTrackerBuildFully(){
+  if(!firebaseDb)return;
+  const col=LEGACY_TRACKER_COLLECTION;
+  const coreRef=firebaseDb.collection(col).doc(LEGACY_BUILD_ID);
+  let shards=0;
+  try{
+    const snap=await coreRef.get();
+    shards=Number(snap.exists&&snap.data()&&snap.data().meta&&snap.data().meta.mediaMsShardCount)||0;
+  }catch(e){}
+  await firebaseDb.collection(col).doc(LEGACY_BUILD_ID+'-media-vehicle').delete().catch(()=>{});
+  await firebaseDb.collection(col).doc(LEGACY_BUILD_ID+'-media').delete().catch(()=>{});
+  await deleteMediaShardDocs(col,LEGACY_MEDIA_MS_PREFIX,shards);
+  await coreRef.delete();
+}
+function clearActiveBuildRefs(){
+  clearTimeout(saveTimer);
+  saveTimer=null;
+  activeBuildId=null;
+  activePublicSlug=null;
+  firestoreDocRef=null;
+  publicDocRef=null;
+  mediaVehicleDocRef=null;
+  mediaDocRef=null;
+}
+async function deleteEntireBuild(buildId,slug){
+  const col=getUserBuildsCol();
+  const mediaCol=getUserMediaCol();
+  if(!col)throw new Error('Garage unavailable.');
+  let privateShards=cachedMediaMsShardCount||0;
+  let publicShards=cachedPublicMediaMsShardCount||0;
+  try{
+    const snap=await col.doc(buildId).get();
+    if(snap.exists){
+      privateShards=Number(snap.data().meta&&snap.data().meta.mediaMsShardCount)||privateShards;
+    }
+  }catch(e){}
+  await deleteBuildMediaShards(mediaCol,buildId,privateShards);
+  await deletePublicBuildMedia(slug,publicShards);
+  if(buildId===LEGACY_BUILD_ID)await deleteLegacyTrackerBuildFully();
+  await col.doc(buildId).delete();
+  const verify=await col.doc(buildId).get();
+  if(verify.exists)throw new Error('Build document still exists after delete.');
+  try{
+    await saveUserGarageMeta({deletedBuildIds:firebase.firestore.FieldValue.arrayUnion(buildId)});
+  }catch(e){console.warn('Could not record deleted build id:',e);}
 }
 async function confirmDeleteActiveBuild(){
   if(!activeBuildId||isGarageOpActive())return;
   const buildId=activeBuildId;
   const slug=activePublicSlug||buildId;
   const buildName=BUILD_NAME||'this build';
+  const stayOnGarage=document.getElementById('panel-vehicle')?.classList.contains('active');
   closeDeleteBuildModal();
   beginGarageOp('Deleting build');
   try{
-    setGarageOpProgress(12,'Removing build data from cloud...');
+    setGarageOpProgress(15,'Removing all build data from cloud...');
     throwIfGarageOpCancelled();
-    const col=getUserBuildsCol();
-    const mediaCol=getUserMediaCol();
-    if(col)await col.doc(buildId).delete();
-    await deleteBuildMediaShards(mediaCol,buildId,cachedMediaMsShardCount);
-    await deletePublicBuildMedia(slug,cachedPublicMediaMsShardCount);
+    saveLocalStateNow();
+    await deleteEntireBuild(buildId,slug);
     try{localStorage.removeItem(localSaveKey());}catch(e){}
     delete garageBuildThumbs[buildId];
-    setGarageOpProgress(45,'Updating garage list...');
+    clearActiveBuildRefs();
+    garageBuilds=garageBuilds.filter(b=>b.buildId!==buildId);
+    setGarageOpProgress(55,'Updating garage...');
     throwIfGarageOpCancelled();
     await loadGarageBuildList();
-    const next=garageBuilds.find(b=>b.buildId!==buildId);
-    setGarageOpProgress(100,'Build deleted');
-    endGarageOp();
+    garageBuilds=garageBuilds.filter(b=>b.buildId!==buildId);
+    const next=garageBuilds[0];
     if(next){
-      showGarageToast('Deleted '+buildName+'. Loading next build...');
-      await switchGarageBuild(next.buildId);
+      setGarageOpProgress(75,'Loading next build...');
+      await loadBuildById(next.buildId,{fastLoad:true,skipGarageRender:true});
+      await saveUserGarageMeta({activeBuildId:next.buildId});
+      setGarageOpProgress(100,'Build deleted');
+      showGarageToast('Deleted '+buildName+'.');
     }else{
-      activeBuildId=null;
-      activePublicSlug=null;
-      firestoreDocRef=null;
-      publicDocRef=null;
       sections=cloneDefaultData(DEFAULT_SECTIONS);
       sponsors=cloneDefaultData(DEFAULT_SPONSORS);
       decisions=[];
@@ -6968,42 +7021,46 @@ async function confirmDeleteActiveBuild(){
       vehicleImageOriginal='';
       repairTrackerState();
       safeBuild();
-      renderGarageUI();
-      syncBuildMetaUI();
+      setGarageOpProgress(100,'Build deleted');
       showGarageToast('Build deleted. Create a new build to continue.');
     }
+    setSaveInd('saved','Build deleted');
+    setTimeout(()=>setSaveInd('idle','Cloud sync on'),1800);
   }catch(e){
-    endGarageOp();
     if(isGarageOpCancelledError(e)){
       showGarageToast('Delete cancelled.');
       return;
     }
-    console.warn(e);
-    showGarageToast('Could not delete build.');
+    console.warn('Delete failed:',e);
+    showGarageToast(e&&e.message?e.message:'Could not delete build.');
+  }finally{
+    endGarageOp();
+    if(stayOnGarage)showPanel('vehicle',false);
+    renderGarageUI();
   }
 }
 async function switchGarageBuild(buildId){
   if(!buildId||buildId===activeBuildId||isGarageOpActive())return;
+  const stayOnGarage=document.getElementById('panel-vehicle')?.classList.contains('active');
   beginGarageOp('Switching build');
   try{
-    setGarageOpProgress(8,'Saving current build to cloud...');
+    setGarageOpProgress(10,'Saving current build to cloud...');
     setSaveInd('saving','Saving current build before switch...');
     throwIfGarageOpCancelled();
+    saveLocalStateNow();
     await flushCloudSave();
-    setGarageOpProgress(42,'Loading build data and media...');
+    setGarageOpProgress(50,'Loading build data...');
     throwIfGarageOpCancelled();
     setSaveInd('saving','Loading build...');
-    await loadBuildById(buildId,{fastLoad:true});
-    setGarageOpProgress(78,'Updating garage...');
+    await loadBuildById(buildId,{fastLoad:true,skipGarageRender:true});
+    setGarageOpProgress(82,'Finishing up...');
     throwIfGarageOpCancelled();
     await saveUserGarageMeta({activeBuildId:buildId});
     await loadGarageBuildList();
-    await loadGarageBuildThumbnails();
-    renderGarageUI();
+    if(activeBuildId&&vehicleImage)garageBuildThumbs[activeBuildId]=vehicleImage;
     setGarageOpProgress(100,'Build ready');
     setSaveInd('saved','Build switched');
     setTimeout(()=>setSaveInd('idle','Cloud sync on'),1800);
-    await new Promise(r=>setTimeout(r,280));
   }catch(e){
     if(isGarageOpCancelledError(e)){
       setSaveInd('idle','Switch cancelled');
@@ -7021,6 +7078,12 @@ async function switchGarageBuild(buildId){
     }
   }finally{
     endGarageOp();
+    if(stayOnGarage)showPanel('vehicle',false);
+    renderGarageUI();
+    loadGarageBuildThumbnails(true).then(()=>{
+      const list=document.querySelector('.garage-page-list');
+      if(list)list.innerHTML=renderGarageBuildListHtml();
+    });
   }
 }
 function showGarageToast(msg){
@@ -7037,15 +7100,16 @@ function showGarageToast(msg){
   showGarageToast._t=setTimeout(()=>el.classList.remove('show'),4200);
 }
 function renderGarageBuildListHtml(){
-  const lockCls=isGarageOpActive()?' is-locked':'';
-  let html=garageBuilds.map(b=>`<button class="garage-page-item${b.buildId===activeBuildId?' active':''}${lockCls}" type="button"${isGarageOpActive()?' disabled':''} onclick="requestSwitchGarageBuild('${b.buildId}')"><span class="garage-page-item-body">${garageThumbHtml(b.buildId)}<span class="garage-page-item-main"><span class="garage-page-item-name">${esc(b.buildName||'Untitled build')}</span><span class="garage-page-item-meta">${esc(formatVehicleLabel(b.vehicleYear,b.vehicleMake,b.vehicleModel)||b.buildId)}</span></span></span>${b.buildId===activeBuildId?'<span class="garage-page-item-badge">Active</span>':''}</button>`).join('');
+  let html=garageBuilds.map(b=>`<button class="garage-page-item${b.buildId===activeBuildId?' active':''}" type="button" onclick="requestSwitchGarageBuild('${b.buildId}')"><span class="garage-page-item-body">${garageThumbHtml(b.buildId)}<span class="garage-page-item-main"><span class="garage-page-item-name">${esc(b.buildName||'Untitled build')}</span><span class="garage-page-item-meta">${esc(formatVehicleLabel(b.vehicleYear,b.vehicleMake,b.vehicleModel)||b.buildId)}</span></span></span>${b.buildId===activeBuildId?'<span class="garage-page-item-badge">Active</span>':''}</button>`).join('');
   if(!html)html='<div class="vehicle-panel-note" style="margin-top:0"><i class="ti ti-info-circle"></i><span>No builds yet. Create your first build above.</span></div>';
   return html;
 }
 function renderGarageUI(){
   if(activeBuildId&&vehicleImage)garageBuildThumbs[activeBuildId]=vehicleImage;
+  const gen=++garageThumbGen;
   renderVehiclePanel();
-  loadGarageBuildThumbnails().then(()=>{
+  loadGarageBuildThumbnails(true).then(()=>{
+    if(gen!==garageThumbGen)return;
     const list=document.querySelector('.garage-page-list');
     if(list)list.innerHTML=renderGarageBuildListHtml();
   });
@@ -7115,7 +7179,6 @@ async function confirmGarageCreateBuild(){
     throwIfGarageOpCancelled();
     await loadBuildById(buildId,{fastLoad:true});
     await loadGarageBuildList();
-    await loadGarageBuildThumbnails();
     renderGarageUI();
     scheduleSave();
     setGarageOpProgress(100,'Build created');
@@ -7265,12 +7328,13 @@ function resolveMediaCollection(collectionRefOrName){
   if(collectionRefOrName&&typeof collectionRefOrName.doc==='function')return collectionRefOrName;
   return firebaseDb.collection(collectionRefOrName);
 }
-async function probeMilestoneShards(collectionRefOrName,prefix,state,onlyIfMissing){
+async function probeMilestoneShards(collectionRefOrName,prefix,state,onlyIfMissing,maxProbe){
   if(!firebaseDb||!state)return 0;
   const col=resolveMediaCollection(collectionRefOrName);
   let count=Number(state.meta&&state.meta.mediaMsShardCount)||0;
-  if(!count){
-    for(let i=0;i<48;i++){
+  const limit=maxProbe==null?48:maxProbe;
+  if(!count&&limit>0){
+    for(let i=0;i<limit;i++){
       try{
         const snap=await col.doc(prefix+i).get();
         if(!snap.exists)break;
@@ -7290,30 +7354,31 @@ async function probeMilestoneShards(collectionRefOrName,prefix,state,onlyIfMissi
 async function loadMilestonePhotoShards(collectionRefOrName,prefix,count){
   const col=resolveMediaCollection(collectionRefOrName);
   const photoMap=new Map();
-  for(let i=0;i<count;i++){
-    try{
-      const ref=col.doc(prefix+i);
-      const sSnap=await withTimeout(ref.get(),8000,'Milestone media shard load');
-      if(sSnap.exists){
-        (sSnap.data().milestones||[]).forEach(m=>{
-          const prev=photoMap.get(m.id)||[];
-          const next=Array.isArray(m.photos)?m.photos:[];
-          if(next.length)photoMap.set(m.id,prev.concat(next));
-        });
-      }
-    }catch(e){
-      console.warn('Milestone media shard load failed:',e);
-    }
+  const batchSize=6;
+  for(let start=0;start<count;start+=batchSize){
+    const end=Math.min(start+batchSize,count);
+    await Promise.all(Array.from({length:end-start},(_,j)=>{
+      const i=start+j;
+      return withTimeout(col.doc(prefix+i).get(),6000,'Milestone media shard load').then(sSnap=>{
+        if(sSnap.exists){
+          (sSnap.data().milestones||[]).forEach(m=>{
+            const prev=photoMap.get(m.id)||[];
+            const next=Array.isArray(m.photos)?m.photos:[];
+            if(next.length)photoMap.set(m.id,prev.concat(next));
+          });
+        }
+      }).catch(e=>console.warn('Milestone media shard load failed:',e));
+    }));
   }
   return photoMap;
 }
-async function loadPrivateMedia(state){
+async function loadPrivateMedia(state,fastLoad){
   if(!firebaseReady||!state)return false;
   let loaded=false;
   const shardCount=Number(state.meta&&state.meta.mediaMsShardCount)||0;
   if(mediaVehicleDocRef){
     try{
-      const vSnap=await withTimeout(mediaVehicleDocRef.get(),8000,'Vehicle media load');
+      const vSnap=await withTimeout(mediaVehicleDocRef.get(),fastLoad?5000:8000,'Vehicle media load');
       if(vSnap.exists){
         const v=vSnap.data();
         if(v.vehicleImage)state.vehicleImage=v.vehicleImage;
@@ -7327,19 +7392,30 @@ async function loadPrivateMedia(state){
   const mediaCol=getUserMediaCol();
   const msCollection=mediaCol||LEGACY_TRACKER_COLLECTION;
   const msPrefix=privateMediaMsPrefix||FIRESTORE_MEDIA_MS_PREFIX;
-  const userProbed=await probeMilestoneShards(msCollection,msPrefix,state,true);
-  if(userProbed>0){
-    loaded=true;
-    cachedMediaMsShardCount=Number(state.meta&&state.meta.mediaMsShardCount)||userProbed;
-  }else if(shardCount>0){
-    const photoMap=await loadMilestonePhotoShards(msCollection,msPrefix,shardCount);
-    if(photoMap.size){
-      applyMilestonePhotoMap(state,photoMap);
-      loaded=true;
+  if(fastLoad){
+    if(shardCount>0){
+      const photoMap=await loadMilestonePhotoShards(msCollection,msPrefix,shardCount);
+      if(photoMap.size){
+        applyMilestonePhotoMap(state,photoMap);
+        loaded=true;
+      }
+      cachedMediaMsShardCount=shardCount;
     }
-    cachedMediaMsShardCount=shardCount;
+  }else{
+    const userProbed=await probeMilestoneShards(msCollection,msPrefix,state,true);
+    if(userProbed>0){
+      loaded=true;
+      cachedMediaMsShardCount=Number(state.meta&&state.meta.mediaMsShardCount)||userProbed;
+    }else if(shardCount>0){
+      const photoMap=await loadMilestonePhotoShards(msCollection,msPrefix,shardCount);
+      if(photoMap.size){
+        applyMilestonePhotoMap(state,photoMap);
+        loaded=true;
+      }
+      cachedMediaMsShardCount=shardCount;
+    }
   }
-  if(activeBuildId===LEGACY_BUILD_ID){
+  if(!fastLoad&&activeBuildId===LEGACY_BUILD_ID){
     const legacyLoaded=await loadLegacyPrivateMedia(state);
     if(legacyLoaded)loaded=true;
   }
