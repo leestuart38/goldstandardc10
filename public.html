@@ -264,6 +264,72 @@ body{
   .pub-partner-gold-logo{margin:0 auto}
 }
 
+/* ===== v133 compact dashboard + partners tab ===== */
+.pub-partners-wrap--dash{padding:14px!important;margin-top:12px!important}
+.pub-partners-wrap--dash .card-title{font-size:22px!important;margin-bottom:10px!important}
+.pub-partners-wrap--dash .pub-partners-gold{gap:10px;margin-bottom:10px}
+.pub-partners-wrap--dash .pub-partner-gold{padding:12px 14px;gap:12px;border-radius:16px}
+.pub-partners-wrap--dash .pub-partner-gold-logo{width:min(150px,34vw);height:60px;border-radius:12px}
+.pub-partners-wrap--dash .pub-partner-gold-name{font-size:clamp(18px,3vw,24px)!important}
+.pub-partners-wrap--dash .pub-partner-gold-tier{font-size:9px;margin-bottom:4px}
+.pub-partners-wrap--dash .pub-partners-tier-row{gap:8px;margin-bottom:10px}
+.pub-partners-wrap--dash .pub-partner-mid{min-height:96px;padding:10px;border-radius:14px}
+.pub-partners-wrap--dash .pub-partner-mid-logo{max-width:120px;height:52px}
+.pub-partners-wrap--dash .pub-partner-mid-logo img{max-height:52px}
+.pub-partners-wrap--dash .pub-partner-mid-name{font-size:13px}
+.pub-partners-wrap--dash .pub-partners-grid{gap:8px}
+.pub-partners-wrap--dash .pub-partner-grid-item{min-height:76px;padding:8px;border-radius:12px}
+.pub-partners-wrap--dash .pub-partner-grid-logo{height:38px}
+.pub-partners-wrap--dash .pub-partner-grid-logo img{max-height:38px}
+.pub-partners-wrap--dash .pub-partner-text{font-size:10px}
+.pub-partners-detail-list{display:grid;gap:16px}
+.pub-partner-profile{
+  display:grid;grid-template-columns:minmax(120px,200px) minmax(0,1fr);gap:18px;align-items:start;
+  padding:20px;border-radius:22px;border:1px solid rgba(241,209,122,.2);
+  background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(0,0,0,.2));
+  box-shadow:0 12px 28px rgba(0,0,0,.18);
+}
+.pub-partner-profile.is-gold{border-color:rgba(241,209,122,.42);background:linear-gradient(135deg,rgba(185,138,39,.14),rgba(0,0,0,.22))}
+.pub-partner-profile-logo{
+  width:100%;aspect-ratio:5/3;border-radius:16px;border:1px solid rgba(241,209,122,.18);
+  background:#080808;display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+.pub-partner-profile-logo img{width:100%;height:100%;object-fit:contain;display:block}
+.pub-partner-profile-logo-fallback{
+  font-family:var(--gs-display);font-size:14px;font-weight:700;letter-spacing:var(--gs-tracking-tight);
+  text-transform:uppercase;color:var(--muted);text-align:center;padding:12px;
+}
+.pub-partner-profile-tier{
+  display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;
+  font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;
+  border:1px solid rgba(241,209,122,.28);color:var(--gold-light);background:rgba(0,0,0,.24);margin-bottom:8px;
+}
+.pub-partner-profile-name{
+  font-family:var(--gs-display);font-size:clamp(24px,4vw,36px);font-weight:700;
+  letter-spacing:var(--gs-tracking-tight);text-transform:uppercase;line-height:1;margin-bottom:10px;
+}
+.pub-partner-profile-desc{
+  font-size:14px;line-height:1.6;font-weight:550;color:var(--cream);margin-bottom:12px;white-space:pre-wrap;
+}
+.pub-partner-sponsored-title{
+  font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;
+}
+.pub-partner-sponsored-list{margin:0 0 14px;padding-left:18px;color:var(--cream);font-size:13px;line-height:1.55}
+.pub-partner-sponsored-list li{margin-bottom:4px}
+.pub-partner-profile-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pub-partner-social-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-height:36px;padding:8px 12px;border-radius:10px;border:1px solid rgba(241,209,122,.22);
+  background:rgba(0,0,0,.28);color:var(--cream);font-size:10px;font-weight:800;
+  letter-spacing:.06em;text-transform:uppercase;text-decoration:none;
+}
+.pub-partner-social-btn:hover{border-color:rgba(241,209,122,.42);background:rgba(185,138,39,.12)}
+.pub-partner-social-btn i{font-size:14px;line-height:1}
+@media(max-width:700px){
+  .pub-partner-profile{grid-template-columns:1fr}
+  .pub-partner-profile-logo{max-width:220px}
+}
+
 
 /* ===== v86 public page sync with main app ===== */
 :root{
@@ -636,6 +702,7 @@ body{margin:0}
           <button class="tab" type="button" data-public-tab="buildlist" onclick="showPublicPanel('buildlist')"><i class="ti ti-tools"></i><span class="tab-label">Build List</span></button>
           <button class="tab" type="button" data-public-tab="worklog" onclick="showPublicPanel('worklog')"><i class="ti ti-tool"></i><span class="tab-label">Work Log</span></button>
           <button class="tab" type="button" data-public-tab="milestones" onclick="showPublicPanel('milestones')"><i class="ti ti-notebook"></i><span class="tab-label">Milestones</span></button>
+          <button class="tab" type="button" data-public-tab="partners" onclick="showPublicPanel('partners')"><i class="ti ti-building-store"></i><span class="tab-label">Partners</span></button>
         </div>
       </div>
     </div>
@@ -652,9 +719,9 @@ body{margin:0}
       <div class="pub-dash-sub"><span id="milestone-count">0</span> published milestones</div>
     </div>
     <div class="pub-news" id="pub-news"></div>
-    <div class="sections-card pub-partners-wrap" id="pub-partners-wrap" hidden>
+    <div class="sections-card pub-partners-wrap pub-partners-wrap--dash" id="pub-partners-wrap" hidden>
       <div class="card-title">Build Partners</div>
-      <div id="pub-partners"></div>
+      <div id="pub-partners-dash"></div>
     </div>
     <div class="sections-card">
       <div class="card-title">Section Progress</div>
@@ -681,6 +748,13 @@ body{margin:0}
     <div class="milestones-card">
       <div class="card-title">Build Milestones</div>
       <div id="milestone-list" class="milestone-list"></div>
+    </div>
+  </div>
+
+  <div id="public-partners" class="public-panel">
+    <div class="parts-card">
+      <div class="card-title">Build Partners</div>
+      <div id="pub-partners-detail" class="pub-partners-detail-list"></div>
     </div>
   </div>
 </div>
@@ -758,8 +832,29 @@ function publicPartnerUrl(url){
   if(/^www\./i.test(u))return 'https://'+u;
   return 'https://'+u;
 }
+function publicSocialUrl(platform,raw){
+  const v=String(raw||'').trim();
+  if(!v)return '';
+  if(/^https?:\/\//i.test(v))return v;
+  const handle=v.replace(/^@/,'').replace(/^\/+/,'');
+  if(!handle)return '';
+  if(platform==='instagram')return 'https://instagram.com/'+handle;
+  if(platform==='facebook')return 'https://facebook.com/'+handle;
+  if(platform==='youtube')return handle.includes('/')?'https://youtube.com/'+handle:'https://youtube.com/@'+handle;
+  if(platform==='tiktok')return 'https://tiktok.com/@'+handle;
+  return publicPartnerUrl(v);
+}
+const PUB_PARTNER_TIER_ORDER={'Gold Sponsor':0,'Silver Sponsor':1,'Bronze Sponsor':2,'Supporting Partner':3};
+function sortPublicPartners(list){
+  return (list||[]).slice().sort((a,b)=>{
+    const ta=PUB_PARTNER_TIER_ORDER[a.tier]??9;
+    const tb=PUB_PARTNER_TIER_ORDER[b.tier]??9;
+    if(ta!==tb)return ta-tb;
+    return String(a.name||'').localeCompare(String(b.name||''));
+  });
+}
 function publicPartnerCard(s,kind){
-  const name=esc(String(s.name||'Sponsor').trim()||'Sponsor');
+  const name=esc(String(s.name||'Partner').trim()||'Partner');
   const href=publicPartnerUrl(s.website);
   const logo=String(s.logo||'').trim();
   const tier=esc(String(s.tier||'Supporting Partner'));
@@ -773,9 +868,9 @@ function publicPartnerCard(s,kind){
 }
 function renderPublicPartners(sponsors){
   const wrap=document.getElementById('pub-partners-wrap');
-  const el=document.getElementById('pub-partners');
+  const el=document.getElementById('pub-partners-dash');
   if(!wrap||!el)return;
-  const list=(sponsors||[]).filter(s=>s&&String(s.name||'').trim());
+  const list=sortPublicPartners((sponsors||[]).filter(s=>s&&String(s.name||'').trim()));
   if(!list.length){wrap.hidden=true;el.innerHTML='';return;}
   wrap.hidden=false;
   const gold=list.filter(s=>s.tier==='Gold Sponsor');
@@ -788,6 +883,51 @@ function renderPublicPartners(sponsors){
     ${mid.length?`<div class="pub-partners-tier-row">${mid.map(s=>publicPartnerCard(s,'mid')).join('')}</div>`:''}
     ${supporting.length?`<div class="pub-partners-grid">${supporting.map(s=>publicPartnerCard(s,'grid')).join('')}</div>`:''}`;
 }
+function publicPartnerSocialButtons(s){
+  const links=[
+    {key:'instagram',icon:'ti-brand-instagram',label:'Instagram'},
+    {key:'facebook',icon:'ti-brand-facebook',label:'Facebook'},
+    {key:'youtube',icon:'ti-brand-youtube',label:'YouTube'},
+    {key:'tiktok',icon:'ti-brand-tiktok',label:'TikTok'}
+  ];
+  return links.map(l=>{
+    const href=publicSocialUrl(l.key,s[l.key]);
+    if(!href)return '';
+    return `<a class="pub-partner-social-btn" href="${esc(href)}" target="_blank" rel="noopener noreferrer"><i class="ti ${l.icon}"></i>${l.label}</a>`;
+  }).filter(Boolean).join('');
+}
+function publicSponsoredItemsHtml(raw){
+  const items=String(raw||'').split(/\r?\n/).map(x=>x.replace(/^[-•*]\s*/,'').trim()).filter(Boolean);
+  if(!items.length)return '';
+  return `<div class="pub-partner-sponsored-title">Sponsored items</div><ul class="pub-partner-sponsored-list">${items.map(item=>`<li>${esc(item)}</li>`).join('')}</ul>`;
+}
+function publicPartnerProfileCard(s){
+  const name=esc(String(s.name||'Partner').trim()||'Partner');
+  const tier=esc(String(s.tier||'Supporting Partner'));
+  const logo=String(s.logo||'').trim();
+  const website=publicPartnerUrl(s.website);
+  const desc=String(s.publicDescription||'').trim();
+  const socials=publicPartnerSocialButtons(s);
+  const websiteBtn=website?`<a class="pub-part-link-btn" href="${esc(website)}" target="_blank" rel="noopener noreferrer"><i class="ti ti-world"></i>Visit website</a>`:'';
+  const logoHtml=logo?`<img src="${logo}" alt="${name} logo">`:`<span class="pub-partner-profile-logo-fallback">${name}</span>`;
+  const cls=s.tier==='Gold Sponsor'?' is-gold':'';
+  return `<article class="pub-partner-profile${cls}">
+    <div class="pub-partner-profile-logo">${logoHtml}</div>
+    <div class="pub-partner-profile-copy">
+      <span class="pub-partner-profile-tier">${tier}</span>
+      <h2 class="pub-partner-profile-name">${name}</h2>
+      ${desc?`<div class="pub-partner-profile-desc">${esc(desc)}</div>`:''}
+      ${publicSponsoredItemsHtml(s.sponsoredItems)}
+      <div class="pub-partner-profile-actions">${websiteBtn}${socials}</div>
+    </div>
+  </article>`;
+}
+function renderPublicPartnerProfiles(sponsors){
+  const el=document.getElementById('pub-partners-detail');
+  if(!el)return;
+  const list=sortPublicPartners((sponsors||[]).filter(s=>s&&String(s.name||'').trim()));
+  el.innerHTML=list.length?list.map(publicPartnerProfileCard).join(''):`<div class="empty">No public build partners published yet.</div>`;
+}
 function publicSectionToggleMeta(parts,completion){
   const linkCount=publicSectionLinkCount(parts);
   const linkHtml=linkCount?`<span class="public-section-toggle-stat pub-sec-link-count"><i class="ti ti-link"></i>${linkCount} shop link${linkCount===1?'':'s'}</span>`:'';
@@ -797,7 +937,7 @@ function fmtDate(iso){try{return new Date(iso).toLocaleDateString('en-CA',{year:
 function sectionName(data,key){const s=(data.sections||[]).find(x=>x.key===key);return s?s.name:''}
 
 function showPublicPanel(name,push=true,scrollTop=false){
-  if(!['dashboard','buildlist','worklog','milestones'].includes(name))name='dashboard';
+  if(!['dashboard','buildlist','worklog','milestones','partners'].includes(name))name='dashboard';
   document.querySelectorAll('.public-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab[data-public-tab]').forEach(t=>t.classList.remove('active'));
   const panel=document.getElementById('public-'+name);
@@ -813,7 +953,7 @@ function showPublicPanel(name,push=true,scrollTop=false){
 }
 function publicPanelFromHash(){
   const h=(window.location.hash||'#dashboard').replace('#','').trim();
-  return ['dashboard','buildlist','worklog','milestones'].includes(h)?h:'dashboard';
+  return ['dashboard','buildlist','worklog','milestones','partners'].includes(h)?h:'dashboard';
 }
 window.addEventListener('popstate',()=>showPublicPanel(publicPanelFromHash(),false));
 window.addEventListener('hashchange',()=>showPublicPanel(publicPanelFromHash(),false));
@@ -1034,6 +1174,7 @@ function render(data){
   const milestones=(data.milestones||[]).slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
   renderPublicNews(milestones);
   renderPublicPartners(data.sponsors||[]);
+  renderPublicPartnerProfiles(data.sponsors||[]);
   document.getElementById('milestone-count').textContent=milestones.length;
   document.getElementById('milestone-list').innerHTML=milestones.length?milestones.map(m=>{
     const sec=sectionName(data,m.relatedSection);
