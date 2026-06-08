@@ -6161,7 +6161,15 @@ let VEHICLE_MAKE='';
 let VEHICLE_MODEL='';
 let VEHICLE_NICKNAME='';
 const LEGACY_LOCAL_SAVE_KEY='c10tracker_v3';
+const LAST_BUILD_KEY='c10tracker_last_build';
 function localSaveKey(){return 'c10tracker_v3_'+(activeBuildId||LEGACY_BUILD_ID);}
+function loadLocalBuildState(buildId){
+  if(!buildId)return null;
+  try{
+    const raw=localStorage.getItem('c10tracker_v3_'+buildId);
+    return raw?JSON.parse(raw):null;
+  }catch(e){return null;}
+}
 function fetchLegacyLocalPayload(){
   try{
     const raw=localStorage.getItem(LEGACY_LOCAL_SAVE_KEY);
@@ -6423,7 +6431,7 @@ function packState(){
       vehicleNickname:VEHICLE_NICKNAME
     },
     meta:{
-      appVersion:'v147-engagement-fix',
+      appVersion:'v148-fast-boot-smooth',
       updatedAt:now,
       buildId:activeBuildId,
       publicSlug:activePublicSlug
@@ -6565,7 +6573,8 @@ function garageThumbHtml(buildId){
   if(src)return `<span class="garage-page-thumb"><img src="${src}" alt=""></span>`;
   return `<span class="garage-page-thumb empty"><i class="ti ti-car" aria-hidden="true"></i></span>`;
 }
-function applyCloudStateToApp(cloud){
+function applyCloudStateToApp(cloud,options){
+  const opts=options||{};
   applySettingsFromState(cloud);
   vehicleImage=cloud.vehicleImage||'';
   vehicleImageOriginal=cloud.vehicleImageOriginal||'';
@@ -6581,7 +6590,13 @@ function applyCloudStateToApp(cloud){
   activeBuildCreatedAt=cloud.createdAt||'';
   if(cloud.buildId)activeBuildId=cloud.buildId;
   if(cloud.publicSlug)activePublicSlug=cloud.publicSlug;
-  repairTrackerState();
+  const structOk=Array.isArray(sections)&&sections.length>=5&&sections.every(s=>s&&s.key&&Array.isArray(s.parts));
+  if(opts.skipRepair&&structOk){
+    workTasks=repairWorkTasks(workTasks);
+    normalizeBoardOrders();
+  }else{
+    repairTrackerState();
+  }
 }
 async function fetchLegacyTrackerCore(){
   if(!firebaseDb)return null;
@@ -6822,27 +6837,88 @@ function queueDepartingCloudSave(refs,state){
 }
 async function hydrateBuildMedia(state,fastLoad){
   if(!state)return;
-  await loadPrivateMedia(state,fastLoad);
+  await loadPrivateMedia(state,fastLoad,{vehicleOnly:true});
   if(activeBuildId===LEGACY_BUILD_ID&&!state.vehicleImage&&!state.vehicleImageOriginal){
     await loadLegacyPrivateMedia(state);
   }
-  applyCloudStateToApp(state);
+  vehicleImage=state.vehicleImage||vehicleImage;
+  vehicleImageOriginal=state.vehicleImageOriginal||vehicleImageOriginal;
   saveLocalStateNow();
-  cachedQuickMediaFingerprint=quickMediaFingerprint({
-    vehicleImage,vehicleImageOriginal,
-    milestones:milestones.map(m=>({id:m.id,photos:m.photos||[]}))
-  });
-  renderMilestones();
   renderVehicleImage();
   syncBuildMetaUI();
   if(activeBuildId&&vehicleImage)garageBuildThumbs[activeBuildId]=vehicleImage;
   const list=document.querySelector('.garage-page-list');
   if(list)list.innerHTML=renderGarageBuildListHtml();
+  loadPrivateMedia(state,fastLoad,{milestonesOnly:true}).then(()=>{
+    if(Array.isArray(state.milestones))milestones=state.milestones;
+    saveLocalStateNow();
+    cachedQuickMediaFingerprint=quickMediaFingerprint({
+      vehicleImage,vehicleImageOriginal,
+      milestones:milestones.map(m=>({id:m.id,photos:m.photos||[]}))
+    });
+    renderMilestones();
+    if(list)list.innerHTML=renderGarageBuildListHtml();
+  }).catch(e=>console.warn('Milestone media hydrate failed:',e));
+}
+function tryInstantLocalBoot(){
+  const lastId=localStorage.getItem(LAST_BUILD_KEY);
+  if(!lastId)return false;
+  const local=loadLocalBuildState(lastId);
+  if(!local||!hasUsableCloudState(local))return false;
+  activeBuildId=lastId;
+  activePublicSlug=local.publicSlug||local.buildId||lastId;
+  applyCloudStateToApp(local,{skipRepair:true});
+  quickApplyBuildUI();
+  hideCloudLoading();
+  return true;
+}
+async function fetchGarageMetaFast(){
+  const metaRef=getUserMetaRef();
+  if(!metaRef)return {};
+  try{
+    const snap=await withTimeout(metaRef.get(),3500,'Garage meta');
+    return snap.exists?snap.data():{};
+  }catch(e){
+    console.warn('Garage meta load failed:',e);
+    return {};
+  }
+}
+function runInitBackgroundTasks(meta,buildId){
+  Promise.resolve().then(async()=>{
+    try{
+      if(!garageBuilds.length)await loadGarageBuildList();
+      if(!meta||meta.activeBuildId!==buildId)await saveUserGarageMeta({activeBuildId:buildId});
+      startEngagementInboxListener();
+      const thumbGen=++garageThumbGen;
+      loadGarageBuildThumbnails(true).then(()=>{
+        if(thumbGen===garageThumbGen)renderGarageUI();
+      }).catch(e=>console.warn('Garage thumb preload failed:',e));
+      safeBuild();
+      repairAllSponsorLogos();
+    }catch(e){console.warn('Background init failed:',e);}
+  });
+}
+function runSwitchBackgroundTasks(departingRefs,departingState,buildId){
+  localStorage.setItem(LAST_BUILD_KEY,buildId);
+  queueDepartingCloudSave(departingRefs,departingState);
+  milestoneEngagementCache={};
+  milestoneCommentsCache={};
+  Promise.resolve().then(async()=>{
+    try{
+      await saveUserGarageMeta({activeBuildId:buildId});
+      await loadGarageBuildList();
+      startEngagementInboxListener();
+      loadGarageBuildThumbnails(true).then(()=>{
+        const list=document.querySelector('.garage-page-list');
+        if(list)list.innerHTML=renderGarageBuildListHtml();
+      }).catch(()=>{});
+    }catch(e){console.warn('Background switch tasks failed:',e);}
+  });
 }
 function needsC10Repair(data){
   if(!data)return true;
   if(!hasUsableCloudState(data))return true;
-  return countArr(data.milestones)===0||countArr(data.workTasks)===0||(!data.vehicleImage&&!data.vehicleImageOriginal);
+  return buildRichnessScore(data)<8000;
 }
 function resetBuildSessionState(){
   partFilters={search:'',status:'',priority:''};
@@ -6939,10 +7015,12 @@ async function loadBuildById(buildId,options){
   const forceC10Restore=!!opts.forceC10Restore;
   const fastLoad=!!opts.fastLoad;
   const deferMedia=!!opts.deferMedia;
+  const skipRepair=!!opts.skipRepair;
   if(!buildId||!currentUser)throw new Error('Invalid build.');
   throwIfGarageOpCancelled();
   const col=getUserBuildsCol();
-  const snap=await withTimeout(col.doc(buildId).get(),fastLoad?6000:12000,'Build load');
+  let snap=opts.prefetchedSnap||null;
+  if(!snap)snap=await withTimeout(col.doc(buildId).get(),fastLoad?4000:10000,'Build load');
   let data;
   let restored=false;
   if(!snap.exists){
@@ -6972,8 +7050,9 @@ async function loadBuildById(buildId,options){
     data=mediaState;
   }
   throwIfGarageOpCancelled();
-  applyCloudStateToApp(deferMedia?stripMediaFromState(data):data);
+  applyCloudStateToApp(deferMedia?stripMediaFromState(data):data,{skipRepair});
   saveLocalStateNow();
+  localStorage.setItem(LAST_BUILD_KEY,buildId);
   if(opts.lightRender)quickApplyBuildUI();
   else{safeBuild();repairAllSponsorLogos();}
   cachedQuickMediaFingerprint=quickMediaFingerprint({
@@ -6993,7 +7072,7 @@ async function loadBuildById(buildId,options){
   }
   if(activeBuildId&&vehicleImage)garageBuildThumbs[activeBuildId]=vehicleImage;
   if(!opts.skipGarageRender)renderGarageUI();
-  syncBuildMetaUI();
+  if(!opts.lightRender)syncBuildMetaUI();
   if(deferMedia){
     const hydrateGen=++garageThumbGen;
     hydrateBuildMedia(mediaState,fastLoad).then(()=>{
@@ -7180,29 +7259,28 @@ async function switchGarageBuild(buildId){
     const departingRefs=captureBuildRefs();
     const departingState=packState();
     saveLocalStateNow();
-    setGarageOpProgress(18,'Syncing build data...');
-    startGarageProgressNudge(18,44,'Syncing build data...',5000);
-    await saveCloudState({refs:departingRefs,state:departingState,coreOnly:true});
+    const col=getUserBuildsCol();
+    const buildPrefetch=col?col.doc(buildId).get():null;
+    setGarageOpProgress(20,'Syncing build data...');
+    startGarageProgressNudge(20,52,'Syncing build data...',3500);
+    const coreSave=saveCloudState({refs:departingRefs,state:departingState,coreOnly:true});
+    const prefetchedSnap=buildPrefetch?await Promise.all([coreSave,buildPrefetch]).then(r=>r[1]):await coreSave;
     stopGarageProgressNudge();
-    setGarageOpProgress(48,'Loading build...');
-    startGarageProgressNudge(48,78,'Loading build...',6000);
+    setGarageOpProgress(58,'Loading build...');
+    startGarageProgressNudge(58,92,'Loading build...',3500);
     throwIfGarageOpCancelled();
     setSaveInd('saving','Loading build...');
-    await loadBuildById(buildId,{fastLoad:true,deferMedia:true,lightRender:true,skipGarageRender:true});
+    await loadBuildById(buildId,{
+      fastLoad:true,deferMedia:true,lightRender:true,skipGarageRender:true,skipRepair:true,
+      prefetchedSnap:prefetchedSnap||null
+    });
     stopGarageProgressNudge();
-    setGarageOpProgress(82,'Finishing up...');
-    setTimeout(()=>{try{safeBuild();repairAllSponsorLogos();}catch(e){}},0);
-    throwIfGarageOpCancelled();
-    queueDepartingCloudSave(departingRefs,departingState);
-    await saveUserGarageMeta({activeBuildId:buildId});
-    await loadGarageBuildList();
     if(activeBuildId&&vehicleImage)garageBuildThumbs[activeBuildId]=vehicleImage;
     setGarageOpProgress(100,'Build ready');
     setSaveInd('saved','Build switched');
-    milestoneEngagementCache={};
-    milestoneCommentsCache={};
-    startEngagementInboxListener();
     setTimeout(()=>setSaveInd('idle','Cloud sync on'),1800);
+    runSwitchBackgroundTasks(departingRefs,departingState,buildId);
+    setTimeout(()=>{try{safeBuild();repairAllSponsorLogos();}catch(e){}},0);
   }catch(e){
     if(isGarageOpCancelledError(e)){
       setSaveInd('idle','Switch cancelled');
@@ -7222,10 +7300,6 @@ async function switchGarageBuild(buildId){
     endGarageOp();
     if(stayOnGarage)showPanel('vehicle',false);
     renderGarageUI();
-    loadGarageBuildThumbnails(true).then(()=>{
-      const list=document.querySelector('.garage-page-list');
-      if(list)list.innerHTML=renderGarageBuildListHtml();
-    });
   }
 }
 function showGarageToast(msg){
@@ -7363,12 +7437,14 @@ function hasUsableCloudState(d){
   return d && hasUsableSections(d.sections);
 }
 
+let firestorePersistenceReady=null;
 function initFirebaseSync(){
   try{
     if(typeof firebase==='undefined')throw new Error('Firebase SDK not loaded');
     if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
     firebaseAuth=firebase.auth();
     firebaseDb=firebase.firestore();
+    try{firebaseDb.settings({cacheSizeBytes:firebase.firestore.CACHE_SIZE_UNLIMITED});}catch(e){}
     firebaseReady=true;
     return true;
   }catch(e){
@@ -7376,6 +7452,16 @@ function initFirebaseSync(){
     console.warn('Firebase sync unavailable:',e);
     return false;
   }
+}
+async function enableFirestoreCache(){
+  if(!firebaseDb)return;
+  if(firestorePersistenceReady)return firestorePersistenceReady;
+  firestorePersistenceReady=firebaseDb.enablePersistence({synchronizeTabs:true}).catch(e=>{
+    if(e&&e.code==='failed-precondition')return null;
+    if(e&&e.code!=='unimplemented')console.warn('Firestore persistence:',e);
+    return null;
+  });
+  return firestorePersistenceReady;
 }
 
 function withTimeout(promise,ms,label){
@@ -7540,11 +7626,14 @@ async function loadMilestonePhotoShards(collectionRefOrName,prefix,count){
   }
   return photoMap;
 }
-async function loadPrivateMedia(state,fastLoad){
+async function loadPrivateMedia(state,fastLoad,mediaOpts){
   if(!firebaseReady||!state)return false;
+  const mopts=mediaOpts||{};
+  const vehicleOnly=!!mopts.vehicleOnly;
+  const milestonesOnly=!!mopts.milestonesOnly;
   let loaded=false;
   const shardCount=Number(state.meta&&state.meta.mediaMsShardCount)||0;
-  if(mediaVehicleDocRef){
+  if(!milestonesOnly&&mediaVehicleDocRef){
     try{
       const vSnap=await withTimeout(mediaVehicleDocRef.get(),fastLoad?5000:8000,'Vehicle media load');
       if(vSnap.exists){
@@ -7557,6 +7646,7 @@ async function loadPrivateMedia(state,fastLoad){
       console.warn('Vehicle media load failed:',e);
     }
   }
+  if(vehicleOnly)return loaded;
   const mediaCol=getUserMediaCol();
   const msCollection=mediaCol||LEGACY_TRACKER_COLLECTION;
   const msPrefix=privateMediaMsPrefix||FIRESTORE_MEDIA_MS_PREFIX;
@@ -8358,7 +8448,6 @@ async function startAuthenticatedApp(user){
 
   try{
     await initData();
-    startEngagementInboxListener();
   }catch(e){
     console.error('initData failed:',e);
     hideCloudLoading();
@@ -8648,32 +8737,39 @@ function quickApplyBuildUI(){
 
 async function initData(){
   beginGarageOp('Loading build tracker',{allowCancel:false});
+  let initMeta=null;
+  let initBuildId=null;
   try{
     setGarageOpProgress(5,'Connecting to cloud...');
     initFirebaseSync();
 
     if(firebaseReady&&currentUser){
       try{
-        setGarageOpProgress(18,'Checking your garage...');
-        const meta=await migrateLegacyBuildIfNeeded();
-        setGarageOpProgress(32,'Selecting active build...');
-        const buildId=await resolveActiveBuildId(meta);
-        setGarageOpProgress(48,'Loading build...');
-        startGarageProgressNudge(48,70,'Loading build...',7000);
-        await loadBuildById(buildId,{fastLoad:true,deferMedia:true,lightRender:true});
+        await enableFirestoreCache();
+        const showedLocal=tryInstantLocalBoot();
+        if(showedLocal)setGarageOpProgress(22,'Syncing with cloud...');
+        let meta=await fetchGarageMetaFast();
+        if(!meta.legacyMigrated){
+          setGarageOpProgress(28,'Checking garage...');
+          meta=await migrateLegacyBuildIfNeeded();
+        }
+        initMeta=meta;
+        const buildId=(meta&&meta.activeBuildId)||LEGACY_BUILD_ID;
+        initBuildId=buildId;
+        localStorage.setItem(LAST_BUILD_KEY,buildId);
+        const col=getUserBuildsCol();
+        const buildPrefetch=col?col.doc(buildId).get():null;
+        setGarageOpProgress(42,'Loading build...');
+        startGarageProgressNudge(42,90,'Loading build...',4000);
+        await loadBuildById(buildId,{
+          fastLoad:true,deferMedia:true,lightRender:true,skipRepair:true,
+          prefetchedSnap:buildPrefetch?await buildPrefetch:null
+        });
         stopGarageProgressNudge();
-        setGarageOpProgress(78,'Almost ready...');
-        if(!garageBuilds.length)await loadGarageBuildList();
-        setGarageOpProgress(92,'Finishing up...');
-        if(!meta||meta.activeBuildId!==buildId)await saveUserGarageMeta({activeBuildId:buildId});
         setGarageOpProgress(100,'Ready');
         setSaveInd('saved','Garage loaded');
         setTimeout(()=>setSaveInd('idle','Cloud sync on'),1800);
-        const thumbGen=++garageThumbGen;
-        loadGarageBuildThumbnails(true).then(()=>{
-          if(thumbGen===garageThumbGen)renderGarageUI();
-        }).catch(e=>console.warn('Garage thumb preload failed:',e));
-        setTimeout(()=>{try{safeBuild();repairAllSponsorLogos();}catch(e){}},0);
+        runInitBackgroundTasks(meta,buildId);
         return;
       }catch(e){
         console.warn('Garage load failed. Falling back to local backup:',e);
