@@ -5496,7 +5496,7 @@ function packState(){
       vehicleModel:VEHICLE_MODEL
     },
     meta:{
-      appVersion:'v126-media-shards',
+      appVersion:'v127-compress-permissions',
       updatedAt:new Date().toISOString()
     }
   };
@@ -5726,6 +5726,44 @@ async function writeMediaShards(collection,prefix,shardPayloads,prevCount){
   }
   return shardPayloads.length;
 }
+async function shrinkMediaForCloud(media){
+  const vehicleOpts={maxW:1280,maxH:820,targetBytes:IMAGE_TARGET_VEHICLE,minW:480,minH:320,startQuality:0.82,minQuality:0.24};
+  const milestoneOpts={maxW:1000,maxH:750,targetBytes:IMAGE_TARGET_MILESTONE,minW:360,minH:270,startQuality:0.78,minQuality:0.22};
+  const out={
+    vehicleImage:media.vehicleImage||'',
+    vehicleImageOriginal:media.vehicleImageOriginal||'',
+    milestones:Array.isArray(media.milestones)?media.milestones.map(m=>({id:m.id,photos:Array.isArray(m.photos)?m.photos.slice():[]})):[]
+  };
+  if(out.vehicleImage&&dataUrlByteLength(out.vehicleImage)>IMAGE_TARGET_VEHICLE){
+    setSaveInd('saving','Compressing hero image for cloud...');
+    out.vehicleImage=await compressDataUrl(out.vehicleImage,vehicleOpts);
+  }
+  if(out.vehicleImageOriginal&&dataUrlByteLength(out.vehicleImageOriginal)>IMAGE_TARGET_VEHICLE){
+    setSaveInd('saving','Compressing original vehicle photo for cloud...');
+    out.vehicleImageOriginal=await compressDataUrl(out.vehicleImageOriginal,vehicleOpts);
+  }
+  for(const row of out.milestones){
+    for(let i=0;i<row.photos.length;i++){
+      if(dataUrlByteLength(row.photos[i])>IMAGE_TARGET_MILESTONE){
+        setSaveInd('saving','Compressing milestone photos for cloud...');
+        row.photos[i]=await compressDataUrl(row.photos[i],milestoneOpts);
+      }
+    }
+  }
+  return out;
+}
+function applyShrunkMediaToState(shrunk){
+  if(!shrunk)return;
+  if(shrunk.vehicleImage!==undefined)vehicleImage=shrunk.vehicleImage||'';
+  if(shrunk.vehicleImageOriginal!==undefined)vehicleImageOriginal=shrunk.vehicleImageOriginal||'';
+  if(Array.isArray(shrunk.milestones)&&Array.isArray(milestones)){
+    const photoMap=new Map(shrunk.milestones.map(m=>[m.id,Array.isArray(m.photos)?m.photos:[]]));
+    milestones=milestones.map(m=>{
+      if(!photoMap.has(m.id))return m;
+      return Object.assign({},m,{photos:photoMap.get(m.id)||[]});
+    });
+  }
+}
 async function savePrivateMedia(media){
   const plan=planMediaWrites(media);
   const vehicleDoc=Object.assign({},plan.vehiclePayload,{savedAt:firebase.firestore.FieldValue.serverTimestamp()});
@@ -5938,7 +5976,9 @@ async function saveCloudState(){
   if(!firebaseReady||!firestoreDocRef)return false;
   const full=packState();
   const {core,media}=splitCloudPayload(full);
-  const mediaMsShardCount=await savePrivateMedia(media);
+  const shrunkMedia=await shrinkMediaForCloud(media);
+  applyShrunkMediaToState(shrunkMedia);
+  const mediaMsShardCount=await savePrivateMedia(shrunkMedia);
   const corePayload=sanitizeForFirestore(core);
   corePayload.meta=Object.assign({},corePayload.meta||{},{mediaMsShardCount});
   corePayload.savedAt=firebase.firestore.FieldValue.serverTimestamp();
@@ -6513,6 +6553,9 @@ async function doSave(){
     else if(msg.includes('Milestone photos')||msg.includes('milestone'))hint=msg.startsWith('Cloud')?msg:'Cloud save failed: '+msg;
     else if(msg.includes('Build data is too large')||msg.includes('Public build data'))hint=msg.startsWith('Cloud')?msg:'Cloud save failed: '+msg;
     else if(msg.includes('too large')||msg.includes('longer than'))hint='Cloud save failed: '+msg;
+    else if(msg.includes('permission')||msg.includes('Permission')||msg.includes('PERMISSION_DENIED')||msg.includes('insufficient permissions')){
+      hint='Cloud save failed: Firestore permissions. In Firebase Console → Firestore → Rules, publish the rules in firestore.rules, then try again.';
+    }
     else if(msg)hint='Cloud save failed: '+msg;
     setSaveInd('idle',hint);
   }
@@ -7419,46 +7462,84 @@ function renderVehicleImage(){
   }
 }
 
-function compressVehicleImage(file){
+const IMAGE_TARGET_VEHICLE=320000;
+const IMAGE_TARGET_MILESTONE=150000;
+const IMAGE_MAX_UPLOAD_BYTES=30*1024*1024;
+
+function dataUrlByteLength(dataUrl){
+  return dataUrl?String(dataUrl).length:0;
+}
+
+function compressImageFromSource(src,opts){
+  const settings=Object.assign({
+    maxW:1200,maxH:900,targetBytes:IMAGE_TARGET_MILESTONE,
+    minW:360,minH:270,startQuality:0.8,minQuality:0.22,fileSize:0
+  },opts||{});
   return new Promise((resolve,reject)=>{
-    if(!file||!file.type||!file.type.startsWith('image/')){
-      reject(new Error('Please upload an image file.'));
-      return;
-    }
-
-    const reader=new FileReader();
-    reader.onload=()=>{
-      const img=new Image();
-      img.onload=()=>{
-        const maxW=1400;
-        const maxH=900;
-        let w=img.width;
-        let h=img.height;
-        const ratio=Math.min(maxW/w,maxH/h,1);
-        w=Math.round(w*ratio);
-        h=Math.round(h*ratio);
-
-        const canvas=document.createElement('canvas');
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      const ctx=canvas.getContext('2d',{alpha:false});
+      let scale=Math.min(settings.maxW/img.width,settings.maxH/img.height,1);
+      if(settings.fileSize>5*1024*1024)scale*=0.72;
+      if(settings.fileSize>10*1024*1024)scale*=0.62;
+      let quality=settings.startQuality;
+      let data='';
+      for(let pass=0;pass<24;pass++){
+        const w=Math.max(settings.minW,Math.round(img.width*scale));
+        const h=Math.max(settings.minH,Math.round(img.height*scale));
         canvas.width=w;
         canvas.height=h;
-        const ctx=canvas.getContext('2d');
+        ctx.fillStyle='#101010';
+        ctx.fillRect(0,0,w,h);
         ctx.drawImage(img,0,0,w,h);
-
-        let quality=.78;
-        let data=canvas.toDataURL('image/jpeg',quality);
-
-        while(data.length>400000 && quality>.45){
-          quality-=.08;
-          data=canvas.toDataURL('image/jpeg',quality);
+        data=canvas.toDataURL('image/jpeg',quality);
+        if(data.length<=settings.targetBytes)break;
+        if(quality>settings.minQuality){
+          quality=Math.max(settings.minQuality,quality-0.06);
+        }else{
+          scale*=0.84;
         }
+      }
+      if(data.length>settings.targetBytes*1.35){
+        reject(new Error('Image is still too large after compression. Try a smaller photo.'));
+        return;
+      }
+      resolve(data);
+    };
+    img.onerror=()=>reject(new Error('Could not read image.'));
+    img.src=src;
+  });
+}
 
-        resolve(data);
-      };
-      img.onerror=()=>reject(new Error('Could not read image.'));
-      img.src=reader.result;
+function compressImageFile(file,opts){
+  if(!file||!file.type||!file.type.startsWith('image/')){
+    return Promise.reject(new Error('Please upload an image file.'));
+  }
+  if(file.size>IMAGE_MAX_UPLOAD_BYTES){
+    return Promise.reject(new Error('Image must be under 30 MB. Pick a smaller file or resize it first.'));
+  }
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>{
+      compressImageFromSource(reader.result,Object.assign({},opts||{},{fileSize:file.size}))
+        .then(resolve)
+        .catch(reject);
     };
     reader.onerror=()=>reject(new Error('Could not read image file.'));
     reader.readAsDataURL(file);
+  });
+}
+
+function compressDataUrl(dataUrl,opts){
+  if(!dataUrl||!String(dataUrl).startsWith('data:image'))return Promise.resolve(dataUrl||'');
+  return compressImageFromSource(dataUrl,opts);
+}
+
+function compressVehicleImage(file){
+  return compressImageFile(file,{
+    maxW:1280,maxH:820,targetBytes:IMAGE_TARGET_VEHICLE,
+    minW:480,minH:320,startQuality:0.82,minQuality:0.24
   });
 }
 
@@ -7535,36 +7616,9 @@ function deleteMilestone(id){
 }
 
 function compressMilestoneImage(file){
-  return new Promise((resolve,reject)=>{
-    if(!file||!file.type||!file.type.startsWith('image/')){
-      reject(new Error('Please upload an image file.'));
-      return;
-    }
-    const reader=new FileReader();
-    reader.onload=()=>{
-      const img=new Image();
-      img.onload=()=>{
-        const maxW=1200,maxH=900;
-        let w=img.width,h=img.height;
-        const ratio=Math.min(maxW/w,maxH/h,1);
-        w=Math.round(w*ratio);h=Math.round(h*ratio);
-        const canvas=document.createElement('canvas');
-        canvas.width=w;canvas.height=h;
-        const ctx=canvas.getContext('2d');
-        ctx.drawImage(img,0,0,w,h);
-        let quality=.74;
-        let data=canvas.toDataURL('image/jpeg',quality);
-        while(data.length>180000&&quality>.32){
-          quality-=.08;
-          data=canvas.toDataURL('image/jpeg',quality);
-        }
-        resolve(data);
-      };
-      img.onerror=()=>reject(new Error('Could not read image.'));
-      img.src=reader.result;
-    };
-    reader.onerror=()=>reject(new Error('Could not read image file.'));
-    reader.readAsDataURL(file);
+  return compressImageFile(file,{
+    maxW:1000,maxH:750,targetBytes:IMAGE_TARGET_MILESTONE,
+    minW:360,minH:270,startQuality:0.78,minQuality:0.22
   });
 }
 
@@ -7578,15 +7632,19 @@ async function handleMilestonePhotos(id,e){
     const room=Math.max(0,6-(m.photos?m.photos.length:0));
     if(!room){setSaveInd('idle','Max 6 photos per milestone');return;}
     for(const file of files.slice(0,room)){
+      const sizeMb=(file.size/1048576).toFixed(1);
+      setSaveInd('saving',sizeMb>=2?`Compressing ${sizeMb} MB image...`:'Compressing images...');
       const data=await compressMilestoneImage(file);
       m.photos=m.photos||[];
       m.photos.push(data);
     }
     renderMilestones();
+    scheduleSave();
     doSave();
   }catch(err){
     console.warn(err);
-    setSaveInd('idle','Image upload failed');
+    const errMsg=err&&err.message?String(err.message):'Image upload failed';
+    setSaveInd('idle',errMsg);
   }finally{
     if(e&&e.target)e.target.value='';
   }
