@@ -2501,15 +2501,30 @@ button,.tab,.section-hdr,.chip,.chip-opt,.ss-card{touch-action:manipulation;-web
   display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;
   border-radius:999px;background:#dc2626;color:#fff;font-size:10px;font-weight:900;margin-left:6px;
 }
-.notif-list{display:grid;gap:10px}
-.notif-item{
-  display:grid;gap:6px;padding:14px 16px;border-radius:16px;border:1px solid rgba(241,209,122,.14);
-  background:rgba(0,0,0,.22);cursor:pointer;
+.notif-list{display:grid;gap:14px}
+.notif-card{
+  display:grid;gap:10px;padding:16px 18px;border-radius:18px;border:1px solid rgba(241,209,122,.14);
+  background:rgba(0,0,0,.22);
 }
-.notif-item.unread{border-color:rgba(241,209,122,.34);background:rgba(185,138,39,.08)}
+.notif-card.unread{border-color:rgba(241,209,122,.34);background:rgba(185,138,39,.08)}
+.notif-build-badge{
+  display:inline-flex;align-items:center;gap:6px;width:fit-content;
+  padding:5px 10px;border-radius:999px;border:1px solid rgba(241,209,122,.28);
+  background:rgba(185,138,39,.12);color:var(--gs-gold-light);
+  font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;
+}
 .notif-item-title{font-size:12px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--gs-gold-light)}
-.notif-item-body{font-size:13px;line-height:1.45;color:var(--gs-cream)}
+.notif-milestone{font-size:12px;font-weight:700;color:var(--gs-cream);opacity:.92}
+.notif-quote{
+  padding:12px 14px;border-radius:12px;border-left:3px solid rgba(241,209,122,.45);
+  background:rgba(0,0,0,.28);font-size:14px;line-height:1.55;color:var(--gs-cream);white-space:pre-wrap;
+}
 .notif-item-meta{font-size:10px;color:var(--gs-muted);letter-spacing:.05em;text-transform:uppercase}
+.notif-thread{margin-top:4px;padding-top:12px;border-top:1px solid rgba(241,209,122,.12)}
+.notif-thread-label{
+  font-size:10px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:var(--gs-muted);margin-bottom:8px;
+}
+.notif-card-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
 .notif-toolbar{display:flex;justify-content:flex-end;margin-bottom:12px}
 
 @media(max-width:700px){
@@ -5850,7 +5865,7 @@ body{margin:0}
   <div class="milestone-toolbar">
     <div>
       <div class="milestone-toolbar-title">Notifications</div>
-      <div class="milestone-toolbar-sub">Likes and comments on your public milestone posts.</div>
+      <div class="milestone-toolbar-sub">All builds in one place — see comments, like, and reply without leaving this page.</div>
     </div>
   </div>
   <div class="notif-toolbar">
@@ -6431,7 +6446,7 @@ function packState(){
       vehicleNickname:VEHICLE_NICKNAME
     },
     meta:{
-      appVersion:'v148-fast-boot-smooth',
+      appVersion:'v149-global-notifications',
       updatedAt:now,
       buildId:activeBuildId,
       publicSlug:activePublicSlug
@@ -7408,6 +7423,7 @@ async function confirmGarageCreateBuild(){
     safeBuild();
     syncBuildMetaUI();
     await loadGarageBuildList();
+    startEngagementInboxListener();
     renderGarageUI();
     setGarageOpProgress(100,'Build created');
     setSaveInd('saved','New build created');
@@ -10116,12 +10132,31 @@ function closeMilestoneLightbox(){
 }
 
 let notifications=[];
-let notificationsUnsub=null;
+let notificationsUnsubs=[];
+let notifInboxBuckets={};
+let notifRenderGen=0;
 let milestoneEngagementCache={};
 let milestoneCommentsCache={};
 
 function publicSlugForEngagement(){
   return activePublicSlug||activeBuildId||'';
+}
+function getAllEngagementSlugs(){
+  const slugs=new Set();
+  (garageBuilds||[]).forEach(b=>{
+    const s=b.publicSlug||b.buildId;
+    if(s)slugs.add(s);
+  });
+  const active=publicSlugForEngagement();
+  if(active)slugs.add(active);
+  return Array.from(slugs);
+}
+function buildLabelForSlug(slug){
+  const b=(garageBuilds||[]).find(x=>(x.publicSlug||x.buildId)===slug);
+  return b?(b.buildName||slug):slug;
+}
+function resolveNotifBuildName(n){
+  return n.buildName||buildLabelForSlug(n.inboxSlug||n.publicSlug||'');
 }
 function engagementDocKey(slug,milestoneId){
   return String(slug||'')+'__'+String(milestoneId||'');
@@ -10134,21 +10169,37 @@ function engagementInboxCol(slug){
   if(!firebaseDb||!slug)return null;
   return firebaseDb.collection(PUBLIC_ENGAGEMENT_INBOX_COLLECTION).doc(slug).collection('items');
 }
-function stopEngagementInboxListener(){
-  if(notificationsUnsub){notificationsUnsub();notificationsUnsub=null;}
+function mergeNotificationBuckets(){
+  notifications=Object.keys(notifInboxBuckets).flatMap(slug=>
+    (notifInboxBuckets[slug]||[]).map(n=>Object.assign({},n,{inboxSlug:n.inboxSlug||slug,publicSlug:n.publicSlug||slug}))
+  ).sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).slice(0,180);
 }
-function startEngagementInboxListener(){
+function stopEngagementInboxListener(){
+  notificationsUnsubs.forEach(u=>{try{u();}catch(e){}});
+  notificationsUnsubs=[];
+  notifInboxBuckets={};
+}
+async function startEngagementInboxListener(){
   stopEngagementInboxListener();
-  const slug=publicSlugForEngagement();
-  const col=engagementInboxCol(slug);
-  if(!col)return;
-  notificationsUnsub=col.orderBy('createdAt','desc').limit(100).onSnapshot(snap=>{
-    notifications=snap.docs.map(d=>Object.assign({id:d.id},d.data()));
-    updateNotificationsBadge();
-    if(document.getElementById('panel-notifications')?.classList.contains('active'))renderNotifications();
-    const posted=milestones.filter(x=>x.posted);
-    if(posted.length)renderMilestones();
-  },e=>console.warn('Notifications listener failed:',e));
+  if(!firebaseDb||!currentUser)return;
+  if(!garageBuilds.length){
+    try{await loadGarageBuildList();}catch(e){console.warn('Garage list for notifications failed:',e);}
+  }
+  const slugs=getAllEngagementSlugs();
+  if(!slugs.length)return;
+  slugs.forEach(slug=>{
+    const col=engagementInboxCol(slug);
+    if(!col)return;
+    const unsub=col.orderBy('createdAt','desc').limit(80).onSnapshot(snap=>{
+      notifInboxBuckets[slug]=snap.docs.map(d=>Object.assign({id:d.id,inboxSlug:slug,publicSlug:slug},d.data()));
+      mergeNotificationBuckets();
+      updateNotificationsBadge();
+      if(document.getElementById('panel-notifications')?.classList.contains('active'))renderNotifications();
+      const posted=milestones.filter(x=>x.posted);
+      if(posted.length&&slug===publicSlugForEngagement())renderMilestones();
+    },e=>console.warn('Notifications listener failed:',slug,e));
+    notificationsUnsubs.push(unsub);
+  });
 }
 function unreadNotificationCount(){
   return notifications.filter(n=>!n.read).length;
@@ -10162,46 +10213,140 @@ function updateNotificationsBadge(){
 }
 function notificationTitle(n){
   if(n.type==='milestone_like')return (n.actorName||'Someone')+' liked a milestone';
-  if(n.type==='milestone_comment')return (n.actorName||'Someone')+' commented on a milestone';
-  if(n.type==='comment_like')return (n.actorName||'Someone')+' liked your reply thread';
-  if(n.type==='comment_reply')return (n.actorName||'Someone')+' replied to a comment';
-  return 'New activity on your public build';
+  if(n.type==='milestone_comment')return (n.actorName||'Someone')+' commented';
+  if(n.type==='comment_like')return (n.actorName||'Someone')+' liked a comment';
+  if(n.type==='comment_reply')return (n.actorName||'Someone')+' replied';
+  return 'New public activity';
 }
 function fmtNotifTime(iso){
   try{return new Date(iso).toLocaleString('en-CA',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}catch(e){return ''}
 }
-function renderNotifications(){
+function notifCommentBody(n){
+  return String(n.commentBody||n.preview||n.message||'').trim();
+}
+function notifHasThread(n){
+  return !!(n&&n.milestoneId&&(n.inboxSlug||n.publicSlug));
+}
+function notifThreadKey(slug,milestoneId){
+  return String(slug||'')+'::'+String(milestoneId||'');
+}
+function notifReplyInputId(slug,milestoneId,commentId){
+  return 'notif-reply-'+slug+'-'+milestoneId+'-'+commentId;
+}
+function renderEngagementCommentsHtml(slug,milestoneId,comments,context){
+  const top=comments.filter(c=>!c.parentId);
+  const replies=comments.filter(c=>c.parentId&&c.parentId!==c.id);
+  const ctx=context||'notif';
+  const renderOne=(c,isReply)=>{
+    const replyId=ctx==='notif'?notifReplyInputId(slug,milestoneId,c.id):'reply-input-'+milestoneId+'-'+c.id;
+    const formId=ctx==='notif'?'notif-form-'+slug+'-'+milestoneId+'-'+c.id:'reply-form-'+milestoneId+'-'+c.id;
+    const likeFn=ctx==='notif'
+      ?`ownerLikeComment('${slug}','${milestoneId}','${c.id}','notif')`
+      :`ownerLikeComment('${slug}','${milestoneId}','${c.id}','milestone')`;
+    const replyFn=ctx==='notif'
+      ?`toggleNotifReplyForm('${slug}','${milestoneId}','${c.id}')`
+      :`toggleReplyForm('${milestoneId}','${c.id}')`;
+    const postFn=ctx==='notif'
+      ?`ownerReplyToComment('${slug}','${milestoneId}','${c.id}','notif')`
+      :`ownerReplyToComment('${slug}','${milestoneId}','${c.id}','milestone')`;
+    return `<div class="ms-comment${c.isOwnerReply?' owner':''}${isReply?' ms-comment-reply':''}">
+      <div class="ms-comment-head">
+        <span class="ms-comment-author">${esc(c.authorName||'Guest')}${c.isOwnerReply?' · Builder':''}</span>
+        <span class="ms-comment-time">${esc(fmtNotifTime(c.createdAt))}</span>
+      </div>
+      <div class="ms-comment-body">${esc(c.body||'')}</div>
+      <div class="ms-comment-actions">
+        <button class="ms-engage-btn" type="button" onclick="${likeFn}"><i class="ti ti-heart"></i>${Number(c.likeCount)||0}</button>
+        <button class="ms-engage-btn" type="button" onclick="${replyFn}"><i class="ti ti-message-reply"></i>Reply</button>
+      </div>
+      <div class="ms-reply-form" id="${formId}" hidden>
+        <textarea id="${replyId}" placeholder="Write a reply as the builder..."></textarea>
+        <button class="ms-btn post" type="button" onclick="${postFn}"><i class="ti ti-send"></i>Post reply</button>
+      </div>
+    </div>`;
+  };
+  let html=top.map(c=>renderOne(c,false)+replies.filter(r=>r.parentId===c.id).map(r=>renderOne(r,true)).join('')).join('');
+  if(!html)html='<div class="milestone-empty" style="padding:14px 0">No comments yet.</div>';
+  return html;
+}
+function renderNotifCardShell(n,showThread){
+  const slug=n.inboxSlug||n.publicSlug||'';
+  const buildName=esc(resolveNotifBuildName(n));
+  const msTitle=n.milestoneTitle?`<div class="notif-milestone"><i class="ti ti-notebook"></i> ${esc(n.milestoneTitle)}</div>`:'';
+  const body=notifCommentBody(n);
+  const quote=(n.type==='milestone_comment'||n.type==='comment_reply')&&body
+    ?`<div class="notif-quote">"${esc(body)}"</div>`:'';
+  const likeOnly=n.type==='milestone_like'&&!body?'<div class="notif-quote">Someone liked this milestone post.</div>':'';
+  const thread=showThread&&notifHasThread(n)
+    ?`<div class="notif-thread" id="notif-thread-${esc(slug)}-${esc(n.milestoneId)}"><div class="notif-thread-label">Conversation</div><div class="milestone-empty" style="padding:10px 0">Loading comments...</div></div>`
+    :'';
+  return `<article class="notif-card${n.read?'':' unread'}" data-notif-id="${esc(n.id)}" data-notif-slug="${esc(slug)}">
+    <div class="notif-build-badge"><i class="ti ti-car-garage"></i>${buildName}</div>
+    <div class="notif-item-title">${esc(notificationTitle(n))}</div>
+    ${msTitle}
+    ${quote||likeOnly}
+    <div class="notif-item-meta">${esc(fmtNotifTime(n.createdAt))}</div>
+    ${thread}
+    <div class="notif-card-actions">
+      ${n.milestoneId?`<button class="ms-btn" type="button" onclick="openNotificationOnBuild('${esc(slug)}','${esc(n.milestoneId)}','${esc(n.id)}')"><i class="ti ti-external-link"></i>Open build milestone</button>`:''}
+      ${!n.read?`<button class="ms-btn" type="button" onclick="markNotificationRead('${esc(slug)}','${esc(n.id)}')"><i class="ti ti-check"></i>Mark read</button>`:''}
+    </div>
+  </article>`;
+}
+async function renderNotifications(){
   const el=document.getElementById('notif-list');
   if(!el)return;
+  const gen=++notifRenderGen;
   if(!notifications.length){
     el.innerHTML='<div class="milestone-empty"><i class="ti ti-bell"></i>No notifications yet. Likes and comments on your public milestones will show up here.</div>';
     return;
   }
-  el.innerHTML=notifications.map(n=>`<button class="notif-item${n.read?'':' unread'}" type="button" onclick="openNotification('${n.id}')">
-    <div class="notif-item-title">${esc(notificationTitle(n))}</div>
-    <div class="notif-item-body">${esc(n.preview||n.message||'')}</div>
-    <div class="notif-item-meta">${esc(fmtNotifTime(n.createdAt))}</div>
-  </button>`).join('');
+  const seenThreads=new Set();
+  el.innerHTML=notifications.map(n=>{
+    const key=notifHasThread(n)?notifThreadKey(n.inboxSlug||n.publicSlug,n.milestoneId):'';
+    const showThread=!!key&&!seenThreads.has(key);
+    if(showThread)seenThreads.add(key);
+    return renderNotifCardShell(n,showThread);
+  }).join('');
+  const threadKeys=[...seenThreads];
+  await Promise.all(threadKeys.map(async key=>{
+    if(gen!==notifRenderGen)return;
+    const sep=key.indexOf('::');
+    const slug=key.slice(0,sep);
+    const milestoneId=key.slice(sep+2);
+    const comments=await loadMilestoneComments(slug,milestoneId);
+    if(gen!==notifRenderGen)return;
+    const host=document.getElementById('notif-thread-'+slug+'-'+milestoneId);
+    if(host){
+      host.innerHTML=`<div class="notif-thread-label">Conversation</div>${renderEngagementCommentsHtml(slug,milestoneId,comments,'notif')}`;
+    }
+  }));
 }
-async function markAllNotificationsRead(){
-  const slug=publicSlugForEngagement();
-  const col=engagementInboxCol(slug);
-  if(!col)return;
-  const unread=notifications.filter(n=>!n.read);
-  await Promise.all(unread.map(n=>col.doc(n.id).set({read:true},{merge:true}).catch(e=>console.warn(e))));
-}
-async function openNotification(id){
-  const n=notifications.find(x=>x.id===id);
-  if(!n)return;
-  const slug=publicSlugForEngagement();
+async function markNotificationRead(slug,id){
   const col=engagementInboxCol(slug);
   if(col)await col.doc(id).set({read:true},{merge:true}).catch(()=>{});
+}
+async function markAllNotificationsRead(){
+  const unread=notifications.filter(n=>!n.read);
+  await Promise.all(unread.map(n=>markNotificationRead(n.inboxSlug||n.publicSlug,n.id)));
+}
+function toggleNotifReplyForm(slug,milestoneId,commentId){
+  const el=document.getElementById('notif-form-'+slug+'-'+milestoneId+'-'+commentId);
+  if(el)el.hidden=!el.hidden;
+}
+async function openNotificationOnBuild(slug,milestoneId,notifId){
+  if(notifId)await markNotificationRead(slug,notifId);
+  const build=garageBuilds.find(b=>(b.publicSlug||b.buildId)===slug);
+  const buildId=build?build.buildId:slug;
+  if(buildId&&buildId!==activeBuildId){
+    await switchGarageBuild(buildId);
+  }
   showPanel('milestones',true);
-  if(n.milestoneId)setTimeout(()=>{
-    const card=document.querySelector(`[data-ms-id="${n.milestoneId}"]`);
+  setTimeout(()=>{
+    const card=document.querySelector(`[data-ms-id="${milestoneId}"]`);
     if(card)card.scrollIntoView({behavior:'smooth',block:'center'});
-    toggleMilestoneComments(n.milestoneId,true);
-  },120);
+    toggleMilestoneComments(milestoneId,true);
+  },180);
 }
 async function loadMilestoneEngagementSummary(slug,milestoneId){
   const key=slug+'::'+milestoneId;
@@ -10236,33 +10381,26 @@ async function loadMilestoneComments(slug,milestoneId){
   }
 }
 function renderMilestoneCommentsHtml(milestoneId,comments){
-  const top=comments.filter(c=>!c.parentId);
-  const replies=comments.filter(c=>c.parentId&&c.parentId!==c.id);
-  const renderOne=(c,isReply)=>{
-    const likedKey='owner-'+((currentUser&&currentUser.uid)||'user');
-    return `<div class="ms-comment${c.isOwnerReply?' owner':''}${isReply?' ms-comment-reply':''}">
-      <div class="ms-comment-head">
-        <span class="ms-comment-author">${esc(c.authorName||'Guest')}${c.isOwnerReply?' · Builder':''}</span>
-        <span class="ms-comment-time">${esc(fmtNotifTime(c.createdAt))}</span>
-      </div>
-      <div class="ms-comment-body">${esc(c.body||'')}</div>
-      <div class="ms-comment-actions">
-        <button class="ms-engage-btn" type="button" onclick="ownerLikeComment('${milestoneId}','${c.id}')"><i class="ti ti-heart"></i>${Number(c.likeCount)||0}</button>
-        <button class="ms-engage-btn" type="button" onclick="toggleReplyForm('${milestoneId}','${c.id}')"><i class="ti ti-message-reply"></i>Reply</button>
-      </div>
-      <div class="ms-reply-form" id="reply-form-${milestoneId}-${c.id}" hidden>
-        <textarea id="reply-input-${milestoneId}-${c.id}" placeholder="Write a reply as the builder..."></textarea>
-        <button class="ms-btn post" type="button" onclick="ownerReplyToComment('${milestoneId}','${c.id}')"><i class="ti ti-send"></i>Post reply</button>
-      </div>
-    </div>`;
-  };
-  let html=top.map(c=>renderOne(c,false)+replies.filter(r=>r.parentId===c.id).map(r=>renderOne(r,true)).join('')).join('');
-  if(!html)html='<div class="milestone-empty" style="padding:14px 0">No comments yet.</div>';
-  return html;
+  const slug=publicSlugForEngagement();
+  return renderEngagementCommentsHtml(slug,milestoneId,comments,'milestone');
 }
 function toggleReplyForm(milestoneId,commentId){
   const el=document.getElementById('reply-form-'+milestoneId+'-'+commentId);
   if(el)el.hidden=!el.hidden;
+}
+async function refreshEngagementViews(slug,milestoneId,context){
+  delete milestoneCommentsCache[slug+'::'+milestoneId];
+  if(context==='notif'||document.getElementById('panel-notifications')?.classList.contains('active')){
+    await renderNotifications();
+  }
+  if(context==='milestone'||slug===publicSlugForEngagement()){
+    const panel=document.getElementById('ms-comments-'+milestoneId);
+    if(panel&&!panel.hidden){
+      const comments=await loadMilestoneComments(slug,milestoneId);
+      panel.innerHTML=renderMilestoneCommentsHtml(milestoneId,comments);
+    }
+    if(slug===publicSlugForEngagement())renderMilestones();
+  }
 }
 async function toggleMilestoneComments(milestoneId,forceOpen){
   const panel=document.getElementById('ms-comments-'+milestoneId);
@@ -10275,8 +10413,7 @@ async function toggleMilestoneComments(milestoneId,forceOpen){
     panel.innerHTML=renderMilestoneCommentsHtml(milestoneId,comments);
   }
 }
-async function ownerLikeComment(milestoneId,commentId){
-  const slug=publicSlugForEngagement();
+async function ownerLikeComment(slug,milestoneId,commentId,context){
   const ref=milestoneEngagementRef(slug,milestoneId);
   if(!ref||!currentUser)return;
   const likeRef=ref.collection('comments').doc(commentId).collection('likes').doc('owner-'+currentUser.uid);
@@ -10290,23 +10427,26 @@ async function ownerLikeComment(milestoneId,commentId){
       await likeRef.set({createdAt:new Date().toISOString(),ownerUid:currentUser.uid});
       await commentRef.set({likeCount:firebase.firestore.FieldValue.increment(1)},{merge:true});
     }
-    delete milestoneCommentsCache[slug+'::'+milestoneId];
-    await toggleMilestoneComments(milestoneId,true);
+    await refreshEngagementViews(slug,milestoneId,context||'notif');
   }catch(e){
     console.warn(e);
     showGarageToast('Could not update like.');
   }
 }
-async function ownerReplyToComment(milestoneId,parentCommentId){
-  const slug=publicSlugForEngagement();
+async function ownerReplyToComment(slug,milestoneId,parentCommentId,context){
   const ref=milestoneEngagementRef(slug,milestoneId);
-  const input=document.getElementById('reply-input-'+milestoneId+'-'+parentCommentId);
+  const ctx=context||'notif';
+  const inputId=ctx==='notif'
+    ?notifReplyInputId(slug,milestoneId,parentCommentId)
+    :'reply-input-'+milestoneId+'-'+parentCommentId;
+  const input=document.getElementById(inputId);
   const body=String((input&&input.value)||'').trim();
   if(!ref||!body)return;
+  const buildName=buildLabelForSlug(slug)||BUILD_NAME||'Builder';
   try{
     const commentRef=ref.collection('comments').doc();
     await commentRef.set(sanitizeForFirestore({
-      authorName:BUILD_NAME||'Builder',
+      authorName:buildName,
       body,parentId:parentCommentId,likeCount:0,isOwnerReply:true,
       ownerUid:currentUser?currentUser.uid:'',
       milestoneId,publicSlug:slug,
@@ -10314,11 +10454,9 @@ async function ownerReplyToComment(milestoneId,parentCommentId){
     }));
     await ref.set({commentCount:firebase.firestore.FieldValue.increment(1),milestoneId,publicSlug:slug},{merge:true});
     if(input)input.value='';
-    delete milestoneCommentsCache[slug+'::'+milestoneId];
     const key=slug+'::'+milestoneId;
     if(milestoneEngagementCache[key])milestoneEngagementCache[key].commentCount=(milestoneEngagementCache[key].commentCount||0)+1;
-    await toggleMilestoneComments(milestoneId,true);
-    renderMilestones();
+    await refreshEngagementViews(slug,milestoneId,ctx);
   }catch(e){
     console.warn(e);
     showGarageToast('Could not post reply.');
@@ -11534,7 +11672,7 @@ async function bootTracker(){
   if(trackerBooted) return;
   trackerBooted=true;
 
-  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,markAllNotificationsRead,openNotification,toggleMilestoneComments,ownerLikeComment,ownerReplyToComment,toggleReplyForm,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
+  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,markAllNotificationsRead,markNotificationRead,openNotificationOnBuild,toggleNotifReplyForm,toggleMilestoneComments,ownerLikeComment,ownerReplyToComment,toggleReplyForm,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
   document.addEventListener('click',e=>{
     if(!e.target.closest('.tracker-nav-more-wrap'))closeMoreMenu();
     if(!e.target.closest('.tracker-nav-mobile-wrap'))closeMobileNavMenu();

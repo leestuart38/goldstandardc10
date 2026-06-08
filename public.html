@@ -780,7 +780,7 @@ const FIREBASE_CONFIG={
 const PUBLIC_COLLECTION='publicBuilds';
 const PUBLIC_ENGAGEMENT_COLLECTION='publicEngagement';
 const PUBLIC_ENGAGEMENT_INBOX_COLLECTION='publicEngagementInbox';
-let db,docRef,activePublicSlug='';
+let db,docRef,activePublicSlug='',pubBuildTitle='My Build',pubMilestonesById={};
 function getPublicBuildSlug(){
   const params=new URLSearchParams(window.location.search);
   const q=String(params.get('build')||'').trim();
@@ -1026,12 +1026,24 @@ function msEngagementRef(milestoneId){
   if(!db||!activePublicSlug||!milestoneId)return null;
   return db.collection(PUBLIC_ENGAGEMENT_COLLECTION).doc(engagementDocKey(activePublicSlug,milestoneId));
 }
+function pubMilestoneTitle(milestoneId){
+  const m=pubMilestonesById[milestoneId];
+  return m&&m.title?String(m.title).trim():'';
+}
+function enrichEngagementInboxPayload(payload){
+  const body=String(payload.commentBody||payload.preview||payload.message||'').trim();
+  return Object.assign({},payload,{
+    buildName:pubBuildTitle||'My Build',
+    milestoneTitle:payload.milestoneId?pubMilestoneTitle(payload.milestoneId):'',
+    commentBody:body
+  });
+}
 async function createEngagementInboxItem(payload){
   if(!db||!activePublicSlug)return;
   try{
-    await db.collection(PUBLIC_ENGAGEMENT_INBOX_COLLECTION).doc(activePublicSlug).collection('items').add(Object.assign({
+    await db.collection(PUBLIC_ENGAGEMENT_INBOX_COLLECTION).doc(activePublicSlug).collection('items').add(enrichEngagementInboxPayload(Object.assign({
       read:false,createdAt:new Date().toISOString(),publicSlug:activePublicSlug
-    },payload));
+    },payload)));
   }catch(e){
     console.warn('Inbox notification skipped:',e);
   }
@@ -1077,7 +1089,7 @@ async function togglePublicMilestoneLike(milestoneId){
         likeCount:firebase.firestore.FieldValue.increment(1),
         milestoneId,publicSlug:activePublicSlug
       },{merge:true});
-      createEngagementInboxItem({type:'milestone_like',milestoneId,actorName:'Someone',preview:'Liked your milestone post'});
+      createEngagementInboxItem({type:'milestone_like',milestoneId,actorName:'Someone',preview:'Liked your milestone post',commentBody:''});
     }
     delete pubEngagementCache[activePublicSlug+'::'+milestoneId];
     await refreshPublicMilestoneEngagement(milestoneId);
@@ -1150,7 +1162,7 @@ async function submitPublicComment(milestoneId){
       commentCount:firebase.firestore.FieldValue.increment(1),
       milestoneId,publicSlug:activePublicSlug
     },{merge:true});
-    createEngagementInboxItem({type:'milestone_comment',milestoneId,commentId:commentRef.id,actorName:authorName,preview:body.slice(0,160)});
+    createEngagementInboxItem({type:'milestone_comment',milestoneId,commentId:commentRef.id,actorName:authorName,preview:body.slice(0,160),commentBody:body});
     delete pubCommentsCache[activePublicSlug+'::'+milestoneId];
     delete pubEngagementCache[activePublicSlug+'::'+milestoneId];
     if(bodyEl)bodyEl.value='';
@@ -1350,7 +1362,8 @@ function formatPublicVehicleLabel(data){
   return built||saved;
 }
 function render(data){
-  document.getElementById('build-title').textContent=data.buildTitle||'My Build';
+  pubBuildTitle=String(data.buildTitle||'My Build').trim()||'My Build';
+  document.getElementById('build-title').textContent=pubBuildTitle;
   const vehicleMeta=document.getElementById('vehicle-meta');
   const vehicleLabel=formatPublicVehicleLabel(data);
   if(vehicleMeta){
@@ -1418,6 +1431,8 @@ function render(data){
   }
 
   const milestones=(data.milestones||[]).slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+  pubMilestonesById={};
+  milestones.forEach(m=>{if(m&&m.id)pubMilestonesById[m.id]=m;});
   renderPublicNews(milestones);
   renderPublicPartners(data.sponsors||[]);
   renderPublicPartnerProfiles(data.sponsors||[]);
