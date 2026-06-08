@@ -232,11 +232,12 @@ body{
 .pub-partner-dash-card.is-tier-silver{border-color:rgba(192,192,192,.32)}
 .pub-partner-dash-card.is-tier-bronze{border-color:rgba(180,120,60,.32)}
 .pub-partner-dash-logo{
-  width:min(120px,28vw);aspect-ratio:1/1;box-sizing:border-box;padding:12px;
+  width:min(120px,28vw);aspect-ratio:1/1;box-sizing:border-box;
+  padding:12px;border-radius:12px;overflow:hidden;
   display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  background:transparent;border:none;border-radius:0;
+  background:#000;border:1px solid rgba(241,209,122,.18);
 }
-.pub-partner-dash-logo img{width:100%;height:100%;object-fit:contain;display:block}
+.pub-partner-dash-logo img{width:100%;height:100%;object-fit:contain;display:block;background:#000}
 .pub-partner-dash-fallback{
   font-family:var(--gs-display);font-size:12px;font-weight:700;letter-spacing:var(--gs-tracking-tight);
   text-transform:uppercase;color:var(--muted);text-align:center;line-height:1.2;
@@ -250,7 +251,6 @@ body{
   letter-spacing:var(--gs-tracking-tight);text-transform:uppercase;line-height:1.05;
 }
 .pub-partners-wrap--dash{padding:14px!important;margin-top:12px!important}
-.pub-partners-wrap--dash .card-title{font-size:22px!important;margin-bottom:10px!important}
 @media(max-width:700px){
   .pub-partner-dash-card{grid-template-columns:1fr;text-align:center}
   .pub-partner-dash-logo{margin:0 auto}
@@ -266,9 +266,9 @@ body{
 .pub-partner-profile-logo{
   width:100%;max-width:200px;aspect-ratio:1/1;box-sizing:border-box;padding:14px;
   border-radius:16px;border:1px solid rgba(241,209,122,.18);
-  background:transparent;display:flex;align-items:center;justify-content:center;overflow:hidden;
+  background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden;
 }
-.pub-partner-profile-logo img{width:100%;height:100%;object-fit:contain;display:block}
+.pub-partner-profile-logo img{width:100%;height:100%;object-fit:contain;display:block;background:#000}
 .pub-partner-profile-logo-fallback{
   font-family:var(--gs-display);font-size:14px;font-weight:700;letter-spacing:var(--gs-tracking-tight);
   text-transform:uppercase;color:var(--muted);text-align:center;padding:12px;
