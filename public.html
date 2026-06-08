@@ -652,6 +652,8 @@ const FIREBASE_CONFIG={
 };
 const PUBLIC_COLLECTION='publicBuilds';
 const PUBLIC_DOC='gold-standard-c10';
+const PUBLIC_MEDIA_VEHICLE_DOC='gold-standard-c10-media-vehicle';
+const PUBLIC_MEDIA_MS_PREFIX='gold-standard-c10-media-ms-';
 let db,docRef;
 
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -964,14 +966,51 @@ function render(data){
 }
 
 function showError(msg){document.getElementById('updated-at').textContent=msg}
+async function mergePublicMedia(data){
+  if(!data||!db)return data||{};
+  const shardCount=Number(data.mediaMsShardCount)||0;
+  const hasInlinePhotos=Array.isArray(data.milestones)&&data.milestones.some(m=>Array.isArray(m.photos)&&m.photos.length);
+  if(!shardCount&&(data.vehicleImage||hasInlinePhotos))return data;
+  try{
+    const vSnap=await db.collection(PUBLIC_COLLECTION).doc(PUBLIC_MEDIA_VEHICLE_DOC).get();
+    if(vSnap.exists){
+      const v=vSnap.data()||{};
+      if(v.vehicleImage)data.vehicleImage=v.vehicleImage;
+      if(v.vehicleImageOriginal)data.vehicleImageOriginal=v.vehicleImageOriginal;
+    }
+    if(shardCount>0){
+      const photoMap=new Map();
+      for(let i=0;i<shardCount;i++){
+        const sSnap=await db.collection(PUBLIC_COLLECTION).doc(PUBLIC_MEDIA_MS_PREFIX+i).get();
+        if(sSnap.exists){
+          (sSnap.data().milestones||[]).forEach(m=>{
+            const prev=photoMap.get(m.id)||[];
+            const next=Array.isArray(m.photos)?m.photos:[];
+            if(next.length)photoMap.set(m.id,prev.concat(next));
+          });
+        }
+      }
+      if(photoMap.size&&Array.isArray(data.milestones)){
+        data.milestones=data.milestones.map(m=>{
+          const photos=photoMap.get(m.id);
+          return photos&&photos.length?Object.assign({},m,{photos}):m;
+        });
+      }
+    }
+  }catch(e){
+    console.warn('Public media merge failed:',e);
+  }
+  return data;
+}
 async function init(){
   try{
     if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
     db=firebase.firestore();
     docRef=db.collection(PUBLIC_COLLECTION).doc(PUBLIC_DOC);
-    docRef.onSnapshot(snap=>{
+    docRef.onSnapshot(async snap=>{
       if(!snap.exists){showError('Public build data has not been published yet. Check Firestore rules and click Share Build in the private tracker.');return;}
-      render(snap.data()||{});
+      const data=await mergePublicMedia(snap.data()||{});
+      render(data);
     },err=>{console.warn(err);showError('Could not load public build data.')})
   }catch(e){console.warn(e);showError('Public page failed to initialize.')}
 }
