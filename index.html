@@ -6329,6 +6329,8 @@ const LEGACY_TRACKER_COLLECTION='tracker';
 const LEGACY_BUILD_ID='gold-standard-c10';
 const LEGACY_MEDIA_MS_PREFIX='gold-standard-c10-media-ms-';
 const PUBLIC_COLLECTION='publicBuilds';
+const PUBLIC_ENGAGEMENT_COLLECTION='publicEngagement';
+const PUBLIC_ENGAGEMENT_INBOX_COLLECTION='publicEngagementInbox';
 const USER_BUILDS_SUB='builds';
 const USER_MEDIA_SUB='buildMedia';
 const USER_META_SUB='meta';
@@ -6421,7 +6423,7 @@ function packState(){
       vehicleNickname:VEHICLE_NICKNAME
     },
     meta:{
-      appVersion:'v146-fast-social',
+      appVersion:'v147-engagement-fix',
       updatedAt:now,
       buildId:activeBuildId,
       publicSlug:activePublicSlug
@@ -6972,8 +6974,8 @@ async function loadBuildById(buildId,options){
   throwIfGarageOpCancelled();
   applyCloudStateToApp(deferMedia?stripMediaFromState(data):data);
   saveLocalStateNow();
-  safeBuild();
-  repairAllSponsorLogos();
+  if(opts.lightRender)quickApplyBuildUI();
+  else{safeBuild();repairAllSponsorLogos();}
   cachedQuickMediaFingerprint=quickMediaFingerprint({
     vehicleImage,vehicleImageOriginal,
     milestones:milestones.map(m=>({id:m.id,photos:m.photos||[]}))
@@ -7186,9 +7188,10 @@ async function switchGarageBuild(buildId){
     startGarageProgressNudge(48,78,'Loading build...',6000);
     throwIfGarageOpCancelled();
     setSaveInd('saving','Loading build...');
-    await loadBuildById(buildId,{fastLoad:true,deferMedia:true,skipGarageRender:true});
+    await loadBuildById(buildId,{fastLoad:true,deferMedia:true,lightRender:true,skipGarageRender:true});
     stopGarageProgressNudge();
     setGarageOpProgress(82,'Finishing up...');
+    setTimeout(()=>{try{safeBuild();repairAllSponsorLogos();}catch(e){}},0);
     throwIfGarageOpCancelled();
     queueDepartingCloudSave(departingRefs,departingState);
     await saveUserGarageMeta({activeBuildId:buildId});
@@ -8620,6 +8623,28 @@ function safeBuild(){
     return false;
   }
 }
+function quickApplyBuildUI(){
+  try{
+    syncBuildMetaUI();
+    updateDashboard();
+    renderVehicleImage();
+    const route=panelFromRoute();
+    if(route==='parts'){
+      const ps=document.getElementById('parts-sections');
+      if(ps){ps.innerHTML='';sections.forEach(sec=>buildSection(sec));}
+    }else if(route==='milestones')renderMilestones();
+    else if(route==='worklog')renderWorkLog();
+    else if(route==='sponsorships')renderSponsors();
+    else if(route==='decisions')renderResearch();
+    else if(route==='vehicle')renderVehiclePanel();
+    else if(route==='notifications')renderNotifications();
+    showPanel(route,false);
+    return true;
+  }catch(e){
+    console.warn('quickApplyBuildUI failed:',e);
+    return safeBuild();
+  }
+}
 
 async function initData(){
   beginGarageOp('Loading build tracker',{allowCancel:false});
@@ -8635,12 +8660,12 @@ async function initData(){
         const buildId=await resolveActiveBuildId(meta);
         setGarageOpProgress(48,'Loading build...');
         startGarageProgressNudge(48,70,'Loading build...',7000);
-        await loadBuildById(buildId,{fastLoad:true,deferMedia:true});
+        await loadBuildById(buildId,{fastLoad:true,deferMedia:true,lightRender:true});
         stopGarageProgressNudge();
-        setGarageOpProgress(72,'Loading garage...');
+        setGarageOpProgress(78,'Almost ready...');
         if(!garageBuilds.length)await loadGarageBuildList();
-        setGarageOpProgress(88,'Saving preferences...');
-        await saveUserGarageMeta({activeBuildId:buildId});
+        setGarageOpProgress(92,'Finishing up...');
+        if(!meta||meta.activeBuildId!==buildId)await saveUserGarageMeta({activeBuildId:buildId});
         setGarageOpProgress(100,'Ready');
         setSaveInd('saved','Garage loaded');
         setTimeout(()=>setSaveInd('idle','Cloud sync on'),1800);
@@ -8648,7 +8673,7 @@ async function initData(){
         loadGarageBuildThumbnails(true).then(()=>{
           if(thumbGen===garageThumbGen)renderGarageUI();
         }).catch(e=>console.warn('Garage thumb preload failed:',e));
-        await new Promise(r=>setTimeout(r,240));
+        setTimeout(()=>{try{safeBuild();repairAllSponsorLogos();}catch(e){}},0);
         return;
       }catch(e){
         console.warn('Garage load failed. Falling back to local backup:',e);
@@ -9994,7 +10019,6 @@ function closeMilestoneLightbox(){
   document.body.style.overflow='';
 }
 
-const ENGAGEMENT_INBOX_SUB='engagementInbox';
 let notifications=[];
 let notificationsUnsub=null;
 let milestoneEngagementCache={};
@@ -10003,13 +10027,16 @@ let milestoneCommentsCache={};
 function publicSlugForEngagement(){
   return activePublicSlug||activeBuildId||'';
 }
+function engagementDocKey(slug,milestoneId){
+  return String(slug||'')+'__'+String(milestoneId||'');
+}
 function milestoneEngagementRef(slug,milestoneId){
-  if(!firebaseDb||!slug)return null;
-  return firebaseDb.collection(PUBLIC_COLLECTION).doc(slug).collection('milestoneEngagement').doc(milestoneId);
+  if(!firebaseDb||!slug||!milestoneId)return null;
+  return firebaseDb.collection(PUBLIC_ENGAGEMENT_COLLECTION).doc(engagementDocKey(slug,milestoneId));
 }
 function engagementInboxCol(slug){
   if(!firebaseDb||!slug)return null;
-  return firebaseDb.collection(PUBLIC_COLLECTION).doc(slug).collection(ENGAGEMENT_INBOX_SUB);
+  return firebaseDb.collection(PUBLIC_ENGAGEMENT_INBOX_COLLECTION).doc(slug).collection('items');
 }
 function stopEngagementInboxListener(){
   if(notificationsUnsub){notificationsUnsub();notificationsUnsub=null;}
@@ -10103,11 +10130,18 @@ async function loadMilestoneComments(slug,milestoneId){
     const list=snap.docs.map(d=>Object.assign({id:d.id},d.data()));
     milestoneCommentsCache[key]=list;
     return list;
-  }catch(e){return []}
+  }catch(e){
+    try{
+      const snap=await ref.collection('comments').get();
+      const list=snap.docs.map(d=>Object.assign({id:d.id},d.data())).sort((a,b)=>String(a.createdAt||'').localeCompare(String(b.createdAt||'')));
+      milestoneCommentsCache[key]=list;
+      return list;
+    }catch(err){console.warn('Comment load failed:',err);return []}
+  }
 }
 function renderMilestoneCommentsHtml(milestoneId,comments){
   const top=comments.filter(c=>!c.parentId);
-  const replies=comments.filter(c=>c.parentId);
+  const replies=comments.filter(c=>c.parentId&&c.parentId!==c.id);
   const renderOne=(c,isReply)=>{
     const likedKey='owner-'+((currentUser&&currentUser.uid)||'user');
     return `<div class="ms-comment${c.isOwnerReply?' owner':''}${isReply?' ms-comment-reply':''}">
@@ -10179,9 +10213,10 @@ async function ownerReplyToComment(milestoneId,parentCommentId){
       authorName:BUILD_NAME||'Builder',
       body,parentId:parentCommentId,likeCount:0,isOwnerReply:true,
       ownerUid:currentUser?currentUser.uid:'',
+      milestoneId,publicSlug:slug,
       createdAt:new Date().toISOString()
     }));
-    await ref.set({commentCount:firebase.firestore.FieldValue.increment(1),milestoneId},{merge:true});
+    await ref.set({commentCount:firebase.firestore.FieldValue.increment(1),milestoneId,publicSlug:slug},{merge:true});
     if(input)input.value='';
     delete milestoneCommentsCache[slug+'::'+milestoneId];
     const key=slug+'::'+milestoneId;
