@@ -525,6 +525,14 @@ html[data-theme="light"] .pub-theme-toggle .ti-moon{display:block}
   box-shadow:0 0 0 1px rgba(241,209,122,.12)!important;
 }
 .tracker-nav .tab i{font-size:15px;line-height:1}
+.tracker-nav .tab[hidden],
+.tracker-nav .tab.tab-nav-hidden{
+  display:none!important;
+}
+.public-panel[hidden],
+.public-panel.tab-nav-hidden{
+  display:none!important;
+}
 .public-main{max-width:1220px;margin:0 auto;padding:0 18px 24px}
 
 .public-hero-img{
@@ -1026,6 +1034,18 @@ function normalizePublicPageSettings(raw){
     likesEnabled:src.likesEnabled!==false
   };
 }
+function setPublicNavItemVisible(tab,panel,show){
+  if(tab){
+    tab.hidden=!show;
+    tab.classList.toggle('tab-nav-hidden',!show);
+    if(!show)tab.classList.remove('active');
+  }
+  if(panel){
+    panel.hidden=!show;
+    panel.classList.toggle('tab-nav-hidden',!show);
+    if(!show)panel.classList.remove('active');
+  }
+}
 function applyPublicTabVisibility(ps){
   const map={
     buildlist:ps.showBuildList!==false,
@@ -1035,10 +1055,16 @@ function applyPublicTabVisibility(ps){
   };
   Object.keys(map).forEach(name=>{
     const tab=document.querySelector(`.tab[data-public-tab="${name}"]`);
-    if(tab)tab.hidden=!map[name];
+    const panel=document.getElementById('public-'+name);
+    setPublicNavItemVisible(tab,panel,map[name]);
   });
+  const dashTab=document.querySelector('.tab[data-public-tab="dashboard"]');
+  const dashPanel=document.getElementById('public-dashboard');
+  if(dashTab){dashTab.hidden=false;dashTab.classList.remove('tab-nav-hidden');}
+  if(dashPanel){dashPanel.hidden=false;dashPanel.classList.remove('tab-nav-hidden');}
   const active=publicPanelFromHash();
   if(active!=='dashboard'&&!map[active])showPublicPanel('dashboard',true,true);
+  else showPublicPanel(active,false,false);
 }
 function renderPublicDisabledState(){
   let el=document.getElementById('pub-disabled-banner');
@@ -1057,7 +1083,14 @@ function renderPublicDisabledState(){
 function clearPublicDisabledState(){
   const el=document.getElementById('pub-disabled-banner');
   if(el)el.remove();
-  document.querySelectorAll('.public-panel').forEach(p=>{p.hidden=false;});
+  document.querySelectorAll('.public-panel').forEach(p=>{
+    p.hidden=false;
+    p.classList.remove('tab-nav-hidden');
+  });
+  document.querySelectorAll('.tab[data-public-tab]').forEach(t=>{
+    t.hidden=false;
+    t.classList.remove('tab-nav-hidden');
+  });
   const nav=document.querySelector('.tracker-nav');
   if(nav)nav.hidden=false;
 }
@@ -1745,8 +1778,6 @@ function render(data){
   }
   clearPublicDisabledState();
   applyPublicTabVisibility(ps);
-  const dash=document.getElementById('public-dashboard');
-  if(dash)dash.classList.add('active');
   renderPublicBuilder(data.builderProfile);
   const vehicleMeta=document.getElementById('vehicle-meta');
   const vehicleLabel=formatPublicVehicleLabel(data);

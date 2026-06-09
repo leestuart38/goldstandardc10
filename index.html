@@ -4608,12 +4608,19 @@ body{margin:0}
   min-width:0;
   flex-wrap:nowrap!important;
   align-items:center!important;
+  justify-content:center!important;
   gap:10px!important;
   margin:0!important;
   overflow-x:auto!important;
   -webkit-overflow-scrolling:touch;
   scrollbar-width:none;
   grid-template-columns:none!important;
+}
+.tracker-nav .tab[hidden],
+.tracker-nav .tab.tab-nav-hidden,
+.tracker-nav-dropdown-item[hidden],
+.tracker-nav-dropdown-item.tab-nav-hidden{
+  display:none!important;
 }
 .tracker-nav .tabs::-webkit-scrollbar{display:none}
 .tracker-nav .tab,
@@ -9616,11 +9623,22 @@ function normalizePublicSlugInput(raw){
 function isBuildPartnersEnabled(){
   return publicPageSettings.showBuildPartners!==false;
 }
+function setNavItemVisible(el,show){
+  if(!el)return;
+  el.hidden=!show;
+  el.classList.toggle('tab-nav-hidden',!show);
+  if(!show&&el.classList.contains('active'))el.classList.remove('active');
+}
 function applyBuildPartnersVisibility(){
   const on=isBuildPartnersEnabled();
-  document.querySelectorAll('.nav-partners-item').forEach(el=>{el.hidden=!on;});
+  document.querySelectorAll('.nav-partners-item').forEach(el=>setNavItemVisible(el,on));
   const stats=document.getElementById('spon-stats');
-  if(stats)stats.hidden=!on;
+  if(stats){
+    stats.hidden=!on;
+    stats.classList.toggle('tab-nav-hidden',!on);
+  }
+  const panel=document.getElementById('panel-sponsorships');
+  if(panel&&!on&&panel.classList.contains('active'))showPanel('dashboard',true);
 }
 function publicUrlForSlug(slug){
   const q='?build='+encodeURIComponent(slug||activePublicSlug||activeBuildId||LEGACY_BUILD_ID);
