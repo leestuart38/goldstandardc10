@@ -545,6 +545,13 @@ body{margin:0}
   border:1px solid var(--line);
   background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
 }
+.pub-builder-head{display:flex;align-items:flex-start;gap:16px;margin-bottom:10px}
+.pub-builder-avatar{
+  flex-shrink:0;width:88px;height:88px;border-radius:18px;overflow:hidden;
+  border:2px solid rgba(241,209,122,.32);background:rgba(0,0,0,.25);
+}
+.pub-builder-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.pub-builder-head-copy{flex:1;min-width:0}
 .pub-builder-kicker{
   font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-light);margin-bottom:8px;
 }
@@ -1387,7 +1394,7 @@ function renderPublicBuilder(profile){
   const el=document.getElementById('pub-builder-card');
   if(!el)return;
   const p=profile&&typeof profile==='object'?profile:null;
-  const hasInfo=p&&(p.displayName||p.tagline||p.location||p.website||p.email||p.instagram||p.facebook||p.youtube||p.tiktok);
+  const hasInfo=p&&(p.displayName||p.tagline||p.location||p.website||p.email||p.photo||p.instagram||p.facebook||p.youtube||p.tiktok);
   if(!hasInfo||p.showOnPublic===false){
     el.hidden=true;
     el.innerHTML='';
@@ -1403,10 +1410,16 @@ function renderPublicBuilder(profile){
   });
   const loc=p.location?`<span><i class="ti ti-map-pin"></i> ${esc(p.location)}</span>`:'';
   el.hidden=false;
+  const avatar=p.photo?`<div class="pub-builder-avatar"><img src="${p.photo}" alt="${esc(p.displayName||'Builder')}"></div>`:'';
   el.innerHTML=`<div class="pub-builder-kicker">About the builder</div>
-    <div class="pub-builder-name">${esc(p.displayName||'The Builder')}</div>
-    ${p.tagline?`<div class="pub-builder-tagline">${esc(p.tagline)}</div>`:''}
-    ${loc?`<div class="pub-builder-meta">${loc}</div>`:''}
+    <div class="pub-builder-head">
+      ${avatar}
+      <div class="pub-builder-head-copy">
+        <div class="pub-builder-name">${esc(p.displayName||'The Builder')}</div>
+        ${p.tagline?`<div class="pub-builder-tagline">${esc(p.tagline)}</div>`:''}
+        ${loc?`<div class="pub-builder-meta">${loc}</div>`:''}
+      </div>
+    </div>
     ${links.length?`<div class="pub-builder-links">${links.join('')}</div>`:''}`;
 }
 function render(data){
