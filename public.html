@@ -810,6 +810,8 @@ html[data-theme="light"] .pub-theme-toggle .ti-moon{display:block}
   font-family:var(--gs-display);font-size:22px;font-weight:800;color:var(--gold-light);
   letter-spacing:.02em;margin-right:4px;
 }
+.public-section-teaser-only{padding:0;border:none;background:transparent}
+.public-section-teaser-only .pub-sec-teaser{margin:0}
 @media(max-width:700px){
   .pub-sec-grid{grid-template-columns:1fr}
   .pub-sec-item:last-child:nth-child(odd){grid-column:auto}
@@ -1186,10 +1188,19 @@ function publicCountdownHtml(revealAt){
     <span><strong class="pub-cd-mins">${c.minutes}</strong> Min</span>
   </div>`;
 }
-function renderPublicSectionProgressItem(sec){
+function preparePublicSections(data){
+  return ((data&&data.sections)||[]).slice().sort((a,b)=>
+    (a.sortOrder||0)-(b.sortOrder||0)||String(a.name||'').localeCompare(String(b.name||''))
+  );
+}
+function isPublicSectionHidden(sec){
+  return normalizePublicVisibility(sec&&sec.publicVisibility)==='hidden';
+}
+function renderPublicSectionTeaser(sec){
   const vis=effectivePublicVisibility(sec);
+  if(vis==='hidden')return '';
+  const msg=String(sec.publicMessage||'').trim();
   if(vis==='coming-soon'){
-    const msg=String(sec.publicMessage||'').trim();
     return `<div class="pub-sec-teaser">
       <div class="pub-sec-teaser-kicker">Coming Soon</div>
       <div class="pub-sec-item-name">${esc(sec.name)}</div>
@@ -1197,7 +1208,6 @@ function renderPublicSectionProgressItem(sec){
     </div>`;
   }
   if(vis==='countdown'){
-    const msg=String(sec.publicMessage||'').trim();
     return `<div class="pub-sec-teaser">
       <div class="pub-sec-teaser-kicker">Reveal In</div>
       <div class="pub-sec-item-name">${esc(sec.name)}</div>
@@ -1205,6 +1215,12 @@ function renderPublicSectionProgressItem(sec){
       ${msg?`<div class="pub-sec-teaser-msg">${esc(msg)}</div>`:''}
     </div>`;
   }
+  return '';
+}
+function renderPublicSectionProgressItem(sec){
+  const vis=effectivePublicVisibility(sec);
+  if(vis==='hidden')return '';
+  if(vis==='coming-soon'||vis==='countdown')return renderPublicSectionTeaser(sec);
   const sp=parseInt(sec.completion||0)||0;
   return `<div class="pub-sec-item">
     <div class="pub-sec-ring-sm">${ringSvg(sp,56,6,'pub-sec-ring')}</div>
@@ -1218,8 +1234,49 @@ function renderPublicSectionProgressItem(sec){
     </div>
   </div>`;
 }
+function renderPublicBuildListSection(sec){
+  const vis=effectivePublicVisibility(sec);
+  if(vis==='hidden')return '';
+  if(vis==='coming-soon'||vis==='countdown'){
+    const teaser=renderPublicSectionTeaser(sec);
+    return teaser?`<div class="public-section-drop public-section-teaser-only">${teaser}</div>`:'';
+  }
+  const parts=(sec.parts||[]).slice().sort((a,b)=>priorityRank(a.priority)-priorityRank(b.priority)||String(a.name).localeCompare(String(b.name)));
+  if(!parts.length)return '';
+  return `<div class="public-section-drop">
+    <button class="public-section-toggle" type="button" onclick="togglePublicSection(this)" aria-expanded="false">
+      <span class="public-section-toggle-pm" aria-hidden="true">+</span>
+      <span class="public-section-toggle-copy">
+        <span class="public-section-toggle-title">${esc(sec.name)}</span>
+        <span class="public-section-toggle-meta">${publicSectionToggleMeta(parts,sec.completion)}</span>
+      </span>
+    </button>
+    <div class="public-section-drop-body">
+      ${parts.map(p=>{const hasLink=publicPartHasLink(p);return `<div class="public-part${hasLink?' has-part-link':''}">
+        <div class="public-part-main">
+          <div class="public-part-name">${esc(p.name||'Untitled part')}</div>
+          ${publicPartDetailsHtml(p)}
+        </div>
+        ${hasLink?`<div class="public-part-side">
+          <span class="pub-part-link-kicker">Shop / affiliate link</span>
+          ${publicPartLinkBtn(p)}
+        </div>`:''}
+      </div>`}).join('')}
+    </div>
+  </div>`;
+}
+function publicBuildListHasContent(sections){
+  return sections.some(sec=>{
+    const vis=effectivePublicVisibility(sec);
+    if(vis==='hidden')return false;
+    if(vis==='coming-soon'||vis==='countdown')return true;
+    return (sec.parts||[]).length>0;
+  });
+}
 let publicCountdownTimer=null;
+let publicCountdownData=null;
 function updatePublicCountdowns(){
+  let needsRerender=false;
   document.querySelectorAll('.pub-sec-countdown[data-reveal-at]').forEach(el=>{
     const revealAt=el.getAttribute('data-reveal-at')||'';
     const c=publicCountdownParts(revealAt);
@@ -1229,7 +1286,9 @@ function updatePublicCountdowns(){
     if(d)d.textContent=c.days;
     if(h)h.textContent=c.hours;
     if(m)m.textContent=c.minutes;
+    if(c.expired)needsRerender=true;
   });
+  if(needsRerender&&publicCountdownData)render(publicCountdownData);
 }
 function startPublicCountdownTimers(){
   if(publicCountdownTimer)clearInterval(publicCountdownTimer);
@@ -1906,8 +1965,10 @@ function render(data){
   const secCard=document.getElementById('section-progress')?.closest('.sections-card');
   if(secCard)secCard.hidden=ps.showBuildList===false;
 
-  const sections=data.sections||[];
-  document.getElementById('section-progress').innerHTML=sections.length?sections.map(sec=>renderPublicSectionProgressItem(sec)).join(''):
+  const sections=preparePublicSections(data).filter(s=>!isPublicSectionHidden(s));
+  publicCountdownData=data;
+  const progressHtml=sections.map(sec=>renderPublicSectionProgressItem(sec)).filter(Boolean).join('');
+  document.getElementById('section-progress').innerHTML=progressHtml||
     `<div class="empty">No section progress published yet.</div>`;
   startPublicCountdownTimers();
 
@@ -1917,31 +1978,9 @@ function render(data){
 
   const partsEl=document.getElementById('public-parts-list');
   if(partsEl){
-    partsEl.innerHTML=visibleSections.some(s=>(s.parts||[]).length)?visibleSections.map((s,idx)=>{
-      const parts=(s.parts||[]).slice().sort((a,b)=>priorityRank(a.priority)-priorityRank(b.priority)||String(a.name).localeCompare(String(b.name)));
-      if(!parts.length)return '';
-      return `<div class="public-section-drop">
-        <button class="public-section-toggle" type="button" onclick="togglePublicSection(this)" aria-expanded="false">
-          <span class="public-section-toggle-pm" aria-hidden="true">+</span>
-          <span class="public-section-toggle-copy">
-            <span class="public-section-toggle-title">${esc(s.name)}</span>
-            <span class="public-section-toggle-meta">${publicSectionToggleMeta(parts,s.completion)}</span>
-          </span>
-        </button>
-        <div class="public-section-drop-body">
-          ${parts.map(p=>{const hasLink=publicPartHasLink(p);return `<div class="public-part${hasLink?' has-part-link':''}">
-            <div class="public-part-main">
-              <div class="public-part-name">${esc(p.name||'Untitled part')}</div>
-              ${publicPartDetailsHtml(p)}
-            </div>
-            ${hasLink?`<div class="public-part-side">
-              <span class="pub-part-link-kicker">Shop / affiliate link</span>
-              ${publicPartLinkBtn(p)}
-            </div>`:''}
-          </div>`}).join('')}
-        </div>
-      </div>`;
-    }).join(''):`<div class="empty">No build list published yet.</div>`;
+    const buildHtml=sections.map(sec=>renderPublicBuildListSection(sec)).filter(Boolean).join('');
+    partsEl.innerHTML=publicBuildListHasContent(sections)?buildHtml:
+      `<div class="empty">No build list published yet.</div>`;
   }
 
   const milestones=(data.milestones||[]).slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));

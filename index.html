@@ -9187,19 +9187,22 @@ function publicMasterCompletion(){
   return Math.round((done/total)*100);
 }
 function publicSectionsPayload(){
-  return sections.filter(s=>!s.archived).map(sec=>{
-    const vis=effectivePublicVisibility(sec);
+  return orderedSections((sections||[]).filter(s=>s&&!s.archived)).map(sec=>{
+    const rawVis=normalizePublicVisibility(sec.publicVisibility);
+    const effVis=effectivePublicVisibility(sec);
+    if(effVis==='hidden')return null;
     const base={
       key:sec.key,
       name:sec.name,
       icon:sec.icon||'',
-      publicVisibility:vis,
+      sortOrder:typeof sec.sortOrder==='number'?sec.sortOrder:0,
+      publicVisibility:rawVis,
       publicMessage:sec.publicMessage||'',
       publicRevealAt:sec.publicRevealAt||''
     };
-    if(vis==='hidden')return null;
-    if(vis==='visible'){
+    if(effVis==='visible'){
       return Object.assign(base,{
+        publicVisibility:'visible',
         completion:sectionCompletion(sec),
         totalParts:(sec.parts||[]).filter(p=>p.status!=='N/A').length,
         installed:(sec.parts||[]).filter(p=>p.status==='Installed').length,
@@ -9302,7 +9305,7 @@ function publicPayload(){
     sponsors:ps.showBuildPartners!==false?publicSponsorsPayload():[],
     builderProfile:publicBuilderProfilePayload(),
     updatedAt:new Date().toISOString(),
-    publicVersion:'v9-section-visibility'
+    publicVersion:'v10-section-visibility-sync'
   };
 }
 function publicSponsorsPayload(){
@@ -9331,7 +9334,7 @@ async function savePublicState(){
   corePayload.savedAt=firebase.firestore.FieldValue.serverTimestamp();
   const coreBytes=estimatePayloadBytes(corePayload);
   if(coreBytes>CLOUD_DOC_BYTE_LIMIT)throw new Error('Public build data is too large ('+coreBytes+' bytes).');
-  await publicDocRef.set(corePayload,{merge:true});
+  await publicDocRef.set(corePayload);
   cachedPublicMediaMsShardCount=mediaMsShardCount;
   console.log('Published public build data','shards='+mediaMsShardCount);
   return true;
@@ -9424,7 +9427,7 @@ async function saveCloudState(options){
   const publicMediaChanged=!mediaUnchanged&&publicMediaFp!==refs.cachedPublicMediaPlanFingerprint;
   const ops=[
     refs.firestoreDocRef.set(corePayload,{merge:true}),
-    refs.publicDocRef.set(pubCorePayload,{merge:true})
+    refs.publicDocRef.set(pubCorePayload)
   ];
   if(privateMediaChanged&&privatePlan){
     const mediaColRef=getUserMediaCol()||firebaseDb.collection(LEGACY_TRACKER_COLLECTION);
@@ -9481,7 +9484,9 @@ function publicPayloadFromState(state){
   TARGET_BUDGET=parseFloat(state.settings?.targetBudget)||0;
   vehicleImage=state.vehicleImage||'';
   vehicleImageOriginal=state.vehicleImageOriginal||'';
-  sections=state.sections||sections;
+  sections=Array.isArray(state.sections)
+    ?state.sections.filter(Boolean).map((s,i)=>normalizeSection(s,i)).filter(Boolean)
+    :sections;
   sponsors=state.sponsors||sponsors;
   milestones=state.milestones||milestones;
   workTasks=state.workTasks||workTasks;
