@@ -114,6 +114,14 @@ body{font-family:var(--font-sans)}
 .dot-na{background:#111827}
 .del-btn{font-size:13px;color:var(--color-text-secondary);cursor:pointer;padding:2px 5px;border:none;background:none;border-radius:3px}
 .del-btn:hover{color:#DC2626}
+.part-actions-cell{display:flex;gap:2px;align-items:center;white-space:nowrap}
+.move-btn{font-size:13px;color:var(--color-text-secondary);cursor:pointer;padding:2px 5px;border:none;background:none;border-radius:3px}
+.move-btn:hover{color:var(--gs-gold-light)}
+.part-move-summary{
+  font-size:12px;line-height:1.5;color:var(--gs-muted);margin:0 0 14px;
+}
+.part-move-summary strong{color:var(--gs-cream)}
+.part-move-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
 .add-row-btn{width:100%;padding:7px;font-size:12px;color:var(--color-text-secondary);background:var(--color-background-secondary);border:none;border-top:.5px solid var(--color-border-tertiary);cursor:pointer;text-align:center}
 .add-row-btn:hover{background:var(--color-background-tertiary);color:var(--color-text-primary)}
 .spon-tbl{width:100%;border-collapse:collapse;font-size:12px}
@@ -12353,7 +12361,10 @@ function renderRows(sec){
       <td>${buildChip(sec.key,p.id,p.status)}</td>
       <td>${linkCell}</td>
       <td><input class="note-inp" value="${esc(p.notes||'')}" placeholder="Notes..." onchange="updatePart('${sec.key}','${p.id}','notes',this.value)"/></td>
-      <td><button class="del-btn" onclick="delPart('${sec.key}','${p.id}')"><i class="ti ti-trash" aria-hidden="true"></i></button></td>`;
+      <td class="part-actions-cell">
+        <button class="move-btn" type="button" onclick="openMovePartModal('${sec.key}','${p.id}',event)" title="Move to another section"><i class="ti ti-arrows-right-left" aria-hidden="true"></i></button>
+        <button class="del-btn" type="button" onclick="delPart('${sec.key}','${p.id}')" title="Delete part"><i class="ti ti-trash" aria-hidden="true"></i></button>
+      </td>`;
     tb.appendChild(tr);
   });
   if(!visibleParts.length){
@@ -12397,6 +12408,86 @@ function delPart(sk,pid){
   const sec=sections.find(s=>s.key===sk);if(!sec)return;
   sec.parts=sec.parts.filter(p=>p.id!==pid);
   renderRows(sec);updateSecHeader(sec);updateDashboard();scheduleSave();
+}
+let partMoveDraft=null;
+function movePartDestinationOptions(fromSk,selected){
+  return activeSections()
+    .filter(s=>s.key!==fromSk)
+    .map(s=>`<option value="${s.key}"${s.key===selected?' selected':''}>${esc(s.name)}</option>`)
+    .join('');
+}
+function updateWorkLogPartSectionRef(fromSk,partId,toSk){
+  let touched=false;
+  workTasks.forEach(task=>{
+    (task.linkedPartIds||[]).forEach(l=>{
+      if(l.secKey===fromSk&&l.partId===partId){
+        l.secKey=toSk;
+        touched=true;
+      }
+    });
+  });
+  if(touched)refreshLinkedWorkTaskCards(toSk,partId);
+}
+function movePart(fromSk,partId,toSk){
+  if(!fromSk||!partId||!toSk||fromSk===toSk)return false;
+  const fromSec=sections.find(s=>s.key===fromSk);
+  const toSec=sections.find(s=>s.key===toSk);
+  if(!fromSec||!toSec||toSec.archived)return false;
+  const idx=fromSec.parts.findIndex(p=>p.id===partId);
+  if(idx<0)return false;
+  if(toSec.parts.some(p=>p.id===partId))return false;
+  const part=fromSec.parts[idx];
+  fromSec.parts.splice(idx,1);
+  toSec.parts.push(part);
+  updateWorkLogPartSectionRef(fromSk,partId,toSk);
+  renderRows(fromSec);
+  renderRows(toSec);
+  updateSecHeader(fromSec);
+  updateSecHeader(toSec);
+  updateDashboard();
+  scheduleSave();
+  doSave();
+  return true;
+}
+function openMovePartModal(fromSk,partId,e){
+  if(e){e.stopPropagation();e.preventDefault();}
+  document.querySelectorAll('.chip-dd.open,.prio-dd.open').forEach(d=>d.classList.remove('open'));
+  const fromSec=sections.find(s=>s.key===fromSk);
+  const part=fromSec&&fromSec.parts.find(p=>p.id===partId);
+  if(!fromSec||!part)return;
+  const destinations=activeSections().filter(s=>s.key!==fromSk);
+  if(!destinations.length){
+    wlNotify('Add another active section before moving parts.');
+    return;
+  }
+  partMoveDraft={fromSk,partId};
+  const modal=document.getElementById('part-move-modal');
+  const nameEl=document.getElementById('part-move-part-name');
+  const fromEl=document.getElementById('part-move-from-section');
+  const sel=document.getElementById('part-move-destination');
+  const confirmBtn=document.getElementById('part-move-confirm-btn');
+  if(nameEl)nameEl.textContent=part.name||'Untitled part';
+  if(fromEl)fromEl.textContent=fromSec.name||fromSk;
+  if(sel){
+    sel.innerHTML=movePartDestinationOptions(fromSk,destinations[0].key);
+    sel.disabled=false;
+  }
+  if(confirmBtn)confirmBtn.disabled=false;
+  if(modal)modal.classList.add('open');
+}
+function closeMovePartModal(){
+  partMoveDraft=null;
+  const modal=document.getElementById('part-move-modal');
+  if(modal)modal.classList.remove('open');
+}
+function confirmMovePart(){
+  if(!partMoveDraft)return;
+  const sel=document.getElementById('part-move-destination');
+  const toSk=sel?sel.value:'';
+  if(!toSk){wlNotify('Choose a destination section.');return;}
+  const ok=movePart(partMoveDraft.fromSk,partMoveDraft.partId,toSk);
+  if(ok)closeMovePartModal();
+  else wlNotify('Could not move part. Try again.');
 }
 
 function updateSponStats(){
@@ -13322,7 +13413,7 @@ async function bootTracker(){
   if(trackerBooted) return;
   trackerBooted=true;
 
-  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,setAppTheme,saveBuilderProfile,renderSettingsPanel,showSettingsSubpanel,renderSectionsSettingsPanel,applySectionPresetFromSettings,addCustomSectionFromSettings,renameSectionFromSettings,reorderSection,archiveSection,restoreSection,onSectionPublicSettingChange,onPublicPageSettingChange,syncPublicSlugPreview,syncPublicPageSettingsForm,applyBuildPartnersVisibility,isBuildPartnersEnabled,handleProfilePhotoUpload,profilePhotoDrop,removeProfilePhoto,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,markAllNotificationsRead,markNotificationRead,openNotificationOnBuild,toggleNotifExpand,toggleNotifReplyForm,toggleMilestoneComments,ownerLikeComment,ownerReplyToComment,toggleReplyForm,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
+  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,setAppTheme,saveBuilderProfile,renderSettingsPanel,showSettingsSubpanel,renderSectionsSettingsPanel,applySectionPresetFromSettings,addCustomSectionFromSettings,renameSectionFromSettings,reorderSection,archiveSection,restoreSection,onSectionPublicSettingChange,onPublicPageSettingChange,syncPublicSlugPreview,syncPublicPageSettingsForm,applyBuildPartnersVisibility,isBuildPartnersEnabled,handleProfilePhotoUpload,profilePhotoDrop,removeProfilePhoto,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,markAllNotificationsRead,markNotificationRead,openNotificationOnBuild,toggleNotifExpand,toggleNotifReplyForm,toggleMilestoneComments,ownerLikeComment,ownerReplyToComment,toggleReplyForm,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,movePart,openMovePartModal,closeMovePartModal,confirmMovePart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
   document.addEventListener('click',e=>{
     if(!e.target.closest('.tracker-nav-more-wrap'))closeMoreMenu();
     if(!e.target.closest('.tracker-nav-mobile-wrap'))closeMobileNavMenu();
@@ -13418,6 +13509,29 @@ window.addEventListener('pageshow',()=>setTimeout(()=>{ if(!document.querySelect
     <div class="vehicle-editor-footer">
       <button class="veh-editor-cancel" type="button" onclick="closeVehicleEditorModal()">Cancel</button>
       <button class="veh-editor-save" type="button" onclick="saveVehicleEditor()"><i class="ti ti-device-floppy"></i>Save Vehicle</button>
+    </div>
+  </div>
+</div>
+
+<div class="wl-parts-modal" id="part-move-modal" onclick="closeMovePartModal()">
+  <div class="wl-parts-modal-inner" onclick="event.stopPropagation()">
+    <div class="wl-parts-modal-hdr">
+      <div>
+        <h3 class="wl-parts-modal-title">Move Part</h3>
+        <div class="wl-parts-modal-sub">Move to another active section</div>
+      </div>
+      <button class="wl-parts-modal-close" type="button" onclick="closeMovePartModal()" title="Close"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="wl-parts-modal-body">
+      <p class="part-move-summary">Move <strong id="part-move-part-name">Part</strong> from <strong id="part-move-from-section">Section</strong> to:</p>
+      <div class="veh-editor-field">
+        <label for="part-move-destination">Destination section</label>
+        <select class="veh-editor-input" id="part-move-destination"></select>
+      </div>
+      <div class="part-move-actions">
+        <button class="vehicle-edit-btn" type="button" id="part-move-confirm-btn" onclick="confirmMovePart()"><i class="ti ti-arrows-right-left"></i> Move Part</button>
+        <button class="vehicle-edit-btn" type="button" style="opacity:.85" onclick="closeMovePartModal()">Cancel</button>
+      </div>
     </div>
   </div>
 </div>
