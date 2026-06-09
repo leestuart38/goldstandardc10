@@ -2852,10 +2852,28 @@ button,.tab,.section-hdr,.chip,.chip-opt,.ss-card{touch-action:manipulation;-web
   pointer-events:none;transition:none;
 }
 .section-settings-row-hdr{
+  display:grid;gap:0;user-select:none;
+}
+.section-settings-row-hdr-top{
   display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:nowrap;
-  padding:10px 12px;cursor:pointer;user-select:none;
+  padding:10px 12px;cursor:pointer;
 }
 .section-settings-row-hdr-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
+.section-settings-row-vis{
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+  padding:0 12px 12px 52px;border-top:1px solid rgba(241,209,122,.1);
+}
+.section-settings-row.is-expanded .section-settings-row-vis{
+  background:rgba(0,0,0,.12);
+}
+.section-active-title{padding:22px 18px 14px;margin:0}
+.section-add-block-in-card{margin:16px 18px 0}
+.settings-card>.section-settings-list{padding-top:0}
+.sec-vis-summary-meta{
+  font-size:11px;font-weight:700;color:var(--gs-gold-light);line-height:1.35;
+  padding:4px 10px;border-radius:8px;background:rgba(197,155,53,.12);
+  border:1px solid rgba(241,209,122,.2);max-width:100%;
+}
 .section-settings-row-title{
   font-family:var(--gs-display);font-size:16px;font-weight:700;color:var(--gs-cream);
   letter-spacing:.03em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
@@ -2882,10 +2900,11 @@ button,.tab,.section-hdr,.chip,.chip-opt,.ss-card{touch-action:manipulation;-web
 .sec-drag-handle:active{cursor:grabbing}
 .sec-drag-handle:hover{color:rgba(241,209,122,.95);background:rgba(255,255,255,.06)}
 .sec-expand-btn{
-  flex-shrink:0;width:28px;height:28px;border-radius:8px;border:none;background:transparent;
-  color:var(--gs-muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
+  flex-shrink:0;width:28px;height:28px;border-radius:8px;border:1px solid rgba(241,209,122,.18);
+  background:rgba(0,0,0,.24);color:var(--gs-muted);cursor:pointer;display:inline-flex;
+  align-items:center;justify-content:center;position:relative;z-index:2;pointer-events:auto;
 }
-.sec-expand-btn:hover{color:var(--gs-gold-light)}
+.sec-expand-btn:hover{color:var(--gs-gold-light);border-color:rgba(241,209,122,.42);background:rgba(255,255,255,.06)}
 .sec-drop-indicator{
   height:4px;border-radius:999px;flex-shrink:0;
   background:linear-gradient(90deg,#8b6914,#c59b35,#f0cd73);
@@ -2893,23 +2912,23 @@ button,.tab,.section-hdr,.chip,.chip-opt,.ss-card{touch-action:manipulation;-web
   margin:2px 4px;pointer-events:none;animation:secDropPulse .85s ease infinite alternate;
 }
 @keyframes secDropPulse{from{opacity:.82;transform:scaleX(.985)}to{opacity:1;transform:scaleX(1)}}
-.sec-vis-pills{display:flex;flex-wrap:wrap;gap:6px}
+.sec-vis-pills{display:flex;flex-wrap:wrap;gap:8px}
 .sec-vis-pill{
-  border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.28);
-  color:var(--gs-cream);padding:7px 12px;font-size:10px;font-weight:800;letter-spacing:.05em;
-  cursor:pointer;transition:transform .12s,border-color .12s,background .12s,box-shadow .12s;
-  font-family:var(--gs-display);
+  border-radius:999px;border:2px solid rgba(255,255,255,.18);background:rgba(0,0,0,.38);
+  color:var(--gs-cream);padding:8px 14px;font-size:10px;font-weight:800;letter-spacing:.06em;
+  cursor:pointer;transition:transform .12s,border-color .12s,background .12s,box-shadow .12s,filter .12s;
+  font-family:var(--gs-display);opacity:.82;
 }
-.sec-vis-pill:hover{transform:translateY(-1px)}
-.sec-vis-pill.active{box-shadow:0 0 0 1px rgba(255,255,255,.08),0 6px 16px rgba(0,0,0,.28)}
-.sec-vis-pill.vis-visible{border-color:rgba(34,197,94,.45);color:#bbf7d0}
-.sec-vis-pill.vis-visible.active{background:rgba(34,197,94,.2)}
-.sec-vis-pill.vis-hidden{border-color:rgba(148,163,184,.35);color:#cbd5e1}
-.sec-vis-pill.vis-hidden.active{background:rgba(100,116,139,.22)}
-.sec-vis-pill.vis-coming-soon{border-color:rgba(245,158,11,.45);color:#fde68a}
-.sec-vis-pill.vis-coming-soon.active{background:rgba(245,158,11,.18)}
-.sec-vis-pill.vis-countdown{border-color:rgba(96,165,250,.45);color:#bfdbfe}
-.sec-vis-pill.vis-countdown.active{background:rgba(59,130,246,.18)}
+.sec-vis-pill:hover{transform:translateY(-1px);opacity:1;filter:brightness(1.08)}
+.sec-vis-pill.active{opacity:1;transform:none;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+.sec-vis-pill.vis-visible{border-color:#4ade80;color:#dcfce7}
+.sec-vis-pill.vis-visible.active{background:linear-gradient(180deg,#22c55e,#15803d);color:#fff;border-color:#86efac;box-shadow:0 0 0 2px rgba(74,222,128,.28),0 6px 16px rgba(0,0,0,.35)}
+.sec-vis-pill.vis-hidden{border-color:#94a3b8;color:#e2e8f0}
+.sec-vis-pill.vis-hidden.active{background:linear-gradient(180deg,#64748b,#334155);color:#f8fafc;border-color:#cbd5e1;box-shadow:0 0 0 2px rgba(148,163,184,.25),0 6px 16px rgba(0,0,0,.35)}
+.sec-vis-pill.vis-coming-soon{border-color:var(--gs-gold);color:var(--gs-gold-light)}
+.sec-vis-pill.vis-coming-soon.active{background:linear-gradient(180deg,var(--gs-gold),var(--gs-gold-dark));color:#120e08;border-color:var(--gs-gold-light);box-shadow:0 0 0 2px rgba(241,209,122,.32),0 6px 16px rgba(0,0,0,.35)}
+.sec-vis-pill.vis-countdown{border-color:#93c5fd;color:#dbeafe}
+.sec-vis-pill.vis-countdown.active{background:linear-gradient(180deg,#3b82f6,#1d4ed8);color:#fff;border-color:#bfdbfe;box-shadow:0 0 0 2px rgba(147,197,253,.28),0 6px 16px rgba(0,0,0,.35)}
 .section-add-block{
   margin:0 18px 16px;border-radius:16px;border:1px solid rgba(241,209,122,.38);
   background:linear-gradient(180deg,rgba(197,155,53,.2),rgba(0,0,0,.22));
@@ -6689,7 +6708,7 @@ html[data-theme="light"] #panel-dashboard .completion-track{background:rgba(111,
     <nav class="settings-nav" id="settings-nav" aria-label="Settings sections">
       <button class="settings-nav-btn active" type="button" data-settings-panel="profile" onclick="showSettingsSubpanel('profile')"><i class="ti ti-user-circle"></i><span>Builder Profile</span></button>
       <button class="settings-nav-btn" type="button" data-settings-panel="public" onclick="showSettingsSubpanel('public')"><i class="ti ti-world"></i><span>Public Page</span></button>
-      <button class="settings-nav-btn" type="button" data-settings-panel="sections" onclick="showSettingsSubpanel('sections')"><i class="ti ti-layout-grid"></i><span>Sections</span></button>
+      <button class="settings-nav-btn" type="button" data-settings-panel="sections" onclick="showSettingsSubpanel('sections')"><i class="ti ti-layout-grid"></i><span>Build Sections</span></button>
       <button class="settings-nav-btn" type="button" data-settings-panel="statuses" onclick="showSettingsSubpanel('statuses')"><i class="ti ti-adjustments"></i><span>Statuses &amp; Priorities</span></button>
     </nav>
     <div class="settings-content" id="settings-content">
@@ -6822,7 +6841,7 @@ html[data-theme="light"] #panel-dashboard .completion-track{background:rgba(111,
       </div>
       <div id="settings-sub-sections" class="settings-subpanel" data-settings-panel="sections">
         <div class="settings-subpanel-hdr">
-          <div class="settings-subpanel-title">Sections</div>
+          <div class="settings-subpanel-title">Build Sections</div>
           <div class="settings-subpanel-sub">Organize build sections, apply presets, and control what appears on your public page.</div>
         </div>
         <section class="settings-card">
@@ -6849,8 +6868,7 @@ html[data-theme="light"] #panel-dashboard .completion-track{background:rgba(111,
           <div id="section-user-presets-list" class="section-user-presets-list"></div>
         </section>
         <section class="settings-card">
-          <div class="settings-card-title">Active Sections</div>
-          <div class="section-add-block">
+          <div class="section-add-block section-add-block-in-card">
             <div class="section-add-block-title"><i class="ti ti-plus"></i> Add New Section</div>
             <div class="section-add-block-sub">Create a custom section for parts that do not fit a preset category.</div>
             <div class="section-add-block-row">
@@ -6861,6 +6879,7 @@ html[data-theme="light"] #panel-dashboard .completion-track{background:rgba(111,
               <button type="button" class="section-add-block-btn" onclick="addCustomSectionFromSettings()"><i class="ti ti-plus"></i> Add Section</button>
             </div>
           </div>
+          <div class="settings-card-title section-active-title">Active Sections</div>
           <div id="section-settings-active-list" class="section-settings-list"></div>
         </section>
         <section class="settings-card" id="section-settings-archived-wrap" hidden>
@@ -9673,7 +9692,7 @@ function addCustomSectionFromSettings(){
   const maxSort=(sections||[]).reduce((m,s)=>Math.max(m,s.sortOrder||0),-1);
   const sec=createSectionFromName(name,maxSort+1);
   sections.push(sec);
-  sectionSettingsExpanded.add(sec.key);
+  sectionSettingsExpandedKey=sec.key;
   if(inp)inp.value='';
   scheduleSave();doSave();
   renderSectionsSettingsPanel();
@@ -9705,6 +9724,7 @@ function reorderSection(key,direction){
 function archiveSection(key){
   const sec=findSectionByKey(key);if(!sec||sec.archived)return;
   sec.archived=true;
+  if(sectionSettingsExpandedKey===key)sectionSettingsExpandedKey=null;
   const maxSort=(sections||[]).reduce((m,s)=>Math.max(m,s.sortOrder||0),-1);
   sec.sortOrder=maxSort+1;
   scheduleSave();doSave();
@@ -9731,24 +9751,42 @@ function onSectionPublicSettingChange(key,field,value){
 function pickSectionVisibility(key,mode){
   onSectionPublicSettingChange(key,'publicVisibility',mode);
 }
+function formatSectionRevealDate(iso){
+  if(!iso)return'';
+  try{
+    const d=new Date(iso);
+    if(isNaN(d))return'';
+    return d.toLocaleString(undefined,{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+  }catch(e){return''}
+}
+function renderSectionVisibilityMeta(sec,expanded){
+  if(expanded)return'';
+  const vis=normalizePublicVisibility(sec.publicVisibility);
+  if(vis==='coming-soon'&&sec.publicMessage){
+    return `<span class="sec-vis-summary-meta">${esc(sec.publicMessage)}</span>`;
+  }
+  if(vis==='countdown'){
+    const parts=[];
+    const dateLabel=formatSectionRevealDate(sec.publicRevealAt);
+    if(dateLabel)parts.push('Reveal '+dateLabel);
+    if(sec.publicMessage)parts.push(sec.publicMessage);
+    if(parts.length)return `<span class="sec-vis-summary-meta">${esc(parts.join(' · '))}</span>`;
+  }
+  return'';
+}
 function renderSectionVisibilityPills(sec){
   const cur=normalizePublicVisibility(sec.publicVisibility);
-  return `<div class="sec-vis-pills">${PUBLIC_VISIBILITY_MODES.map(m=>{
-    const cls=m.replace('coming-soon','coming-soon');
-    return `<button type="button" class="sec-vis-pill vis-${cls}${cur===m?' active':''}" onclick="pickSectionVisibility('${sec.key}','${m}')">${PUBLIC_VISIBILITY_LABELS[m]}</button>`;
+  return `<div class="sec-vis-pills" onclick="event.stopPropagation()">${PUBLIC_VISIBILITY_MODES.map(m=>{
+    return `<button type="button" class="sec-vis-pill vis-${m}${cur===m?' active':''}" onclick="pickSectionVisibility('${sec.key}','${m}')">${PUBLIC_VISIBILITY_LABELS[m]}</button>`;
   }).join('')}</div>`;
 }
 function toggleSectionSettingsRow(key,e){
-  if(e&&e.target.closest('.sec-drag-handle,.section-settings-row-actions,.ms-btn'))return;
-  if(sectionSettingsExpanded.has(key))sectionSettingsExpanded.delete(key);
-  else sectionSettingsExpanded.add(key);
-  const row=document.querySelector(`.section-settings-row[data-section-key="${key}"]`);
-  const body=row&&row.querySelector('.section-settings-row-body');
-  const btn=row&&row.querySelector('.sec-expand-btn i');
-  if(body)body.classList.toggle('collapsed',!sectionSettingsExpanded.has(key));
-  if(btn){
-    btn.className=sectionSettingsExpanded.has(key)?'ti ti-chevron-down':'ti ti-chevron-right';
+  if(e){
+    if(e.target.closest('.sec-drag-handle,.section-settings-row-actions,.ms-btn,.sec-vis-pill,.sec-vis-pills'))return;
+    if(e.target.closest('.sec-expand-btn'))e.stopPropagation();
   }
+  sectionSettingsExpandedKey=sectionSettingsExpandedKey===key?null:key;
+  renderSectionsSettingsPanel();
 }
 function assignSectionSortOrders(active,archived){
   [...active,...archived].forEach((s,i)=>{s.sortOrder=i;});
@@ -9907,33 +9945,35 @@ function renderSectionSettingsRow(sec,opts){
   const activeList=activeSections();
   const idx=activeList.findIndex(s=>s.key===sec.key);
   const partCount=(sec.parts||[]).length;
-  const expanded=sectionSettingsExpanded.has(sec.key);
+  const expanded=!archived&&sectionSettingsExpandedKey===sec.key;
   const chev=expanded?'ti-chevron-down':'ti-chevron-right';
-  return `<div class="section-settings-row${archived?' is-archived':''}" data-section-key="${esc(sec.key)}">
-    <div class="section-settings-row-hdr" onclick="toggleSectionSettingsRow('${sec.key}',event)">
-      <div class="section-settings-row-hdr-left">
-        ${archived?'':`<div class="sec-drag-handle" title="Drag to reorder" onclick="event.stopPropagation()"><i class="ti ti-grip-vertical"></i></div>`}
-        <button type="button" class="sec-expand-btn" onclick="toggleSectionSettingsRow('${sec.key}',event)" title="${expanded?'Collapse':'Expand'}"><i class="ti ${chev}"></i></button>
-        <div class="section-settings-row-title">${esc(sec.name)}${partCount?` <span style="font-size:11px;color:var(--gs-muted);font-weight:600">(${partCount} parts)</span>`:''}</div>
+  return `<div class="section-settings-row${archived?' is-archived':''}${expanded?' is-expanded':''}" data-section-key="${esc(sec.key)}">
+    <div class="section-settings-row-hdr">
+      <div class="section-settings-row-hdr-top" onclick="toggleSectionSettingsRow('${sec.key}',event)">
+        <div class="section-settings-row-hdr-left">
+          ${archived?'':`<div class="sec-drag-handle" title="Drag to reorder" onclick="event.stopPropagation()"><i class="ti ti-grip-vertical"></i></div>`}
+          <button type="button" class="sec-expand-btn" onclick="event.stopPropagation();toggleSectionSettingsRow('${sec.key}',event)" title="${expanded?'Collapse':'Expand'}"><i class="ti ${chev}"></i></button>
+          <div class="section-settings-row-title">${esc(sec.name)}${partCount?` <span style="font-size:11px;color:var(--gs-muted);font-weight:600">(${partCount} parts)</span>`:''}</div>
+        </div>
+        <div class="section-settings-row-actions" onclick="event.stopPropagation()">
+          ${archived?'':`<button type="button" class="ms-btn" onclick="reorderSection('${sec.key}',-1)"${idx<=0?' disabled':''} title="Move up"><i class="ti ti-arrow-up"></i></button>
+          <button type="button" class="ms-btn" onclick="reorderSection('${sec.key}',1)"${idx<0||idx>=activeList.length-1?' disabled':''} title="Move down"><i class="ti ti-arrow-down"></i></button>`}
+          ${archived?`<button type="button" class="ms-btn" onclick="restoreSection('${sec.key}')"><i class="ti ti-arrow-back-up"></i> Restore</button>`:
+            `<button type="button" class="ms-btn" onclick="archiveSection('${sec.key}')" title="Archive"><i class="ti ti-archive"></i></button>`}
+        </div>
       </div>
-      <div class="section-settings-row-actions" onclick="event.stopPropagation()">
-        ${archived?'':`<button type="button" class="ms-btn" onclick="reorderSection('${sec.key}',-1)"${idx<=0?' disabled':''} title="Move up"><i class="ti ti-arrow-up"></i></button>
-        <button type="button" class="ms-btn" onclick="reorderSection('${sec.key}',1)"${idx<0||idx>=activeList.length-1?' disabled':''} title="Move down"><i class="ti ti-arrow-down"></i></button>`}
-        ${archived?`<button type="button" class="ms-btn" onclick="restoreSection('${sec.key}')"><i class="ti ti-arrow-back-up"></i> Restore</button>`:
-          `<button type="button" class="ms-btn" onclick="archiveSection('${sec.key}')" title="Archive"><i class="ti ti-archive"></i></button>`}
-      </div>
+      ${archived?'':`<div class="section-settings-row-vis" onclick="event.stopPropagation()">
+        ${renderSectionVisibilityPills(sec)}
+        ${renderSectionVisibilityMeta(sec,expanded)}
+      </div>`}
     </div>
     ${archived?'':`<div class="section-settings-row-body${expanded?'':' collapsed'}">
       <div class="section-settings-row-body-inner">
         <div class="section-settings-fields">
-          <div class="settings-field">
+          <div class="settings-field" style="grid-column:1/-1">
             <label>Section name</label>
             <input class="veh-editor-input" type="text" value="${esc(sec.name)}"
               onchange="renameSectionFromSettings('${sec.key}',this.value)"/>
-          </div>
-          <div class="settings-field" style="grid-column:1/-1">
-            <label>Public visibility</label>
-            ${renderSectionVisibilityPills(sec)}
           </div>
           <div class="section-settings-extra-fields" style="grid-column:1/-1">${sectionSettingsVisibilityFields(sec)}</div>
         </div>
@@ -10276,7 +10316,7 @@ const DEFAULT_PUBLIC_PAGE_SETTINGS={
 };
 let publicPageSettings=Object.assign({},DEFAULT_PUBLIC_PAGE_SETTINGS);
 let userSectionPresets=[];
-const sectionSettingsExpanded=new Set();
+let sectionSettingsExpandedKey=null;
 function normalizePublicPageSettings(raw){
   const src=raw&&typeof raw==='object'?raw:{};
   return{
