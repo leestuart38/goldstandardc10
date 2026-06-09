@@ -2663,6 +2663,69 @@ button,.tab,.section-hdr,.chip,.chip-opt,.ss-card{touch-action:manipulation;-web
 }
 .notif-section-label:first-child{padding-top:2px}
 
+.settings-shell{
+  display:grid;
+  grid-template-columns:minmax(200px,232px) minmax(0,1fr);
+  gap:16px;
+  align-items:start;
+  max-width:1100px;
+}
+.settings-nav{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  position:sticky;
+  top:12px;
+}
+.settings-nav-btn{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  width:100%;
+  text-align:left;
+  padding:12px 14px;
+  border-radius:14px;
+  border:1px solid rgba(241,209,122,.16);
+  background:rgba(0,0,0,.22);
+  color:var(--gs-cream);
+  font-family:var(--gs-display);
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.03em;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:border-color .15s,background .15s,color .15s,box-shadow .15s;
+}
+.settings-nav-btn i{font-size:16px;line-height:1;color:var(--gs-gold-light);flex-shrink:0}
+.settings-nav-btn:hover{
+  border-color:rgba(241,209,122,.34);
+  background:rgba(185,138,39,.1);
+}
+.settings-nav-btn.active{
+  color:#fff;
+  border-color:rgba(241,209,122,.5);
+  background:linear-gradient(180deg,rgba(197,155,53,.32),rgba(0,0,0,.22));
+  box-shadow:0 0 0 1px rgba(241,209,122,.12);
+}
+.settings-content{min-width:0}
+.settings-subpanel{display:none}
+.settings-subpanel.active{display:block}
+.settings-subpanel-hdr{margin-bottom:14px}
+.settings-subpanel-title{
+  font-family:var(--gs-display);
+  font-size:clamp(20px,2.6vw,26px);
+  font-weight:700;
+  letter-spacing:var(--gs-tracking-tight);
+  text-transform:uppercase;
+  color:var(--gs-cream);
+  line-height:1.1;
+}
+.settings-subpanel-sub{
+  margin-top:6px;
+  font-size:12px;
+  line-height:1.45;
+  color:var(--gs-muted);
+}
 .settings-page{display:grid;gap:14px;max-width:920px}
 .settings-card{
   border-radius:18px;border:1px solid rgba(241,209,122,.16);
@@ -2728,6 +2791,10 @@ button,.tab,.section-hdr,.chip,.chip-opt,.ss-card{touch-action:manipulation;-web
 }
 .settings-photo-wrap .image-drop-single .image-drop-preview img{
   width:100%;height:100%;object-fit:cover;display:block;
+}
+@media(max-width:760px){
+  .settings-shell{grid-template-columns:1fr;gap:12px}
+  .settings-nav{position:static;flex-direction:column}
 }
 @media(max-width:700px){
   .settings-row-2,.settings-social-grid{grid-template-columns:1fr}
@@ -2951,6 +3018,9 @@ html[data-theme="light"] .note-inp{
 }
 html[data-theme="light"] .settings-theme-opt{background:rgba(255,255,255,.9);color:var(--gs-cream)}
 html[data-theme="light"] .settings-theme-opt.active{background:rgba(185,138,39,.14)}
+html[data-theme="light"] .settings-nav-btn{background:rgba(255,255,255,.88);color:var(--gs-cream);border-color:rgba(111,79,18,.16)}
+html[data-theme="light"] .settings-nav-btn:hover{background:rgba(185,138,39,.1);border-color:rgba(111,79,18,.28)}
+html[data-theme="light"] .settings-nav-btn.active{background:linear-gradient(180deg,rgba(197,155,53,.28),rgba(255,255,255,.7));border-color:rgba(111,79,18,.34);color:#1c1916}
 html[data-theme="light"] .ms-btn,
 html[data-theme="light"] .vehicle-edit-btn,
 html[data-theme="light"] .vehicle-create-btn{
@@ -6442,118 +6512,105 @@ html[data-theme="light"] #panel-dashboard .completion-track{background:rgba(111,
   <div class="milestone-toolbar">
     <div>
       <div class="milestone-toolbar-title">Settings</div>
-      <div class="milestone-toolbar-sub">Your builder profile is global across all builds. Manage individual vehicles in <button type="button" class="inline-link-btn" onclick="showPanel('vehicle',true)">Garage</button>.</div>
+      <div class="milestone-toolbar-sub">Configure your builder profile, public page, sections, and statuses. Manage builds in <button type="button" class="inline-link-btn" onclick="showPanel('vehicle',true)">Garage</button>.</div>
     </div>
   </div>
-  <div class="settings-page" id="settings-page">
-    <section class="settings-card" id="settings-profile-card">
-      <div class="settings-card-hdr">
-        <div class="settings-card-title"><i class="ti ti-user-circle"></i> Builder profile</div>
-        <div class="settings-card-sub">Shown on your public build pages when enabled. One profile for every build in your garage.</div>
-      </div>
-      <div class="settings-card-body">
-        <form class="settings-form" id="settings-profile-form" onsubmit="return false">
-          <div class="settings-field">
-            <label>Photo or logo <span class="settings-optional">(optional)</span></label>
-            <div class="settings-photo-wrap" id="profile-photo-host"></div>
-          </div>
-          <div class="settings-field">
-            <label for="profile-display-name">Display name</label>
-            <input class="settings-input" id="profile-display-name" type="text" maxlength="80" placeholder="Your name or brand" autocomplete="name">
-          </div>
-          <div class="settings-field">
-            <label for="profile-tagline">Bio / tagline <span class="settings-optional">(optional)</span></label>
-            <textarea class="settings-textarea" id="profile-tagline" maxlength="240" placeholder="Short intro — what you build, your shop, or your story."></textarea>
-          </div>
-          <div class="settings-row-2">
-            <div class="settings-field">
-              <label for="profile-location">Location <span class="settings-optional">(optional)</span></label>
-              <input class="settings-input" id="profile-location" type="text" maxlength="80" placeholder="City, State" autocomplete="address-level2">
+  <div class="settings-shell" id="settings-shell">
+    <nav class="settings-nav" id="settings-nav" aria-label="Settings sections">
+      <button class="settings-nav-btn active" type="button" data-settings-panel="profile" onclick="showSettingsSubpanel('profile')"><i class="ti ti-user-circle"></i><span>Builder Profile</span></button>
+      <button class="settings-nav-btn" type="button" data-settings-panel="public" onclick="showSettingsSubpanel('public')"><i class="ti ti-world"></i><span>Public Page</span></button>
+      <button class="settings-nav-btn" type="button" data-settings-panel="sections" onclick="showSettingsSubpanel('sections')"><i class="ti ti-layout-grid"></i><span>Sections</span></button>
+      <button class="settings-nav-btn" type="button" data-settings-panel="statuses" onclick="showSettingsSubpanel('statuses')"><i class="ti ti-adjustments"></i><span>Statuses &amp; Priorities</span></button>
+    </nav>
+    <div class="settings-content" id="settings-content">
+      <div id="settings-sub-profile" class="settings-subpanel active" data-settings-panel="profile">
+        <div class="settings-subpanel-hdr">
+          <div class="settings-subpanel-title">Builder Profile</div>
+          <div class="settings-subpanel-sub">Shown on your public build pages when enabled. One profile for every build in your garage.</div>
+        </div>
+        <div class="settings-page" id="settings-page">
+          <section class="settings-card" id="settings-profile-card">
+            <div class="settings-card-body" style="padding-top:18px">
+              <form class="settings-form" id="settings-profile-form" onsubmit="return false">
+                <div class="settings-field">
+                  <label>Photo or logo <span class="settings-optional">(optional)</span></label>
+                  <div class="settings-photo-wrap" id="profile-photo-host"></div>
+                </div>
+                <div class="settings-field">
+                  <label for="profile-display-name">Display name</label>
+                  <input class="settings-input" id="profile-display-name" type="text" maxlength="80" placeholder="Your name or brand" autocomplete="name">
+                </div>
+                <div class="settings-field">
+                  <label for="profile-tagline">Bio / tagline <span class="settings-optional">(optional)</span></label>
+                  <textarea class="settings-textarea" id="profile-tagline" maxlength="240" placeholder="Short intro — what you build, your shop, or your story."></textarea>
+                </div>
+                <div class="settings-row-2">
+                  <div class="settings-field">
+                    <label for="profile-location">Location <span class="settings-optional">(optional)</span></label>
+                    <input class="settings-input" id="profile-location" type="text" maxlength="80" placeholder="City, State" autocomplete="address-level2">
+                  </div>
+                  <div class="settings-field">
+                    <label for="profile-email">Public email</label>
+                    <input class="settings-input" id="profile-email" type="email" maxlength="120" placeholder="hello@example.com" autocomplete="email">
+                  </div>
+                </div>
+                <div class="settings-field">
+                  <label for="profile-website">Website</label>
+                  <input class="settings-input" id="profile-website" type="url" maxlength="200" placeholder="https://yoursite.com">
+                </div>
+                <div class="settings-social-grid">
+                  <div class="settings-field">
+                    <label for="profile-instagram">Instagram</label>
+                    <input class="settings-input" id="profile-instagram" type="text" maxlength="120" placeholder="@handle or URL">
+                  </div>
+                  <div class="settings-field">
+                    <label for="profile-facebook">Facebook</label>
+                    <input class="settings-input" id="profile-facebook" type="text" maxlength="120" placeholder="Page or URL">
+                  </div>
+                  <div class="settings-field">
+                    <label for="profile-youtube">YouTube</label>
+                    <input class="settings-input" id="profile-youtube" type="text" maxlength="120" placeholder="@channel or URL">
+                  </div>
+                  <div class="settings-field">
+                    <label for="profile-tiktok">TikTok</label>
+                    <input class="settings-input" id="profile-tiktok" type="text" maxlength="120" placeholder="@handle or URL">
+                  </div>
+                </div>
+                <label class="settings-check">
+                  <input type="checkbox" id="profile-show-public" checked>
+                  <span>Show this profile on public build pages</span>
+                </label>
+                <div class="settings-note">Updates apply the next time you publish or save a public build link. Copy Public Link from the header to refresh live pages.</div>
+                <div class="settings-actions">
+                  <button class="ms-btn post" type="button" onclick="saveBuilderProfile()"><i class="ti ti-device-floppy"></i>Save profile</button>
+                </div>
+              </form>
             </div>
-            <div class="settings-field">
-              <label for="profile-email">Public email</label>
-              <input class="settings-input" id="profile-email" type="email" maxlength="120" placeholder="hello@example.com" autocomplete="email">
-            </div>
-          </div>
-          <div class="settings-field">
-            <label for="profile-website">Website</label>
-            <input class="settings-input" id="profile-website" type="url" maxlength="200" placeholder="https://yoursite.com">
-          </div>
-          <div class="settings-social-grid">
-            <div class="settings-field">
-              <label for="profile-instagram">Instagram</label>
-              <input class="settings-input" id="profile-instagram" type="text" maxlength="120" placeholder="@handle or URL">
-            </div>
-            <div class="settings-field">
-              <label for="profile-facebook">Facebook</label>
-              <input class="settings-input" id="profile-facebook" type="text" maxlength="120" placeholder="Page or URL">
-            </div>
-            <div class="settings-field">
-              <label for="profile-youtube">YouTube</label>
-              <input class="settings-input" id="profile-youtube" type="text" maxlength="120" placeholder="@channel or URL">
-            </div>
-            <div class="settings-field">
-              <label for="profile-tiktok">TikTok</label>
-              <input class="settings-input" id="profile-tiktok" type="text" maxlength="120" placeholder="@handle or URL">
-            </div>
-          </div>
-          <label class="settings-check">
-            <input type="checkbox" id="profile-show-public" checked>
-            <span>Show this profile on public build pages</span>
-          </label>
-          <div class="settings-note">Updates apply the next time you publish or save a public build link. Copy Public Link from the header to refresh live pages.</div>
-          <div class="settings-actions">
-            <button class="ms-btn post" type="button" onclick="saveBuilderProfile()"><i class="ti ti-device-floppy"></i>Save profile</button>
-          </div>
-        </form>
-      </div>
-    </section>
-    <section class="settings-card">
-      <div class="settings-card-hdr">
-        <div class="settings-card-title"><i class="ti ti-palette"></i> Appearance</div>
-        <div class="settings-card-sub">Choose how the private tracker looks on this device.</div>
-      </div>
-      <div class="settings-card-body">
-        <div class="settings-theme-row">
-          <button class="settings-theme-opt active" type="button" data-theme="dark" onclick="setAppTheme('dark')"><i class="ti ti-moon"></i>Dark</button>
-          <button class="settings-theme-opt" type="button" data-theme="light" onclick="setAppTheme('light')"><i class="ti ti-sun"></i>Light</button>
+          </section>
         </div>
       </div>
-    </section>
-    <section class="settings-card">
-      <div class="settings-card-hdr">
-        <div class="settings-card-title"><i class="ti ti-user"></i> Account</div>
-        <div class="settings-card-sub">Signed-in account for cloud sync and your garage.</div>
-      </div>
-      <div class="settings-card-body">
-        <div class="settings-account-line" id="settings-account-email">Loading account…</div>
-        <div class="settings-actions">
-          <button class="ms-btn" type="button" onclick="showPanel('vehicle',true)"><i class="ti ti-car-garage"></i>Open garage</button>
-          <button class="ms-btn danger" type="button" onclick="logoutUser()"><i class="ti ti-logout"></i>Sign out</button>
+      <div id="settings-sub-public" class="settings-subpanel" data-settings-panel="public">
+        <div class="settings-subpanel-hdr">
+          <div class="settings-subpanel-title">Public Page</div>
+          <div class="settings-subpanel-sub">Sharing, visibility, and default options for your public build page.</div>
         </div>
+        <div class="subpanel-placeholder"><i class="ti ti-world"></i><strong>Public page settings coming soon.</strong><span>Default visibility, sharing options, and page layout controls will appear here.</span></div>
       </div>
-    </section>
-    <section class="settings-card">
-      <div class="settings-card-hdr">
-        <div class="settings-card-title"><i class="ti ti-world"></i> Public pages</div>
-        <div class="settings-card-sub">Quick links for sharing and engagement.</div>
-      </div>
-      <div class="settings-card-body">
-        <div class="settings-actions" style="justify-content:flex-start">
-          <button class="ms-btn" type="button" onclick="sharePublicBuild()"><i class="ti ti-copy"></i>Copy public link</button>
-          <button class="ms-btn" type="button" onclick="showMorePanel('notifications')"><i class="ti ti-bell"></i>Notifications</button>
+      <div id="settings-sub-sections" class="settings-subpanel" data-settings-panel="sections">
+        <div class="settings-subpanel-hdr">
+          <div class="settings-subpanel-title">Sections</div>
+          <div class="settings-subpanel-sub">Organize and customize the parts sections used across your build.</div>
         </div>
-        <p class="settings-coming">Notification preferences and default public page options — coming soon.</p>
+        <div class="subpanel-placeholder"><i class="ti ti-layout-grid"></i><strong>Section settings coming soon.</strong><span>Rename, reorder, and manage default build sections from here.</span></div>
       </div>
-    </section>
-    <section class="settings-card">
-      <div class="settings-card-hdr">
-        <div class="settings-card-title"><i class="ti ti-database"></i> Data</div>
+      <div id="settings-sub-statuses" class="settings-subpanel" data-settings-panel="statuses">
+        <div class="settings-subpanel-hdr">
+          <div class="settings-subpanel-title">Statuses &amp; Priorities</div>
+          <div class="settings-subpanel-sub">Customize part statuses, work log columns, and priority labels.</div>
+        </div>
+        <div class="subpanel-placeholder"><i class="ti ti-adjustments"></i><strong>Status and priority settings coming soon.</strong><span>Edit labels, colors, and defaults for statuses and priorities across the tracker.</span></div>
       </div>
-      <div class="settings-card-body">
-        <p class="settings-coming">Export and backup tools — see Export Data in the More menu (coming soon).</p>
-      </div>
-    </section>
+    </div>
   </div>
 </div>
 <div id="panel-billing" class="panel">
@@ -7325,12 +7382,6 @@ function syncSettingsProfileForm(){
   const showEl=document.getElementById('profile-show-public');
   if(showEl)showEl.checked=p.showOnPublic!==false;
   renderProfilePhotoDropZone();
-  const acct=document.getElementById('settings-account-email');
-  if(acct){
-    acct.innerHTML=currentUser&&currentUser.email
-      ?'Signed in as <strong>'+esc(currentUser.email)+'</strong>'
-      :'Not signed in — profile saves when you log in.';
-  }
   applyTheme(appPreferences.theme||'dark');
 }
 function collectBuilderProfileFromForm(){
@@ -7366,7 +7417,20 @@ async function saveBuilderProfile(){
     showGarageToast('Could not save profile.');
   }
 }
+let activeSettingsSubpanel='profile';
+const SETTINGS_SUBPANELS=['profile','public','sections','statuses'];
+function showSettingsSubpanel(name){
+  if(!SETTINGS_SUBPANELS.includes(name))name='profile';
+  activeSettingsSubpanel=name;
+  document.querySelectorAll('.settings-nav-btn').forEach(btn=>{
+    btn.classList.toggle('active',btn.dataset.settingsPanel===name);
+  });
+  document.querySelectorAll('.settings-subpanel').forEach(panel=>{
+    panel.classList.toggle('active',panel.dataset.settingsPanel===name);
+  });
+}
 function renderSettingsPanel(){
+  showSettingsSubpanel(activeSettingsSubpanel||'profile');
   syncSettingsProfileForm();
   loadUserProfile().then(()=>syncSettingsProfileForm()).catch(()=>{});
 }
@@ -12690,7 +12754,7 @@ async function bootTracker(){
   if(trackerBooted) return;
   trackerBooted=true;
 
-  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,setAppTheme,saveBuilderProfile,renderSettingsPanel,handleProfilePhotoUpload,profilePhotoDrop,removeProfilePhoto,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,markAllNotificationsRead,markNotificationRead,openNotificationOnBuild,toggleNotifExpand,toggleNotifReplyForm,toggleMilestoneComments,ownerLikeComment,ownerReplyToComment,toggleReplyForm,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
+  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,setAppTheme,saveBuilderProfile,renderSettingsPanel,showSettingsSubpanel,handleProfilePhotoUpload,profilePhotoDrop,removeProfilePhoto,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,markAllNotificationsRead,markNotificationRead,openNotificationOnBuild,toggleNotifExpand,toggleNotifReplyForm,toggleMilestoneComments,ownerLikeComment,ownerReplyToComment,toggleReplyForm,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
   document.addEventListener('click',e=>{
     if(!e.target.closest('.tracker-nav-more-wrap'))closeMoreMenu();
     if(!e.target.closest('.tracker-nav-mobile-wrap'))closeMobileNavMenu();
