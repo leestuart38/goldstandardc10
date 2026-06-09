@@ -8236,6 +8236,7 @@ function placeholderUpgradePlan(){
 }
 
 const PARTS_CSV_HEADERS=['Section','Name','Priority','Vendor','Budget','Actual','Sponsored','Status','Link','Notes'];
+const PARTS_CSV_TEMPLATE_HEADERS=['Part Name','Section','Priority','Status','Budget','Actual Cost','Sponsored Value','Vendor','Link','Notes'];
 const SPONSORS_CSV_HEADERS=['Name','Status','Value','Tier','Contact Name','Email','Website','Deliverables','Notes','Public Visible'];
 let partsImportDraft=null;
 
@@ -8285,6 +8286,27 @@ function exportPartsCsv(){
   });
   downloadCsvFile(dataToolsFileSlug()+'-parts.csv',PARTS_CSV_HEADERS,rows);
   showGarageToast(rows.length?'Exported '+rows.length+' part'+(rows.length===1?'':'s')+'.':'Exported empty parts sheet.');
+}
+function downloadPartsCsvTemplate(){
+  const sections=activeSections();
+  const exampleSection=sections[0]?sections[0].name:'Your Section';
+  const exampleRow={
+    'Part Name':'Example coilover kit (delete this row)',
+    'Section':exampleSection,
+    'Priority':'Medium',
+    'Status':'Need to Buy',
+    'Budget':'0',
+    'Actual Cost':'0',
+    'Sponsored Value':'0',
+    'Vendor':'TBD',
+    'Link':'',
+    'Notes':'Replace with your own parts below.'
+  };
+  downloadCsvFile(dataToolsFileSlug()+'-parts-template.csv',PARTS_CSV_TEMPLATE_HEADERS,[exampleRow]);
+  const hint=sections.length
+    ?'Template downloaded with example section "'+exampleSection+'". Active sections: '+sections.map(s=>s.name).join(', ')+'.'
+    :'Template downloaded. Add sections in Build Sections, then fill in the Section column.';
+  showGarageToast(hint);
 }
 function exportSponsorsCsv(){
   const rows=(sponsors||[]).map(s=>{
@@ -8407,8 +8429,8 @@ function normalizeImportPartRow(raw){
     priority,
     vendor:importCsvPickField(raw,'vendor','manufacturer')||'TBD',
     budget:parseFloat(importCsvPickField(raw,'budget'))||0,
-    actual:parseFloat(importCsvPickField(raw,'actual'))||0,
-    sponsored:parseFloat(importCsvPickField(raw,'sponsored'))||0,
+    actual:parseFloat(importCsvPickField(raw,'actual','actualcost'))||0,
+    sponsored:parseFloat(importCsvPickField(raw,'sponsored','sponsoredvalue'))||0,
     status,
     link:importCsvPickField(raw,'link','url')||'',
     notes:importCsvPickField(raw,'notes','note')||''
@@ -8419,7 +8441,7 @@ function partsImportPreviewHeaders(rows){
   rows.slice(0,20).forEach(r=>{
     Object.keys(r).forEach(k=>set.add(k));
   });
-  const preferred=['Name','Priority','Vendor','Budget','Status','Notes'];
+  const preferred=['Part Name','Name','Section','Priority','Status','Budget','Actual Cost','Vendor','Notes'];
   const all=[...set].map(k=>{
     const orig=Object.keys(rows[0]||{}).find(h=>h.toLowerCase()===k)||k;
     return orig;
@@ -8553,8 +8575,10 @@ function renderDataToolsPanel(){
   const el=document.getElementById('data-tools-page');
   if(!el)return;
   const sectionOptions=dataImportSectionOptions(activeSections()[0]?.key||'');
-  const partCount=activeSections().reduce((n,s)=>n+(s.parts||[]).length,0);
+  const active=activeSections();
+  const partCount=active.reduce((n,s)=>n+(s.parts||[]).length,0);
   const sponsorCount=(sponsors||[]).length;
+  const sectionHint=active.length?active.map(s=>esc(s.name)).join(', '):'No active sections yet';
   el.innerHTML=`<section class="settings-card">
     <div class="settings-card-hdr">
       <div class="settings-card-title"><i class="ti ti-download"></i> Export</div>
@@ -8589,10 +8613,17 @@ function renderDataToolsPanel(){
       <div class="settings-card-sub">Add parts from a spreadsheet into one section. Existing parts are never removed or replaced.</div>
     </div>
     <div class="settings-card-body">
+      <div class="admin-toolbar" style="margin-bottom:4px">
+        <div class="admin-toolbar-copy">
+          <div class="admin-toolbar-title">Start with a template</div>
+          <div class="admin-toolbar-sub">Download a blank CSV with the correct columns and one example row. Suggested sections for this build: ${sectionHint}.</div>
+        </div>
+        <button type="button" class="ms-btn post" onclick="downloadPartsCsvTemplate()"><i class="ti ti-template"></i> Download Parts CSV Template</button>
+      </div>
       <input id="data-import-file-input" type="file" accept=".csv,text/csv" hidden onchange="onPartsCsvInputChange(event)"/>
       <div class="data-import-zone" id="data-import-zone" onclick="triggerPartsCsvPicker()" ondragover="partsImportZoneDragOver(event)" ondragleave="partsImportZoneDragLeave(event)" ondrop="partsImportZoneDrop(event)">
         <div class="data-import-zone-title"><i class="ti ti-file-spreadsheet"></i> Upload CSV</div>
-        <div class="data-import-zone-sub">Click to browse or drag a .csv file here. Use the same columns as Export Parts CSV when possible.</div>
+        <div class="data-import-zone-sub">Click to browse or drag a filled .csv file here. Import accepts the template columns or an exported parts sheet.</div>
       </div>
       <div class="data-import-meta" id="data-import-meta"></div>
       <div class="data-import-preview-wrap" id="data-import-preview-wrap" hidden></div>
@@ -14952,7 +14983,7 @@ async function bootTracker(){
   if(trackerBooted) return;
   trackerBooted=true;
 
-  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,setAppTheme,saveBuilderProfile,renderSettingsPanel,renderUsersPanel,renderBillingPanel,renderDataToolsPanel,exportPartsCsv,exportSponsorsCsv,exportPublicBuildReportPdf,triggerPartsCsvPicker,onPartsCsvInputChange,partsImportZoneDragOver,partsImportZoneDragLeave,partsImportZoneDrop,confirmPartsCsvImport,resetPartsImportDraft,placeholderInviteUser,placeholderRemoveUser,placeholderUpgradePlan,showSettingsSubpanel,renderSectionsSettingsPanel,applySectionPresetFromSettings,addCustomSectionFromSettings,renameSectionFromSettings,reorderSection,archiveSection,restoreSection,onSectionPublicSettingChange,pickSectionVisibility,toggleSectionSettingsRow,saveUserSectionPresetFromSettings,deleteUserSectionPreset,onPublicPageSettingChange,syncPublicSlugPreview,syncPublicPageSettingsForm,applyBuildPartnersVisibility,isBuildPartnersEnabled,handleProfilePhotoUpload,profilePhotoDrop,removeProfilePhoto,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,markAllNotificationsRead,markNotificationRead,openNotificationOnBuild,toggleNotifExpand,toggleNotifReplyForm,toggleMilestoneComments,ownerLikeComment,ownerReplyToComment,toggleReplyForm,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,movePart,openMovePartModal,closeMovePartModal,confirmMovePart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
+  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,setAppTheme,saveBuilderProfile,renderSettingsPanel,renderUsersPanel,renderBillingPanel,renderDataToolsPanel,exportPartsCsv,downloadPartsCsvTemplate,exportSponsorsCsv,exportPublicBuildReportPdf,triggerPartsCsvPicker,onPartsCsvInputChange,partsImportZoneDragOver,partsImportZoneDragLeave,partsImportZoneDrop,confirmPartsCsvImport,resetPartsImportDraft,placeholderInviteUser,placeholderRemoveUser,placeholderUpgradePlan,showSettingsSubpanel,renderSectionsSettingsPanel,applySectionPresetFromSettings,addCustomSectionFromSettings,renameSectionFromSettings,reorderSection,archiveSection,restoreSection,onSectionPublicSettingChange,pickSectionVisibility,toggleSectionSettingsRow,saveUserSectionPresetFromSettings,deleteUserSectionPreset,onPublicPageSettingChange,syncPublicSlugPreview,syncPublicPageSettingsForm,applyBuildPartnersVisibility,isBuildPartnersEnabled,handleProfilePhotoUpload,profilePhotoDrop,removeProfilePhoto,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,markAllNotificationsRead,markNotificationRead,openNotificationOnBuild,toggleNotifExpand,toggleNotifReplyForm,toggleMilestoneComments,ownerLikeComment,ownerReplyToComment,toggleReplyForm,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,movePart,openMovePartModal,closeMovePartModal,confirmMovePart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
   document.addEventListener('click',e=>{
     if(!e.target.closest('.tracker-nav-more-wrap'))closeMoreMenu();
     if(!e.target.closest('.tracker-nav-mobile-wrap'))closeMobileNavMenu();
