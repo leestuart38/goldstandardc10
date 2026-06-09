@@ -6816,12 +6816,12 @@ html[data-theme="light"] #panel-dashboard .completion-track{background:rgba(111,
   <div class="milestone-toolbar">
     <div>
       <div class="milestone-toolbar-title">Settings</div>
-      <div class="milestone-toolbar-sub">Configure your builder profile, public page, sections, and statuses. Manage builds in <button type="button" class="inline-link-btn" onclick="showPanel('vehicle',true)">Garage</button>.</div>
+      <div class="milestone-toolbar-sub">Configure your profile, appearance, public page, sections, and statuses. Manage builds in <button type="button" class="inline-link-btn" onclick="showPanel('vehicle',true)">Garage</button>.</div>
     </div>
   </div>
   <div class="settings-shell" id="settings-shell">
     <nav class="settings-nav" id="settings-nav" aria-label="Settings sections">
-      <button class="settings-nav-btn active" type="button" data-settings-panel="profile" onclick="showSettingsSubpanel('profile')"><i class="ti ti-user-circle"></i><span>Builder Profile</span></button>
+      <button class="settings-nav-btn active" type="button" data-settings-panel="profile" onclick="showSettingsSubpanel('profile')"><i class="ti ti-user-circle"></i><span>Profile &amp; Appearance</span></button>
       <button class="settings-nav-btn" type="button" data-settings-panel="public" onclick="showSettingsSubpanel('public')"><i class="ti ti-world"></i><span>Public Page</span></button>
       <button class="settings-nav-btn" type="button" data-settings-panel="sections" onclick="showSettingsSubpanel('sections')"><i class="ti ti-layout-grid"></i><span>Build Sections</span></button>
       <button class="settings-nav-btn" type="button" data-settings-panel="statuses" onclick="showSettingsSubpanel('statuses')"><i class="ti ti-adjustments"></i><span>Statuses &amp; Priorities</span></button>
@@ -6829,8 +6829,8 @@ html[data-theme="light"] #panel-dashboard .completion-track{background:rgba(111,
     <div class="settings-content" id="settings-content">
       <div id="settings-sub-profile" class="settings-subpanel active" data-settings-panel="profile">
         <div class="settings-subpanel-hdr">
-          <div class="settings-subpanel-title">Builder Profile</div>
-          <div class="settings-subpanel-sub">Shown on your public build pages when enabled. One profile for every build in your garage.</div>
+          <div class="settings-subpanel-title">Profile &amp; Appearance</div>
+          <div class="settings-subpanel-sub">Your builder profile is shown on public build pages when enabled. Theme preference applies across the app on this device.</div>
         </div>
         <div class="settings-page" id="settings-page">
           <section class="settings-card" id="settings-profile-card">
@@ -6890,6 +6890,21 @@ html[data-theme="light"] #panel-dashboard .completion-track{background:rgba(111,
                   <button class="ms-btn post settings-profile-save-btn" id="settings-profile-save-btn" type="button" onclick="saveBuilderProfile()"><i class="ti ti-device-floppy" id="settings-profile-save-icon"></i><span id="settings-profile-save-label">Save profile</span></button>
                 </div>
               </form>
+            </div>
+          </section>
+          <section class="settings-card" id="settings-appearance-card">
+            <div class="settings-card-hdr">
+              <div class="settings-card-title"><i class="ti ti-palette"></i> Appearance</div>
+              <div class="settings-card-sub">Light or dark mode for the private app. Public pages use the same saved preference.</div>
+            </div>
+            <div class="settings-card-body" style="padding-top:18px">
+              <div class="settings-field">
+                <label>Color theme</label>
+                <div class="settings-theme-row" role="group" aria-label="Color theme">
+                  <button type="button" class="settings-theme-opt" data-theme="dark" onclick="setAppTheme('dark')"><i class="ti ti-moon"></i> Dark</button>
+                  <button type="button" class="settings-theme-opt" data-theme="light" onclick="setAppTheme('light')"><i class="ti ti-sun"></i> Light</button>
+                </div>
+              </div>
             </div>
           </section>
         </div>
