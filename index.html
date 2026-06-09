@@ -2939,6 +2939,111 @@ button,.tab,.section-hdr,.chip,.chip-opt,.ss-card{touch-action:manipulation;-web
 .sec-vis-pill.vis-coming-soon.active{background:linear-gradient(180deg,var(--gs-gold),var(--gs-gold-dark));color:#120e08;border-color:var(--gs-gold-light);box-shadow:0 0 0 2px rgba(241,209,122,.32),0 6px 16px rgba(0,0,0,.35)}
 .sec-vis-pill.vis-countdown{border-color:#93c5fd;color:#dbeafe}
 .sec-vis-pill.vis-countdown.active{background:linear-gradient(180deg,#3b82f6,#1d4ed8);color:#fff;border-color:#bfdbfe;box-shadow:0 0 0 2px rgba(147,197,253,.28),0 6px 16px rgba(0,0,0,.35)}
+.section-settings-extra-fields{
+  margin-top:14px;padding-top:14px;border-top:1px solid rgba(241,209,122,.14);
+}
+.sec-vis-collapsed-countdown{
+  display:inline-flex;align-items:baseline;gap:2px 4px;
+  font-family:var(--gs-display);font-size:9px;font-weight:800;
+  letter-spacing:.05em;text-transform:uppercase;color:#dbeafe;
+  padding:5px 10px;border-radius:999px;flex-shrink:0;
+  background:linear-gradient(180deg,rgba(59,130,246,.32),rgba(29,78,216,.24));
+  border:1px solid rgba(147,197,253,.38);
+}
+.sec-vis-collapsed-countdown strong{
+  font-size:12px;font-weight:800;color:#fff;letter-spacing:.02em;
+}
+.sec-reveal-picker-wrap{position:relative;display:grid;gap:6px}
+.sec-reveal-trigger{
+  width:100%;display:flex;align-items:center;gap:10px;
+  border-radius:12px;border:1px solid rgba(241,209,122,.28);
+  background:rgba(0,0,0,.32);color:var(--gs-cream);padding:12px 14px;
+  font-size:13px;font-weight:700;cursor:pointer;text-align:left;
+  transition:border-color .15s,background .15s,box-shadow .15s;
+}
+.sec-reveal-trigger:hover,.sec-reveal-trigger.open{
+  border-color:rgba(147,197,253,.45);background:rgba(59,130,246,.12);
+  box-shadow:0 0 0 2px rgba(59,130,246,.14);
+}
+.sec-reveal-trigger i:first-child{color:#93c5fd;font-size:18px;flex-shrink:0}
+.sec-reveal-trigger-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sec-reveal-trigger i:last-child{color:var(--gs-muted);font-size:14px;flex-shrink:0;transition:transform .18s}
+.sec-reveal-trigger.open i:last-child{transform:rotate(180deg)}
+.sec-reveal-popover{
+  margin-top:8px;border-radius:16px;border:1px solid rgba(147,197,253,.32);
+  background:linear-gradient(180deg,#1a2230,#12161e);
+  box-shadow:0 18px 42px rgba(0,0,0,.45);padding:14px;display:grid;gap:12px;
+}
+.sec-reveal-cal-hdr{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;
+}
+.sec-reveal-cal-title{
+  font-family:var(--gs-display);font-size:14px;font-weight:700;color:var(--gs-cream);letter-spacing:.03em;
+}
+.sec-reveal-cal-nav{
+  width:32px;height:32px;border-radius:10px;border:1px solid rgba(241,209,122,.2);
+  background:rgba(0,0,0,.28);color:var(--gs-gold-light);cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.sec-reveal-cal-nav:hover{border-color:rgba(241,209,122,.45);background:rgba(255,255,255,.06)}
+.sec-reveal-cal-weekdays,.sec-reveal-cal-grid{
+  display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;
+}
+.sec-reveal-cal-weekdays span{
+  font-size:9px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--gs-muted);
+}
+.sec-reveal-cal-pad{height:34px}
+.sec-reveal-cal-day{
+  height:34px;border-radius:10px;border:1px solid transparent;background:transparent;
+  color:var(--gs-cream);font-size:12px;font-weight:700;cursor:pointer;
+}
+.sec-reveal-cal-day:hover{border-color:rgba(147,197,253,.35);background:rgba(59,130,246,.14)}
+.sec-reveal-cal-day.is-today{border-color:rgba(241,209,122,.35);color:var(--gs-gold-light)}
+.sec-reveal-cal-day.is-selected{
+  border-color:#93c5fd;background:linear-gradient(180deg,#3b82f6,#1d4ed8);color:#fff;
+}
+.sec-reveal-wheels{display:grid;grid-template-columns:1fr 1fr .85fr;gap:8px}
+.sec-reveal-wheel-col{display:grid;gap:4px;min-width:0}
+.sec-reveal-wheel-label{
+  font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--gs-muted);text-align:center;
+}
+.sec-reveal-wheel{
+  position:relative;height:120px;overflow-y:auto;scroll-snap-type:y mandatory;
+  border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.35);
+  -webkit-overflow-scrolling:touch;
+}
+.sec-reveal-wheel::-webkit-scrollbar{width:4px}
+.sec-reveal-wheel::-webkit-scrollbar-thumb{background:rgba(147,197,253,.35);border-radius:999px}
+.sec-reveal-wheel::before,.sec-reveal-wheel::after{
+  content:'';position:sticky;left:0;right:0;height:40px;pointer-events:none;z-index:1;
+}
+.sec-reveal-wheel::before{top:0;background:linear-gradient(180deg,rgba(18,22,30,.95),transparent)}
+.sec-reveal-wheel::after{bottom:0;background:linear-gradient(0deg,rgba(18,22,30,.95),transparent)}
+.sec-reveal-wheel-item{
+  height:40px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--gs-display);font-size:16px;font-weight:700;color:var(--gs-muted);
+  scroll-snap-align:center;cursor:pointer;transition:color .12s,transform .12s;
+}
+.sec-reveal-wheel-item:hover{color:#dbeafe}
+.sec-reveal-wheel-item.is-sel{color:#fff;text-shadow:0 0 12px rgba(147,197,253,.45)}
+.sec-reveal-quick{display:flex;flex-wrap:wrap;gap:6px}
+.sec-reveal-quick-btn{
+  border-radius:999px;border:1px solid rgba(241,209,122,.22);
+  background:rgba(0,0,0,.28);color:var(--gs-gold-light);padding:7px 12px;
+  font-size:10px;font-weight:800;letter-spacing:.04em;cursor:pointer;
+  font-family:var(--gs-display);text-transform:uppercase;
+}
+.sec-reveal-quick-btn:hover{border-color:rgba(241,209,122,.45);background:rgba(197,155,53,.14)}
+.sec-reveal-apply-btn{
+  border-radius:12px;border:1px solid rgba(147,197,253,.45);
+  background:linear-gradient(180deg,#3b82f6,#1d4ed8);color:#fff;
+  padding:11px 14px;font-size:11px;font-weight:900;letter-spacing:.06em;
+  cursor:pointer;font-family:var(--gs-display);text-transform:uppercase;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+}
+.sec-reveal-apply-btn:hover{filter:brightness(1.06)}
+@media(max-width:520px){.sec-reveal-wheels{grid-template-columns:1fr 1fr 1fr}}
 .section-add-block{
   margin:0 18px 16px;border-radius:16px;border:1px solid rgba(241,209,122,.38);
   background:linear-gradient(180deg,rgba(197,155,53,.2),rgba(0,0,0,.22));
@@ -9533,6 +9638,272 @@ function effectivePublicVisibility(sec){
   }
   return v;
 }
+function sectionCountdownParts(revealAt){
+  const end=Date.parse(revealAt);
+  if(!end||isNaN(end))return {days:0,hours:0,minutes:0,expired:true};
+  const diff=Math.max(0,end-Date.now());
+  if(!diff)return {days:0,hours:0,minutes:0,expired:true};
+  return {
+    days:Math.floor(diff/86400000),
+    hours:Math.floor((diff%86400000)/3600000),
+    minutes:Math.floor((diff%3600000)/60000),
+    expired:false
+  };
+}
+function revealExpiredSectionCountdowns(opts){
+  const options=opts||{};
+  let changed=false;
+  (sections||[]).forEach(sec=>{
+    if(!sec||sec.archived)return;
+    if(normalizePublicVisibility(sec.publicVisibility)!=='countdown'||!sec.publicRevealAt)return;
+    const t=Date.parse(sec.publicRevealAt);
+    if(!isNaN(t)&&Date.now()>=t){
+      sec.publicVisibility='visible';
+      changed=true;
+    }
+  });
+  if(!changed)return false;
+  saveLocalStateNow();
+  if(!options.silent){
+    scheduleSave();
+    if(options.save!==false)doSave();
+  }
+  if(!options.skipPanel)renderSectionsSettingsPanel();
+  if(!options.skipBuild)build();
+  return true;
+}
+function dateToRevealState(d){
+  let h=d.getHours();
+  const ampm=h>=12?'PM':'AM';
+  let h12=h%12;
+  if(h12===0)h12=12;
+  return {year:d.getFullYear(),month:d.getMonth(),day:d.getDate(),hour12:h12,minute:d.getMinutes(),ampm};
+}
+function defaultRevealState(){
+  const t=new Date();
+  t.setDate(t.getDate()+7);
+  t.setHours(9,0,0,0);
+  return dateToRevealState(t);
+}
+function parseRevealPickerState(iso){
+  if(iso){
+    const d=new Date(iso);
+    if(!isNaN(d.getTime()))return dateToRevealState(d);
+  }
+  return defaultRevealState();
+}
+function revealStateToIso(st){
+  if(!st)return '';
+  let h=st.hour12%12;
+  if(st.ampm==='PM')h+=12;
+  if(st.hour12===12&&st.ampm==='AM')h=0;
+  if(st.hour12===12&&st.ampm==='PM')h=12;
+  const pad=n=>String(n).padStart(2,'0');
+  return `${st.year}-${pad(st.month+1)}-${pad(st.day)}T${pad(h)}:${pad(st.minute)}`;
+}
+function isRevealToday(y,m,d){
+  const t=new Date();
+  return t.getFullYear()===y&&t.getMonth()===m&&t.getDate()===d;
+}
+function renderSectionCollapsedCountdown(sec){
+  const vis=normalizePublicVisibility(sec.publicVisibility);
+  if(vis!=='countdown'||!sec.publicRevealAt)return '';
+  const c=sectionCountdownParts(sec.publicRevealAt);
+  if(c.expired)return '';
+  return `<span class="sec-vis-collapsed-countdown" data-reveal-at="${esc(sec.publicRevealAt)}">
+    <strong class="sec-cd-d">${c.days}</strong>d
+    <strong class="sec-cd-h">${c.hours}</strong>h
+    <strong class="sec-cd-m">${c.minutes}</strong>m
+  </span>`;
+}
+function updateSectionCollapsedCountdowns(){
+  document.querySelectorAll('.sec-vis-collapsed-countdown[data-reveal-at]').forEach(el=>{
+    const c=sectionCountdownParts(el.getAttribute('data-reveal-at')||'');
+    const d=el.querySelector('.sec-cd-d');
+    const h=el.querySelector('.sec-cd-h');
+    const m=el.querySelector('.sec-cd-m');
+    if(d)d.textContent=c.days;
+    if(h)h.textContent=c.hours;
+    if(m)m.textContent=c.minutes;
+  });
+}
+function startSectionCountdownTimers(){
+  if(sectionCountdownTimer)clearInterval(sectionCountdownTimer);
+  updateSectionCollapsedCountdowns();
+  if(!document.querySelector('.sec-vis-collapsed-countdown[data-reveal-at]'))return;
+  sectionCountdownTimer=setInterval(()=>{
+    updateSectionCollapsedCountdowns();
+    let anyExpired=false;
+    document.querySelectorAll('.sec-vis-collapsed-countdown[data-reveal-at]').forEach(el=>{
+      if(sectionCountdownParts(el.getAttribute('data-reveal-at')||'').expired)anyExpired=true;
+    });
+    if(anyExpired)revealExpiredSectionCountdowns();
+  },60000);
+}
+function closeRevealPicker(){
+  if(!revealPickerOpenKey)return;
+  revealPickerOpenKey=null;
+  revealPickerDraft=null;
+  renderSectionsSettingsPanel();
+}
+function toggleRevealPicker(key,e){
+  if(e)e.stopPropagation();
+  if(revealPickerOpenKey===key){
+    closeRevealPicker();
+    return;
+  }
+  const sec=findSectionByKey(key);
+  revealPickerOpenKey=key;
+  revealPickerDraft=parseRevealPickerState(sec&&sec.publicRevealAt);
+  renderSectionsSettingsPanel();
+  requestAnimationFrame(()=>initRevealPickerWheels(key));
+}
+function revealPickerNavMonth(key,delta){
+  if(revealPickerOpenKey!==key||!revealPickerDraft)return;
+  revealPickerDraft.month+=delta;
+  if(revealPickerDraft.month>11){revealPickerDraft.month=0;revealPickerDraft.year++;}
+  if(revealPickerDraft.month<0){revealPickerDraft.month=11;revealPickerDraft.year--;}
+  const daysInMonth=new Date(revealPickerDraft.year,revealPickerDraft.month+1,0).getDate();
+  if(revealPickerDraft.day>daysInMonth)revealPickerDraft.day=daysInMonth;
+  renderSectionsSettingsPanel();
+  requestAnimationFrame(()=>initRevealPickerWheels(key));
+}
+function revealPickerPickDay(key,day){
+  if(revealPickerOpenKey!==key||!revealPickerDraft)return;
+  revealPickerDraft.day=day;
+  renderSectionsSettingsPanel();
+  requestAnimationFrame(()=>initRevealPickerWheels(key));
+}
+function revealWheelPick(key,type,val){
+  if(revealPickerOpenKey!==key||!revealPickerDraft)return;
+  if(type==='hour')revealPickerDraft.hour12=parseInt(val,10)||12;
+  else if(type==='minute')revealPickerDraft.minute=parseInt(val,10)||0;
+  else revealPickerDraft.ampm=val==='PM'?'PM':'AM';
+  renderSectionsSettingsPanel();
+  requestAnimationFrame(()=>initRevealPickerWheels(key));
+}
+let revealWheelScrollTimer=null;
+function onRevealWheelScroll(key,type,el){
+  if(revealWheelScrollTimer)clearTimeout(revealWheelScrollTimer);
+  revealWheelScrollTimer=setTimeout(()=>{
+    if(revealPickerOpenKey!==key||!revealPickerDraft)return;
+    const items=[...el.querySelectorAll('.sec-reveal-wheel-item')];
+    const mid=el.scrollTop+el.clientHeight/2;
+    let closest=items[0],dist=Infinity;
+    items.forEach(it=>{
+      const c=Math.abs(it.offsetTop+it.clientHeight/2-mid);
+      if(c<dist){dist=c;closest=it;}
+    });
+    if(!closest)return;
+    const val=closest.dataset.val;
+    if(type==='hour')revealPickerDraft.hour12=parseInt(val,10)||12;
+    else if(type==='minute')revealPickerDraft.minute=parseInt(val,10)||0;
+    else revealPickerDraft.ampm=val==='PM'?'PM':'AM';
+    el.querySelectorAll('.sec-reveal-wheel-item').forEach(it=>{
+      it.classList.toggle('is-sel',it===closest);
+    });
+    const label=document.querySelector('.sec-reveal-trigger.open .sec-reveal-trigger-label');
+    if(label)label.textContent=formatSectionRevealDate(revealStateToIso(revealPickerDraft))||'Pick reveal date & time';
+  },90);
+}
+function initRevealPickerWheels(key){
+  const root=document.getElementById('reveal-picker-'+key);
+  if(!root||!revealPickerDraft)return;
+  root.querySelectorAll('.sec-reveal-wheel').forEach(wheel=>{
+    const type=wheel.dataset.wheel;
+    let val=revealPickerDraft.ampm;
+    if(type==='hour')val=revealPickerDraft.hour12;
+    else if(type==='minute')val=revealPickerDraft.minute;
+    const item=wheel.querySelector(`.sec-reveal-wheel-item[data-val="${val}"]`);
+    if(item)wheel.scrollTop=item.offsetTop-wheel.clientHeight/2+item.clientHeight/2;
+  });
+}
+function revealQuickPick(key,preset){
+  if(revealPickerOpenKey!==key||!revealPickerDraft)return;
+  const t=new Date();
+  if(preset==='tonight')t.setHours(20,0,0,0);
+  else if(preset==='tomorrow'){t.setDate(t.getDate()+1);t.setHours(9,0,0,0);}
+  else if(preset==='week'){t.setDate(t.getDate()+7);t.setHours(9,0,0,0);}
+  else if(preset==='month'){t.setMonth(t.getMonth()+1);t.setHours(9,0,0,0);}
+  revealPickerDraft=dateToRevealState(t);
+  renderSectionsSettingsPanel();
+  requestAnimationFrame(()=>initRevealPickerWheels(key));
+}
+function applyRevealPicker(key){
+  if(revealPickerOpenKey!==key||!revealPickerDraft)return;
+  const iso=revealStateToIso(revealPickerDraft);
+  revealPickerOpenKey=null;
+  revealPickerDraft=null;
+  onSectionPublicSettingChange(key,'publicRevealAt',iso);
+}
+function renderRevealCalendar(key,st){
+  const monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const first=new Date(st.year,st.month,1);
+  const startDay=first.getDay();
+  const daysInMonth=new Date(st.year,st.month+1,0).getDate();
+  let cells='';
+  for(let i=0;i<startDay;i++)cells+='<div class="sec-reveal-cal-pad"></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    const sel=d===st.day?' is-selected':'';
+    const today=isRevealToday(st.year,st.month,d)?' is-today':'';
+    cells+=`<button type="button" class="sec-reveal-cal-day${sel}${today}" onclick="revealPickerPickDay('${key}',${d})">${d}</button>`;
+  }
+  return `<div class="sec-reveal-cal">
+    <div class="sec-reveal-cal-hdr">
+      <button type="button" class="sec-reveal-cal-nav" onclick="revealPickerNavMonth('${key}',-1)"><i class="ti ti-chevron-left"></i></button>
+      <span class="sec-reveal-cal-title">${monthNames[st.month]} ${st.year}</span>
+      <button type="button" class="sec-reveal-cal-nav" onclick="revealPickerNavMonth('${key}',1)"><i class="ti ti-chevron-right"></i></button>
+    </div>
+    <div class="sec-reveal-cal-weekdays"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
+    <div class="sec-reveal-cal-grid">${cells}</div>
+  </div>`;
+}
+function renderRevealWheels(key,st){
+  const hours=Array.from({length:12},(_,i)=>i+1);
+  const minutes=Array.from({length:60},(_,i)=>i);
+  const hourItems=hours.map(h=>`<div class="sec-reveal-wheel-item${h===st.hour12?' is-sel':''}" data-val="${h}" onclick="revealWheelPick('${key}','hour',${h})">${h}</div>`).join('');
+  const minItems=minutes.map(m=>`<div class="sec-reveal-wheel-item${m===st.minute?' is-sel':''}" data-val="${m}" onclick="revealWheelPick('${key}','minute',${m})">${String(m).padStart(2,'0')}</div>`).join('');
+  const ampmItems=['AM','PM'].map(a=>`<div class="sec-reveal-wheel-item${a===st.ampm?' is-sel':''}" data-val="${a}" onclick="revealWheelPick('${key}','ampm','${a}')">${a}</div>`).join('');
+  return `<div class="sec-reveal-wheels">
+    <div class="sec-reveal-wheel-col">
+      <div class="sec-reveal-wheel-label">Hour</div>
+      <div class="sec-reveal-wheel" data-wheel="hour" onscroll="onRevealWheelScroll('${key}','hour',this)">${hourItems}</div>
+    </div>
+    <div class="sec-reveal-wheel-col">
+      <div class="sec-reveal-wheel-label">Min</div>
+      <div class="sec-reveal-wheel" data-wheel="minute" onscroll="onRevealWheelScroll('${key}','minute',this)">${minItems}</div>
+    </div>
+    <div class="sec-reveal-wheel-col sec-reveal-wheel-col-ampm">
+      <div class="sec-reveal-wheel-label">AM/PM</div>
+      <div class="sec-reveal-wheel" data-wheel="ampm" onscroll="onRevealWheelScroll('${key}','ampm',this)">${ampmItems}</div>
+    </div>
+  </div>`;
+}
+function renderRevealPickerInner(key,st){
+  return `${renderRevealCalendar(key,st)}
+    ${renderRevealWheels(key,st)}
+    <div class="sec-reveal-quick">
+      <button type="button" class="sec-reveal-quick-btn" onclick="revealQuickPick('${key}','tonight')">Tonight 8 PM</button>
+      <button type="button" class="sec-reveal-quick-btn" onclick="revealQuickPick('${key}','tomorrow')">Tomorrow 9 AM</button>
+      <button type="button" class="sec-reveal-quick-btn" onclick="revealQuickPick('${key}','week')">In 7 days</button>
+    </div>
+    <button type="button" class="sec-reveal-apply-btn" onclick="applyRevealPicker('${key}')"><i class="ti ti-check"></i> Set reveal time</button>`;
+}
+function renderRevealDatetimePicker(sec){
+  const iso=sec.publicRevealAt||'';
+  const open=revealPickerOpenKey===sec.key;
+  const st=open&&revealPickerDraft?revealPickerDraft:parseRevealPickerState(iso);
+  const label=formatSectionRevealDate(iso)||'Pick reveal date & time';
+  const preview=open?formatSectionRevealDate(revealStateToIso(st)):label;
+  return `<div class="sec-reveal-picker-wrap">
+    <button type="button" class="sec-reveal-trigger${open?' open':''}" onclick="toggleRevealPicker('${sec.key}',event)">
+      <i class="ti ti-calendar-event"></i>
+      <span class="sec-reveal-trigger-label">${esc(preview||label)}</span>
+      <i class="ti ti-chevron-down"></i>
+    </button>
+    ${open?`<div class="sec-reveal-popover open" id="reveal-picker-${sec.key}" onclick="event.stopPropagation()">${renderRevealPickerInner(sec.key,st)}</div>`:''}
+  </div>`;
+}
 function slugifySectionKey(name,existingKeys){
   const base=String(name||'section').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,48)||'section';
   let key=base,i=0;
@@ -9757,14 +10128,25 @@ function restoreSection(key){
 }
 function onSectionPublicSettingChange(key,field,value){
   const sec=findSectionByKey(key);if(!sec)return;
-  if(field==='publicVisibility')sec.publicVisibility=normalizePublicVisibility(value);
+  if(field==='publicVisibility'){
+    sec.publicVisibility=normalizePublicVisibility(value);
+    if(sec.publicVisibility!=='countdown')closeRevealPicker();
+  }
   else if(field==='publicMessage')sec.publicMessage=String(value||'').trim();
   else if(field==='publicRevealAt')sec.publicRevealAt=String(value||'').trim();
   scheduleSave();doSave();
   renderSectionsSettingsPanel();
 }
 function pickSectionVisibility(key,mode){
+  const sec=findSectionByKey(key);
+  if(sec&&mode==='countdown'){
+    sectionSettingsExpandedKey=key;
+    if(!sec.publicRevealAt)sec.publicRevealAt=revealStateToIso(defaultRevealState());
+    revealPickerOpenKey=key;
+    revealPickerDraft=parseRevealPickerState(sec.publicRevealAt);
+  }else closeRevealPicker();
   onSectionPublicSettingChange(key,'publicVisibility',mode);
+  if(sec&&mode==='countdown')requestAnimationFrame(()=>initRevealPickerWheels(key));
 }
 function formatSectionRevealDate(iso){
   if(!iso)return'';
@@ -9779,7 +10161,7 @@ function renderSectionVisibilityBadge(sec){
   return `<span class="sec-vis-badge vis-${vis}">${PUBLIC_VISIBILITY_LABELS[vis]}</span>`;
 }
 function renderSectionVisibilityCollapsed(sec){
-  return `<div class="sec-vis-collapsed">${renderSectionVisibilityBadge(sec)}${renderSectionVisibilityMeta(sec,false)}</div>`;
+  return `<div class="sec-vis-collapsed">${renderSectionCollapsedCountdown(sec)}${renderSectionVisibilityBadge(sec)}${renderSectionVisibilityMeta(sec,false)}</div>`;
 }
 function renderSectionVisibilityMeta(sec,expanded){
   if(expanded)return'';
@@ -9787,12 +10169,8 @@ function renderSectionVisibilityMeta(sec,expanded){
   if(vis==='coming-soon'&&sec.publicMessage){
     return `<span class="sec-vis-summary-meta">${esc(sec.publicMessage)}</span>`;
   }
-  if(vis==='countdown'){
-    const parts=[];
-    const dateLabel=formatSectionRevealDate(sec.publicRevealAt);
-    if(dateLabel)parts.push('Reveal '+dateLabel);
-    if(sec.publicMessage)parts.push(sec.publicMessage);
-    if(parts.length)return `<span class="sec-vis-summary-meta">${esc(parts.join(' · '))}</span>`;
+  if(vis==='countdown'&&sec.publicMessage){
+    return `<span class="sec-vis-summary-meta">${esc(sec.publicMessage)}</span>`;
   }
   return'';
 }
@@ -9804,7 +10182,7 @@ function renderSectionVisibilityPills(sec){
 }
 function toggleSectionSettingsRow(key,e){
   if(e){
-    if(e.target.closest('.sec-drag-handle,.section-settings-row-actions,.ms-btn,.sec-vis-pill,.sec-vis-pills'))return;
+    if(e.target.closest('.sec-drag-handle,.section-settings-row-actions,.ms-btn,.sec-vis-pill,.sec-vis-pills,.sec-reveal-picker-wrap'))return;
     if(e.target.closest('.sec-expand-btn'))e.stopPropagation();
   }
   sectionSettingsExpandedKey=sectionSettingsExpandedKey===key?null:key;
@@ -9940,7 +10318,6 @@ function ensureSectionSettingsDragBound(){
 function sectionSettingsVisibilityFields(sec){
   const vis=normalizePublicVisibility(sec.publicVisibility);
   const msg=esc(sec.publicMessage||'');
-  const date=esc((sec.publicRevealAt||'').slice(0,16));
   if(vis==='coming-soon'){
     return `<div class="settings-field" style="grid-column:1/-1">
       <label>Custom message</label>
@@ -9949,12 +10326,11 @@ function sectionSettingsVisibilityFields(sec){
     </div>`;
   }
   if(vis==='countdown'){
-    return `<div class="settings-field">
-      <label>Reveal date</label>
-      <input class="veh-editor-input" type="datetime-local" value="${date}"
-        onchange="onSectionPublicSettingChange('${sec.key}','publicRevealAt',this.value)"/>
+    return `<div class="settings-field" style="grid-column:1/-1">
+      <label>Reveal date & time</label>
+      ${renderRevealDatetimePicker(sec)}
     </div>
-    <div class="settings-field">
+    <div class="settings-field" style="grid-column:1/-1">
       <label>Custom message (optional)</label>
       <input class="veh-editor-input" type="text" value="${msg}" placeholder="Presented soon"
         onchange="onSectionPublicSettingChange('${sec.key}','publicMessage',this.value)"/>
@@ -10033,6 +10409,7 @@ function renderSectionsSettingsPanel(){
     if(archivedWrap)archivedWrap.hidden=!archived.length;
   }
   ensureSectionSettingsDragBound();
+  startSectionCountdownTimers();
 }
 function repairSections(savedSections){
   if(!Array.isArray(savedSections))return cloneDefaultData(DEFAULT_SECTIONS);
@@ -10184,6 +10561,7 @@ function normalizeBoardOrders(){
 }
 function repairTrackerState(){
   sections=repairSections(sections);
+  revealExpiredSectionCountdowns({silent:true,save:false,skipPanel:true,skipBuild:true});
   sponsors=repairSponsors(sponsors);
   decisions=repairDecisions(decisions);
   workTasks=repairWorkTasks(workTasks);
@@ -10340,6 +10718,9 @@ const DEFAULT_PUBLIC_PAGE_SETTINGS={
 let publicPageSettings=Object.assign({},DEFAULT_PUBLIC_PAGE_SETTINGS);
 let userSectionPresets=[];
 let sectionSettingsExpandedKey=null;
+let revealPickerOpenKey=null;
+let revealPickerDraft=null;
+let sectionCountdownTimer=null;
 function normalizePublicPageSettings(raw){
   const src=raw&&typeof raw==='object'?raw:{};
   return{
@@ -10824,6 +11205,7 @@ async function doSave(){
   }
 
   try{
+    revealExpiredSectionCountdowns({silent:true,save:false,skipPanel:true,skipBuild:true});
     await saveCloudState();
     saveLocalStateNow();
     setSaveInd('saved','Cloud synced');
@@ -13881,6 +14263,10 @@ if(document.readyState==='loading'){
 }else{
   bootTracker();
 }
+document.addEventListener('click',e=>{
+  if(revealPickerOpenKey&&!e.target.closest('.sec-reveal-picker-wrap'))closeRevealPicker();
+});
+setInterval(()=>revealExpiredSectionCountdowns(),30000);
 window.addEventListener('pageshow',()=>setTimeout(()=>{ if(!document.querySelector('.section-card')) { repairTrackerState(); safeBuild(); hideCloudLoading(); } },1200));
 
 </script>

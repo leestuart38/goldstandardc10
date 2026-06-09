@@ -793,22 +793,37 @@ html[data-theme="light"] .pub-theme-toggle .ti-moon{display:block}
   margin-top:5px;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);
 }
 .pub-sec-teaser{
-  border-radius:14px;border:1px dashed rgba(197,155,53,.35);
-  background:rgba(0,0,0,.22);padding:14px 16px;display:grid;gap:6px;
+  border-radius:14px;padding:14px 16px;display:grid;gap:6px;
+}
+.pub-sec-teaser.pub-sec-teaser-coming{
+  border:1px solid rgba(241,209,122,.42);
+  background:linear-gradient(180deg,rgba(197,155,53,.2),rgba(0,0,0,.28));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 8px 22px rgba(0,0,0,.18);
+}
+.pub-sec-teaser.pub-sec-teaser-countdown{
+  border:1px solid rgba(147,197,253,.4);
+  background:linear-gradient(180deg,rgba(59,130,246,.18),rgba(0,0,0,.28));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 8px 22px rgba(29,78,216,.16);
 }
 .pub-sec-teaser-kicker{
-  font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-light);
+  font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;
 }
+.pub-sec-teaser-coming .pub-sec-teaser-kicker{color:var(--gold-light)}
+.pub-sec-teaser-countdown .pub-sec-teaser-kicker{color:#93c5fd}
+.pub-sec-teaser-coming .pub-sec-item-name{color:var(--cream)}
+.pub-sec-teaser-countdown .pub-sec-item-name{color:#eff6ff}
 .pub-sec-teaser-msg{
-  font-size:12px;line-height:1.45;color:var(--muted);font-weight:600;
+  font-size:12px;line-height:1.45;font-weight:600;
 }
+.pub-sec-teaser-coming .pub-sec-teaser-msg{color:var(--muted)}
+.pub-sec-teaser-countdown .pub-sec-teaser-msg{color:#bfdbfe}
 .pub-sec-countdown{
   display:flex;flex-wrap:wrap;gap:10px 16px;align-items:baseline;
-  font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--cream);
+  font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#dbeafe;
 }
 .pub-sec-countdown strong{
-  font-family:var(--gs-display);font-size:22px;font-weight:800;color:var(--gold-light);
-  letter-spacing:.02em;margin-right:4px;
+  font-family:var(--gs-display);font-size:22px;font-weight:800;color:#fff;
+  letter-spacing:.02em;margin-right:4px;text-shadow:0 0 16px rgba(147,197,253,.35);
 }
 .public-section-teaser-only{padding:0;border:none;background:transparent}
 .public-section-teaser-only .pub-sec-teaser{margin:0}
@@ -929,6 +944,24 @@ html[data-theme="light"] .pub-builder-kicker{
 }
 html[data-theme="light"] .pub-builder-kicker{color:var(--tone-gold)}
 html[data-theme="light"] .pub-partner-social-btn:hover{background:rgba(185,138,39,.12)}
+html[data-theme="light"] .pub-sec-teaser-coming{
+  border-color:rgba(185,138,39,.35);
+  background:linear-gradient(180deg,rgba(241,209,122,.28),rgba(255,255,255,.85));
+  box-shadow:0 8px 20px rgba(111,79,18,.08);
+}
+html[data-theme="light"] .pub-sec-teaser-countdown{
+  border-color:rgba(59,130,246,.35);
+  background:linear-gradient(180deg,rgba(191,219,254,.45),rgba(255,255,255,.88));
+  box-shadow:0 8px 20px rgba(29,78,216,.1);
+}
+html[data-theme="light"] .pub-sec-teaser-coming .pub-sec-teaser-kicker{color:var(--tone-gold)}
+html[data-theme="light"] .pub-sec-teaser-countdown .pub-sec-teaser-kicker{color:#1d4ed8}
+html[data-theme="light"] .pub-sec-teaser-coming .pub-sec-item-name{color:var(--cream)}
+html[data-theme="light"] .pub-sec-teaser-countdown .pub-sec-item-name{color:#1e3a8a}
+html[data-theme="light"] .pub-sec-teaser-coming .pub-sec-teaser-msg{color:var(--muted)}
+html[data-theme="light"] .pub-sec-teaser-countdown .pub-sec-teaser-msg{color:#1e40af}
+html[data-theme="light"] .pub-sec-countdown{color:#1d4ed8}
+html[data-theme="light"] .pub-sec-countdown strong{color:#1e3a8a;text-shadow:none}
 
 </style>
 </head>
@@ -1201,14 +1234,14 @@ function renderPublicSectionTeaser(sec){
   if(vis==='hidden')return '';
   const msg=String(sec.publicMessage||'').trim();
   if(vis==='coming-soon'){
-    return `<div class="pub-sec-teaser">
+    return `<div class="pub-sec-teaser pub-sec-teaser-coming">
       <div class="pub-sec-teaser-kicker">Coming Soon</div>
       <div class="pub-sec-item-name">${esc(sec.name)}</div>
       ${msg?`<div class="pub-sec-teaser-msg">${esc(msg)}</div>`:''}
     </div>`;
   }
   if(vis==='countdown'){
-    return `<div class="pub-sec-teaser">
+    return `<div class="pub-sec-teaser pub-sec-teaser-countdown">
       <div class="pub-sec-teaser-kicker">Reveal In</div>
       <div class="pub-sec-item-name">${esc(sec.name)}</div>
       ${publicCountdownHtml(sec.publicRevealAt||'')}
