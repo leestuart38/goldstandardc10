@@ -1,7 +1,15 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
+<script>
+(function(){
+  try{
+    var t=localStorage.getItem('gsTheme');
+    if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);
+  }catch(e){}
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b0b0c">
 <title>Build Tracker — Public Page</title>
@@ -38,6 +46,8 @@
   --sem-ms-planned-bg:rgba(113,113,122,.35);--sem-ms-planned-fg:#e4e4e7;--sem-ms-planned-bd:#a1a1aa;
   --sem-ms-progress-bg:rgba(180,83,9,.45);--sem-ms-progress-fg:#fde68a;--sem-ms-progress-bd:#fbbf24;
   --sem-ms-complete-bg:rgba(21,128,61,.45);--sem-ms-complete-fg:#bbf7d0;--sem-ms-complete-bd:#4ade80;
+  --tone-gold:var(--gold-light);--tone-green:#86efac;--tone-red:#fca5a5;
+  --tone-chrome:var(--chrome);--tone-neutral:var(--cream);--tone-muted:var(--muted);
 }
 body{
   font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;
@@ -430,8 +440,22 @@ body{margin:0}
   justify-content:center;
   text-align:left;
   gap:0;
-  padding:22px 24px 18px;
+  padding:22px 56px 18px 24px;
+  position:relative;
 }
+.pub-theme-toggle{
+  position:absolute;right:16px;top:50%;transform:translateY(-50%);
+  width:42px;height:42px;border-radius:12px;cursor:pointer;
+  border:1px solid rgba(241,209,122,.28);
+  background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.28));
+  color:var(--gold-light);display:inline-flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 20px rgba(0,0,0,.22);transition:border-color .15s,background .15s,color .15s;
+}
+.pub-theme-toggle:hover{border-color:rgba(241,209,122,.48);background:rgba(185,138,39,.14)}
+.pub-theme-toggle .ti{font-size:18px;line-height:1}
+.pub-theme-toggle .ti-moon{display:none}
+html[data-theme="light"] .pub-theme-toggle .ti-sun{display:none}
+html[data-theme="light"] .pub-theme-toggle .ti-moon{display:block}
 .public-header-brand{
   display:flex;
   flex-direction:row;
@@ -582,33 +606,42 @@ body{margin:0}
 }
 
 .pub-builder-card{
-  margin-bottom:16px;padding:18px 20px;border-radius:24px;
+  margin-bottom:16px;padding:20px;border-radius:22px;
   border:1px solid var(--line);
-  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+  background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(0,0,0,.2));
+  box-shadow:0 12px 28px rgba(0,0,0,.18);
 }
-.pub-builder-head{display:flex;align-items:flex-start;gap:16px;margin-bottom:10px}
+.pub-builder-inner{
+  display:grid;grid-template-columns:minmax(120px,200px) minmax(0,1fr);gap:18px;align-items:start;
+}
+.pub-builder-avatar-col{width:100%;max-width:200px}
 .pub-builder-avatar{
-  flex-shrink:0;width:88px;height:88px;border-radius:18px;overflow:hidden;
-  border:2px solid rgba(241,209,122,.32);background:rgba(0,0,0,.25);
+  width:100%;aspect-ratio:1/1;box-sizing:border-box;padding:0;border-radius:16px;overflow:hidden;
+  border:1px solid rgba(241,209,122,.18);background:#000;
+  display:flex;align-items:center;justify-content:center;
 }
 .pub-builder-avatar img{width:100%;height:100%;object-fit:cover;display:block}
-.pub-builder-head-copy{flex:1;min-width:0}
+.pub-builder-avatar-fallback span{
+  font-family:var(--gs-display);font-size:clamp(28px,6vw,42px);font-weight:700;
+  letter-spacing:var(--gs-tracking-tight);text-transform:uppercase;color:var(--muted);
+}
+.pub-builder-copy{min-width:0}
 .pub-builder-kicker{
-  font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-light);margin-bottom:8px;
+  display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;
+  font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;
+  border:1px solid rgba(241,209,122,.28);color:var(--gold-light);background:rgba(0,0,0,.24);margin-bottom:8px;
 }
 .pub-builder-name{
-  font-family:var(--gs-display);font-size:clamp(22px,3.5vw,30px);line-height:1.05;
-  text-transform:uppercase;color:var(--cream);margin-bottom:6px;
+  font-family:var(--gs-display);font-size:clamp(24px,4vw,36px);font-weight:700;
+  letter-spacing:var(--gs-tracking-tight);text-transform:uppercase;line-height:1;margin-bottom:10px;color:var(--cream);
 }
-.pub-builder-tagline{font-size:14px;line-height:1.55;color:var(--cream);opacity:.92;margin-bottom:10px}
-.pub-builder-meta{font-size:12px;color:var(--muted);margin-bottom:12px;display:flex;flex-wrap:wrap;gap:10px}
-.pub-builder-links{display:flex;flex-wrap:wrap;gap:8px}
-.pub-builder-link{
-  display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;
-  border:1px solid rgba(241,209,122,.24);background:rgba(0,0,0,.22);color:var(--cream);
-  font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;text-decoration:none;
+.pub-builder-tagline{font-size:14px;line-height:1.6;font-weight:550;color:var(--cream);margin-bottom:10px;white-space:pre-wrap}
+.pub-builder-meta{font-size:12px;color:var(--muted);margin-bottom:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.pub-builder-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:4px}
+@media(max-width:700px){
+  .pub-builder-inner{grid-template-columns:1fr}
+  .pub-builder-avatar-col{max-width:220px}
 }
-.pub-builder-link:hover{border-color:rgba(241,209,122,.45);background:rgba(185,138,39,.12)}
 .pub-dash-progress{
   margin-bottom:16px;
   padding:18px;
@@ -741,6 +774,112 @@ body{margin:0}
   .public-main{padding:0 12px 18px}
 }
 
+/* ===== Public light mode (matches private app aesthetics) ===== */
+html[data-theme="light"]{
+  --bg:#f3efe6;--panel:#ffffff;--cream:#1c1916;--muted:#6b6358;
+  --line:rgba(111,79,18,.2);
+  --sem-pri-crit-bg:#fecaca;--sem-pri-crit-fg:#7f1d1d;--sem-pri-crit-bd:#ef4444;
+  --sem-pri-high-bg:#fde68a;--sem-pri-high-fg:#78350f;--sem-pri-high-bd:#f59e0b;
+  --sem-pri-med-bg:#bbf7d0;--sem-pri-med-fg:#14532d;--sem-pri-med-bd:#22c55e;
+  --sem-pri-low-bg:#bfdbfe;--sem-pri-low-fg:#1e3a8a;--sem-pri-low-bd:#3b82f6;
+  --sem-st-need-bg:#dc2626;--sem-st-need-fg:#fff;--sem-st-need-bd:#b91c1c;
+  --sem-st-ordered-bg:#d97706;--sem-st-ordered-fg:#fff;--sem-st-ordered-bd:#b45309;
+  --sem-st-received-bg:#2563eb;--sem-st-received-fg:#fff;--sem-st-received-bd:#1d4ed8;
+  --sem-st-installed-bg:#16a34a;--sem-st-installed-fg:#fff;--sem-st-installed-bd:#15803d;
+  --sem-st-na-bg:#4b5563;--sem-st-na-fg:#fff;--sem-st-na-bd:#374151;
+  --sem-wl-backlog-col-bg:linear-gradient(180deg,#f4f4f5,#eaeaec);
+  --sem-wl-backlog-col-bd:#a1a1aa;--sem-wl-backlog-col-fg:#3f3f46;
+  --sem-wl-ready-col-bg:linear-gradient(180deg,#dbeafe,#bfdbfe);
+  --sem-wl-ready-col-bd:#60a5fa;--sem-wl-ready-col-fg:#1d4ed8;
+  --sem-wl-progress-col-bg:linear-gradient(180deg,#fef3c7,#fde68a);
+  --sem-wl-progress-col-bd:#fbbf24;--sem-wl-progress-col-fg:#92400e;
+  --sem-wl-hold-col-bg:linear-gradient(180deg,#fee2e2,#fecaca);
+  --sem-wl-hold-col-bd:#f87171;--sem-wl-hold-col-fg:#991b1b;
+  --sem-wl-done-col-bg:linear-gradient(180deg,#dcfce7,#bbf7d0);
+  --sem-wl-done-col-bd:#4ade80;--sem-wl-done-col-fg:#166534;
+  --sem-wl-card-bg:#fff;--sem-wl-card-bd:rgba(111,79,18,.18);
+  --sem-ms-planned-bg:#f4f4f5;--sem-ms-planned-fg:#3f3f46;--sem-ms-planned-bd:#d4d4d8;
+  --sem-ms-progress-bg:#fef3c7;--sem-ms-progress-fg:#92400e;--sem-ms-progress-bd:#fbbf24;
+  --sem-ms-complete-bg:#dcfce7;--sem-ms-complete-fg:#166534;--sem-ms-complete-bd:#4ade80;
+  --tone-gold:#7c5c14;--tone-green:#15803d;--tone-red:#b91c1c;
+  --tone-chrome:#57534e;--tone-neutral:#1c1916;--tone-muted:#6b6358;
+  color-scheme:light;
+}
+html[data-theme="light"] body{
+  background:radial-gradient(circle at 20% -10%,rgba(185,138,39,.14),transparent 38%),linear-gradient(135deg,#faf7f0,#efe9de 52%,#f5f1ea);
+  color:var(--cream);
+}
+html[data-theme="light"] .tracker-header{
+  background:linear-gradient(135deg,rgba(185,138,39,.12),rgba(255,255,255,.7)),linear-gradient(180deg,#fff,#f7f2e8);
+  border-bottom-color:rgba(111,79,18,.16);
+  box-shadow:0 10px 32px rgba(111,79,18,.08);
+}
+html[data-theme="light"] .pub-theme-toggle{
+  background:#fff;color:#1c1916;border-color:rgba(111,79,18,.2);
+  box-shadow:0 4px 14px rgba(111,79,18,.08);
+}
+html[data-theme="light"] .pub-theme-toggle:hover{background:linear-gradient(180deg,rgba(197,155,53,.26),#fff)}
+html[data-theme="light"] .tracker-nav{
+  background:linear-gradient(180deg,#faf6ef,#f0ebe2);
+  border-top-color:rgba(111,79,18,.14);
+}
+html[data-theme="light"] .tracker-nav .tab,
+html[data-theme="light"] .public-tab{
+  background:#fff;color:#1c1916;border-color:rgba(111,79,18,.18);
+  box-shadow:0 2px 8px rgba(111,79,18,.05);
+}
+html[data-theme="light"] .tracker-nav .tab.active,
+html[data-theme="light"] .public-tab.active{
+  background:linear-gradient(180deg,rgba(197,155,53,.32),rgba(241,209,122,.18));
+  color:#1a1408;border-color:rgba(111,79,18,.34);
+}
+html[data-theme="light"] .kpi-card,
+html[data-theme="light"] .sections-card,
+html[data-theme="light"] .parts-card,
+html[data-theme="light"] .milestones-card,
+html[data-theme="light"] .pub-dash-progress,
+html[data-theme="light"] .pub-news,
+html[data-theme="light"] .pub-builder-card,
+html[data-theme="light"] .section-card-public,
+html[data-theme="light"] .pub-partner-profile,
+html[data-theme="light"] .pub-partner-dash-card,
+html[data-theme="light"] .milestone,
+html[data-theme="light"] .pub-wl-col{
+  background:linear-gradient(180deg,#fff,#faf7f1)!important;
+  border-color:rgba(111,79,18,.14)!important;
+  box-shadow:0 10px 28px rgba(111,79,18,.05)!important;
+}
+html[data-theme="light"] .public-part,
+html[data-theme="light"] .pub-news-card,
+html[data-theme="light"] .pub-wl-card{
+  background:#fff;border-color:rgba(111,79,18,.14);
+}
+html[data-theme="light"] .public-part.has-part-link{
+  background:linear-gradient(180deg,#fff,#f8f4ec);
+  border-color:rgba(111,79,18,.22);
+}
+html[data-theme="light"] .kpi-value,
+html[data-theme="light"] .section-percent,
+html[data-theme="light"] .pub-dash-kpi-val{color:var(--tone-gold)}
+html[data-theme="light"] .progress-track{background:rgba(111,79,18,.08);border-color:rgba(111,79,18,.12)}
+html[data-theme="light"] .pub-col-backlog{background:var(--sem-wl-backlog-col-bg)!important;border-color:var(--sem-wl-backlog-col-bd)!important}
+html[data-theme="light"] .pub-col-ready{background:var(--sem-wl-ready-col-bg)!important;border-color:var(--sem-wl-ready-col-bd)!important}
+html[data-theme="light"] .pub-col-progress{background:var(--sem-wl-progress-col-bg)!important;border-color:var(--sem-wl-progress-col-bd)!important}
+html[data-theme="light"] .pub-col-hold{background:var(--sem-wl-hold-col-bg)!important;border-color:var(--sem-wl-hold-col-bd)!important}
+html[data-theme="light"] .pub-col-done{background:var(--sem-wl-done-col-bg)!important;border-color:var(--sem-wl-done-col-bd)!important}
+html[data-theme="light"] .pub-col-backlog .pub-wl-col-title{color:var(--sem-wl-backlog-col-fg)}
+html[data-theme="light"] .pub-col-ready .pub-wl-col-title{color:var(--sem-wl-ready-col-fg)}
+html[data-theme="light"] .pub-col-progress .pub-wl-col-title{color:var(--sem-wl-progress-col-fg)}
+html[data-theme="light"] .pub-col-hold .pub-wl-col-title{color:var(--sem-wl-hold-col-fg)}
+html[data-theme="light"] .pub-col-done .pub-wl-col-title{color:var(--sem-wl-done-col-fg)}
+html[data-theme="light"] .pub-wl-card{background:var(--sem-wl-card-bg)!important;border-color:var(--sem-wl-card-bd)!important}
+html[data-theme="light"] .pub-partner-social-btn,
+html[data-theme="light"] .pub-builder-kicker{
+  background:rgba(255,255,255,.92);color:var(--tone-neutral);border-color:rgba(111,79,18,.2);
+}
+html[data-theme="light"] .pub-builder-kicker{color:var(--tone-gold)}
+html[data-theme="light"] .pub-partner-social-btn:hover{background:rgba(185,138,39,.12)}
+
 </style>
 </head>
 <body>
@@ -754,7 +893,9 @@ body{margin:0}
       <div class="public-vehicle-meta" id="vehicle-meta" hidden></div>
       <div class="public-build-sub" id="build-subtitle">The story behind the build.</div>
       <div class="public-build-updated" id="updated-at">Loading build data...</div>
-    </div></div></div>
+    </div></div>
+    <button class="pub-theme-toggle" type="button" id="pub-theme-toggle" onclick="togglePublicTheme()" aria-label="Toggle light or dark mode" title="Light / dark mode"><i class="ti ti-sun"></i><i class="ti ti-moon"></i></button>
+  </div>
   <nav class="tracker-nav" aria-label="Public build sections">
     <div class="tracker-nav-inner">
       <div class="tracker-nav-items">
@@ -851,6 +992,22 @@ const PUBLIC_COLLECTION='publicBuilds';
 const PUBLIC_ENGAGEMENT_COLLECTION='publicEngagement';
 const PUBLIC_ENGAGEMENT_INBOX_COLLECTION='publicEngagementInbox';
 let db,docRef,activePublicSlug='',pubBuildTitle='My Build',pubMilestonesById={};
+function applyPublicTheme(theme){
+  const t=theme==='light'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  const meta=document.querySelector('meta[name="theme-color"]');
+  if(meta)meta.setAttribute('content',t==='light'?'#f3efe6':'#0b0b0c');
+}
+function togglePublicTheme(){
+  const cur=document.documentElement.getAttribute('data-theme')==='light'?'light':'dark';
+  const next=cur==='light'?'dark':'light';
+  try{localStorage.setItem('gsTheme',next);}catch(e){}
+  applyPublicTheme(next);
+}
+try{
+  const savedTheme=localStorage.getItem('gsTheme');
+  if(savedTheme==='light'||savedTheme==='dark')applyPublicTheme(savedTheme);
+}catch(e){}
 function getPublicBuildSlug(){
   const params=new URLSearchParams(window.location.search);
   const q=String(params.get('build')||'').trim();
@@ -1447,25 +1604,28 @@ function renderPublicBuilder(profile){
   }
   const links=[];
   const web=publicPartnerUrl(p.website);
-  if(web)links.push(`<a class="pub-builder-link" href="${esc(web)}" target="_blank" rel="noopener noreferrer"><i class="ti ti-world"></i>Website</a>`);
-  if(p.email)links.push(`<a class="pub-builder-link" href="mailto:${esc(p.email)}"><i class="ti ti-mail"></i>Email</a>`);
+  if(web)links.push(`<a class="pub-partner-social-btn" href="${esc(web)}" target="_blank" rel="noopener noreferrer"><i class="ti ti-world"></i>Website</a>`);
+  if(p.email)links.push(`<a class="pub-partner-social-btn" href="mailto:${esc(p.email)}"><i class="ti ti-mail"></i>Email</a>`);
   [['instagram','brand-instagram'],['facebook','brand-facebook'],['youtube','brand-youtube'],['tiktok','brand-tiktok']].forEach(([key,icon])=>{
     const href=publicSocialUrl(key,p[key]);
-    if(href)links.push(`<a class="pub-builder-link" href="${esc(href)}" target="_blank" rel="noopener noreferrer"><i class="ti ti-${icon}"></i>${esc(key.charAt(0).toUpperCase()+key.slice(1))}</a>`);
+    if(href)links.push(`<a class="pub-partner-social-btn" href="${esc(href)}" target="_blank" rel="noopener noreferrer"><i class="ti ti-${icon}"></i>${esc(key.charAt(0).toUpperCase()+key.slice(1))}</a>`);
   });
   const loc=p.location?`<span><i class="ti ti-map-pin"></i> ${esc(p.location)}</span>`:'';
   el.hidden=false;
-  const avatar=p.photo?`<div class="pub-builder-avatar"><img src="${p.photo}" alt="${esc(p.displayName||'Builder')}"></div>`:'';
-  el.innerHTML=`<div class="pub-builder-kicker">About the builder</div>
-    <div class="pub-builder-head">
-      ${avatar}
-      <div class="pub-builder-head-copy">
-        <div class="pub-builder-name">${esc(p.displayName||'The Builder')}</div>
-        ${p.tagline?`<div class="pub-builder-tagline">${esc(p.tagline)}</div>`:''}
-        ${loc?`<div class="pub-builder-meta">${loc}</div>`:''}
-      </div>
+  const initial=esc((p.displayName||'B').trim().charAt(0)||'B');
+  const avatarCol=p.photo
+    ?`<div class="pub-builder-avatar-col"><div class="pub-builder-avatar"><img src="${p.photo}" alt="${esc(p.displayName||'Builder')}"></div></div>`
+    :`<div class="pub-builder-avatar-col"><div class="pub-builder-avatar pub-builder-avatar-fallback"><span>${initial}</span></div></div>`;
+  el.innerHTML=`<div class="pub-builder-inner">
+    ${avatarCol}
+    <div class="pub-builder-copy">
+      <div class="pub-builder-kicker">About the builder</div>
+      <div class="pub-builder-name">${esc(p.displayName||'The Builder')}</div>
+      ${p.tagline?`<div class="pub-builder-tagline">${esc(p.tagline)}</div>`:''}
+      ${loc?`<div class="pub-builder-meta">${loc}</div>`:''}
+      ${links.length?`<div class="pub-builder-actions">${links.join('')}</div>`:''}
     </div>
-    ${links.length?`<div class="pub-builder-links">${links.join('')}</div>`:''}`;
+  </div>`;
 }
 function render(data){
   pubBuildTitle=String(data.buildTitle||'My Build').trim()||'My Build';

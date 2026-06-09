@@ -6161,6 +6161,49 @@ html[data-theme="light"] .worklog-col.wl-col-hold{background:var(--sem-wl-hold-c
 html[data-theme="light"] .worklog-col.wl-col-done{background:var(--sem-wl-done-col-bg)!important;border-color:var(--sem-wl-done-col-bd)!important}
 html[data-theme="light"] .worklog-col{box-shadow:0 8px 20px rgba(111,79,18,.05)!important}
 
+/* Theme-scoped dashboard stat cards — neutral frames, tone-colored values only */
+html[data-theme="dark"] #dash-stats.stat-grid .stat,
+html[data-theme="dark"] #worklog-stats .stat,
+html[data-theme="dark"] #spon-stats .stat,
+html[data-theme="dark"] #research-stats .stat{
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.018))!important;
+  border:1px solid rgba(241,209,122,.16)!important;
+  border-left:4px solid rgba(241,209,122,.32)!important;
+  box-shadow:0 14px 32px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.045)!important;
+}
+html[data-theme="dark"] #dash-stats.stat-grid .stat:nth-child(1) .dash-money-input,
+html[data-theme="dark"] #dash-stats.stat-grid .stat:nth-child(1) .dash-money-wrap:before,
+html[data-theme="dark"] #dash-stats.stat-grid .stat:nth-child(6) .val,
+html[data-theme="dark"] #dash-stats.stat-grid .stat:nth-child(10) .val{color:var(--tone-gold)!important}
+html[data-theme="dark"] #dash-stats.stat-grid .stat:nth-child(3) .dash-money-input,
+html[data-theme="dark"] #dash-stats.stat-grid .stat:nth-child(3) .dash-money-wrap:before{color:var(--tone-chrome)!important}
+html[data-theme="dark"] #dash-stats.stat-grid .stat:nth-child(4) .val{color:var(--tone-red)!important}
+html[data-theme="dark"] #dash-stats.stat-grid .stat:nth-child(5) .val{color:var(--tone-neutral)!important}
+html[data-theme="dark"] #dash-stats.stat-grid .stat:nth-child(7) .val,
+html[data-theme="dark"] #dash-stats.stat-grid .stat:nth-child(9) .val{color:var(--tone-green)!important}
+html[data-theme="dark"] .stat .val.gold{color:var(--tone-gold)!important}
+html[data-theme="dark"] .stat .val.green{color:var(--tone-green)!important}
+html[data-theme="dark"] .stat .val.muted{color:var(--tone-muted)!important}
+html[data-theme="dark"] #panel-dashboard .ss-card .ss-spent{color:var(--tone-gold)!important}
+
+html[data-theme="light"] #dash-stats.stat-grid .stat,
+html[data-theme="light"] #worklog-stats .stat,
+html[data-theme="light"] #spon-stats .stat,
+html[data-theme="light"] #research-stats .stat{
+  background:linear-gradient(180deg,#fff,#faf7f1)!important;
+  border-color:rgba(111,79,18,.14)!important;
+  border-left:4px solid rgba(111,79,18,.22)!important;
+  box-shadow:0 6px 18px rgba(111,79,18,.05)!important;
+}
+html[data-theme="light"] #panel-dashboard .big-bar-wrap{
+  background:linear-gradient(180deg,#fff,#f8f4ec)!important;
+  border-color:rgba(111,79,18,.18)!important;
+  box-shadow:0 10px 24px rgba(111,79,18,.06)!important;
+}
+html[data-theme="light"] #panel-dashboard .big-bar{background:rgba(111,79,18,.08)!important;border-color:rgba(111,79,18,.12)!important}
+html[data-theme="light"] #panel-dashboard .ss-card .ss-spent{color:var(--tone-gold)!important}
+html[data-theme="light"] #panel-dashboard .completion-track{background:rgba(111,79,18,.08)!important;border-color:rgba(111,79,18,.12)!important}
+
 </style>
 </head>
 <body>
