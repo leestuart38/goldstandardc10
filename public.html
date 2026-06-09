@@ -14,6 +14,30 @@
   --gold:#b98a27;--gold-light:#f1d17a;--gold-dark:#6f4f12;
   --chrome:#d8d8d6;--line:rgba(241,209,122,.18);--green:#86efac;
   --red:#fca5a5;--blue:#93c5fd;--orange:#fdba74;
+  --sem-pri-crit-bg:#7f1d1d;--sem-pri-crit-fg:#fecaca;--sem-pri-crit-bd:#f87171;
+  --sem-pri-high-bg:#92400e;--sem-pri-high-fg:#fde68a;--sem-pri-high-bd:#fbbf24;
+  --sem-pri-med-bg:#14532d;--sem-pri-med-fg:#bbf7d0;--sem-pri-med-bd:#4ade80;
+  --sem-pri-low-bg:#1e3a8a;--sem-pri-low-fg:#bfdbfe;--sem-pri-low-bd:#60a5fa;
+  --sem-st-need-bg:#dc2626;--sem-st-need-fg:#fff;--sem-st-need-bd:#fca5a5;
+  --sem-st-ordered-bg:#d97706;--sem-st-ordered-fg:#fff;--sem-st-ordered-bd:#fcd34d;
+  --sem-st-received-bg:#2563eb;--sem-st-received-fg:#fff;--sem-st-received-bd:#93c5fd;
+  --sem-st-installed-bg:#16a34a;--sem-st-installed-fg:#fff;--sem-st-installed-bd:#86efac;
+  --sem-st-na-bg:#4b5563;--sem-st-na-fg:#fff;--sem-st-na-bd:#9ca3af;
+  --sem-wl-backlog-col-bg:linear-gradient(180deg,rgba(82,82,91,.48),rgba(39,39,42,.88));
+  --sem-wl-backlog-col-bd:#a1a1aa;--sem-wl-backlog-col-fg:#f4f4f5;--sem-wl-backlog-col-hdr:rgba(161,161,170,.22);
+  --sem-wl-ready-col-bg:linear-gradient(180deg,rgba(37,99,235,.42),rgba(30,58,138,.82));
+  --sem-wl-ready-col-bd:#60a5fa;--sem-wl-ready-col-fg:#93c5fd;--sem-wl-ready-col-hdr:rgba(96,165,250,.22);
+  --sem-wl-progress-col-bg:linear-gradient(180deg,rgba(217,119,6,.38),rgba(120,53,15,.82));
+  --sem-wl-progress-col-bd:#fbbf24;--sem-wl-progress-col-fg:#fcd34d;--sem-wl-progress-col-hdr:rgba(251,191,36,.22);
+  --sem-wl-hold-col-bg:linear-gradient(180deg,rgba(220,38,38,.34),rgba(127,29,29,.78));
+  --sem-wl-hold-col-bd:#f87171;--sem-wl-hold-col-fg:#fca5a5;--sem-wl-hold-col-hdr:rgba(248,113,113,.2);
+  --sem-wl-done-col-bg:linear-gradient(180deg,rgba(21,128,61,.38),rgba(20,83,45,.82));
+  --sem-wl-done-col-bd:#4ade80;--sem-wl-done-col-fg:#86efac;--sem-wl-done-col-hdr:rgba(74,222,128,.2);
+  --sem-wl-card-bg:linear-gradient(180deg,rgba(255,255,255,.1),rgba(0,0,0,.38));
+  --sem-wl-card-bd:rgba(241,209,122,.26);
+  --sem-ms-planned-bg:rgba(113,113,122,.35);--sem-ms-planned-fg:#e4e4e7;--sem-ms-planned-bd:#a1a1aa;
+  --sem-ms-progress-bg:rgba(180,83,9,.45);--sem-ms-progress-fg:#fde68a;--sem-ms-progress-bd:#fbbf24;
+  --sem-ms-complete-bg:rgba(21,128,61,.45);--sem-ms-complete-fg:#bbf7d0;--sem-ms-complete-bd:#4ade80;
 }
 body{
   font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;
@@ -154,8 +178,19 @@ body{
   font-size:10px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;
   border:1px solid rgba(241,209,122,.16);background:rgba(255,255,255,.04);color:var(--muted);
 }
-.status-pill{color:#fff;border-color:transparent}
-.s-need{background:#dc2626}.s-ordered{background:#d97706}.s-received{background:#2563eb}.s-installed{background:#16a34a}.s-na{background:#374151}
+.status-pill{border-color:transparent}
+.s-need{background:var(--sem-st-need-bg);color:var(--sem-st-need-fg);border-color:var(--sem-st-need-bd)}
+.s-ordered{background:var(--sem-st-ordered-bg);color:var(--sem-st-ordered-fg);border-color:var(--sem-st-ordered-bd)}
+.s-received{background:var(--sem-st-received-bg);color:var(--sem-st-received-fg);border-color:var(--sem-st-received-bd)}
+.s-installed{background:var(--sem-st-installed-bg);color:var(--sem-st-installed-fg);border-color:var(--sem-st-installed-bd)}
+.s-na{background:var(--sem-st-na-bg);color:var(--sem-st-na-fg);border-color:var(--sem-st-na-bd)}
+.prio-critical{background:var(--sem-pri-crit-bg);color:var(--sem-pri-crit-fg);border-color:var(--sem-pri-crit-bd)}
+.prio-high{background:var(--sem-pri-high-bg);color:var(--sem-pri-high-fg);border-color:var(--sem-pri-high-bd)}
+.prio-medium{background:var(--sem-pri-med-bg);color:var(--sem-pri-med-fg);border-color:var(--sem-pri-med-bd)}
+.prio-low{background:var(--sem-pri-low-bg);color:var(--sem-pri-low-fg);border-color:var(--sem-pri-low-bd)}
+.ms-pill.ms-planned{background:var(--sem-ms-planned-bg);color:var(--sem-ms-planned-fg);border-color:var(--sem-ms-planned-bd)}
+.ms-pill.ms-progress{background:var(--sem-ms-progress-bg);color:var(--sem-ms-progress-fg);border-color:var(--sem-ms-progress-bd)}
+.ms-pill.ms-complete{background:var(--sem-ms-complete-bg);color:var(--sem-ms-complete-fg);border-color:var(--sem-ms-complete-bd)}
 .milestone-list{display:grid;gap:16px}
 .milestone{
   border-radius:24px;border:1px solid rgba(241,209,122,.14);background:rgba(0,0,0,.20);overflow:hidden;
@@ -497,14 +532,24 @@ body{margin:0}
   font-size:11px;font-weight:900;background:rgba(255,255,255,.08);color:var(--muted);
 }
 .pub-wl-col-body{display:flex;flex-direction:column;gap:8px;overflow-y:auto;min-height:40px}
-.pub-col-backlog{border-color:rgba(255,255,255,.14)}
-.pub-col-ready{border-color:rgba(96,165,250,.28);background:rgba(29,78,216,.08)}
-.pub-col-progress{border-color:rgba(251,191,36,.28);background:rgba(217,119,6,.08)}
-.pub-col-hold{border-color:rgba(248,113,113,.24);background:rgba(220,38,38,.06)}
-.pub-col-done{border-color:rgba(74,222,128,.28);background:rgba(21,128,61,.08)}
+.pub-col-backlog{background:var(--sem-wl-backlog-col-bg);border-color:var(--sem-wl-backlog-col-bd)}
+.pub-col-backlog .pub-wl-col-title{color:var(--sem-wl-backlog-col-fg)}
+.pub-col-backlog .pub-wl-col-hdr{border-bottom:1px solid var(--sem-wl-backlog-col-hdr)}
+.pub-col-ready{background:var(--sem-wl-ready-col-bg);border-color:var(--sem-wl-ready-col-bd)}
+.pub-col-ready .pub-wl-col-title{color:var(--sem-wl-ready-col-fg)}
+.pub-col-ready .pub-wl-col-hdr{border-bottom:1px solid var(--sem-wl-ready-col-hdr)}
+.pub-col-progress{background:var(--sem-wl-progress-col-bg);border-color:var(--sem-wl-progress-col-bd)}
+.pub-col-progress .pub-wl-col-title{color:var(--sem-wl-progress-col-fg)}
+.pub-col-progress .pub-wl-col-hdr{border-bottom:1px solid var(--sem-wl-progress-col-hdr)}
+.pub-col-hold{background:var(--sem-wl-hold-col-bg);border-color:var(--sem-wl-hold-col-bd)}
+.pub-col-hold .pub-wl-col-title{color:var(--sem-wl-hold-col-fg)}
+.pub-col-hold .pub-wl-col-hdr{border-bottom:1px solid var(--sem-wl-hold-col-hdr)}
+.pub-col-done{background:var(--sem-wl-done-col-bg);border-color:var(--sem-wl-done-col-bd)}
+.pub-col-done .pub-wl-col-title{color:var(--sem-wl-done-col-fg)}
+.pub-col-done .pub-wl-col-hdr{border-bottom:1px solid var(--sem-wl-done-col-hdr)}
 .pub-wl-card{
-  border-radius:12px;border:1px solid rgba(241,209,122,.16);
-  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(0,0,0,.2));
+  border-radius:12px;border:1px solid var(--sem-wl-card-bd);
+  background:var(--sem-wl-card-bg);
   padding:10px;box-shadow:0 6px 16px rgba(0,0,0,.16);
 }
 .pub-wl-card-title{font-size:14px;font-weight:800;color:var(--cream);line-height:1.3;word-break:break-word;margin-bottom:8px}
@@ -525,10 +570,6 @@ body{margin:0}
   margin-top:8px;font-size:11px;line-height:1.45;color:var(--muted);white-space:pre-wrap;
   border-top:1px dashed rgba(241,209,122,.12);padding-top:8px;
 }
-.prio-critical{color:#fecaca;border-color:rgba(248,113,113,.35)!important}
-.prio-high{color:#fde68a;border-color:rgba(251,191,36,.35)!important}
-.prio-medium{color:#bfdbfe;border-color:rgba(96,165,250,.3)!important}
-.prio-low{color:var(--muted)}
 @media(max-width:900px){
   .public-header-brand{gap:12px;max-width:100%}
   .top-bar-brand{min-height:84px}
@@ -1258,6 +1299,10 @@ function statusClass(status){
   return {'Need to Buy':'s-need','Ordered':'s-ordered','Received':'s-received','Installed':'s-installed','N/A':'s-na'}[status]||'s-na';
 }
 
+function milestoneStatusClass(status){
+  return {'Planned':'ms-planned','In Progress':'ms-progress','Complete':'ms-complete'}[status]||'';
+}
+
 function priorityRank(p){
   return {'Critical':0,'High':1,'Medium':2,'Low':3}[p]??9;
 }
@@ -1505,7 +1550,7 @@ function render(data){
     return `<article class="milestone" data-ms-id="${esc(m.id||'')}">
       <div class="ms-head">
         <div class="ms-kicker">
-          ${m.status?`<span class="ms-pill">${esc(m.status)}</span>`:''}
+          ${m.status?`<span class="ms-pill ${milestoneStatusClass(m.status)}">${esc(m.status)}</span>`:''}
           ${m.date?`<span class="ms-pill">${esc(fmtDate(m.date))}</span>`:''}
           ${sec?`<span class="ms-pill">${esc(sec)}</span>`:''}
         </div>
