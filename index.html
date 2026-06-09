@@ -2785,6 +2785,41 @@ button,.tab,.section-hdr,.chip,.chip-opt,.ss-card{touch-action:manipulation;-web
 .settings-coming{
   font-size:12px;color:var(--gs-muted);font-style:italic;
 }
+.settings-save-banner{
+  display:none;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;
+  border:1px solid rgba(74,222,128,.35);background:rgba(22,163,74,.14);
+  color:#86efac;font-size:12px;font-weight:800;letter-spacing:.03em;
+}
+.settings-save-banner.show{display:flex}
+.settings-profile-save-btn.is-saving{opacity:.72;pointer-events:none}
+.settings-profile-save-btn.is-saving i{animation:settingsSpin .85s linear infinite}
+@keyframes settingsSpin{to{transform:rotate(360deg)}}
+.settings-profile-save-btn.is-saved{
+  border-color:rgba(74,222,128,.55)!important;
+  background:linear-gradient(180deg,rgba(22,163,74,.42),rgba(22,163,74,.18))!important;
+  color:#ecfdf5!important;
+}
+.settings-card.settings-saved-flash{animation:settingsSavedFlash .95s ease}
+@keyframes settingsSavedFlash{
+  0%,100%{box-shadow:none}
+  45%{box-shadow:0 0 0 3px rgba(74,222,128,.32),0 12px 28px rgba(22,163,74,.12)}
+}
+.settings-toggle-list{display:grid;gap:8px}
+.settings-toggle-row{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 14px;border-radius:12px;border:1px solid rgba(241,209,122,.14);
+  background:rgba(0,0,0,.18);
+}
+.settings-toggle-copy{min-width:0;flex:1}
+.settings-toggle-label{font-size:13px;font-weight:800;color:var(--gs-cream);line-height:1.3}
+.settings-toggle-hint{margin-top:3px;font-size:11px;line-height:1.4;color:var(--gs-muted)}
+.settings-toggle-row .spon-switch-wrap{
+  min-height:0;padding:0;border:none;background:transparent;flex-shrink:0;
+}
+.pub-slug-preview{
+  margin-top:6px;font-size:11px;line-height:1.45;color:var(--gs-muted);word-break:break-all;
+}
+.pub-slug-preview strong{color:var(--gs-gold-light);font-weight:800}
 .settings-photo-wrap{max-width:220px}
 .settings-photo-wrap .image-drop-single .image-drop-preview{
   border-radius:16px;overflow:hidden;aspect-ratio:1;max-height:180px;
@@ -6338,7 +6373,7 @@ html[data-theme="light"] #panel-dashboard .completion-track{background:rgba(111,
         <button class="tab active" data-panel="dashboard" data-path="dashboard" onclick="showPanel('dashboard',true)"><i class="ti ti-gauge"></i><span class="tab-label">Dashboard</span></button>
         <button class="tab" data-panel="parts" data-path="parts" onclick="showPanel('parts',true)"><i class="ti ti-tools"></i><span class="tab-label">Parts</span></button>
         <button class="tab" data-panel="worklog" data-path="worklog" onclick="showPanel('worklog',true)"><i class="ti ti-tool"></i><span class="tab-label">Work Log</span></button>
-        <button class="tab" data-panel="sponsorships" data-path="partners" onclick="showPanel('sponsorships',true)"><i class="ti ti-currency-dollar"></i><span class="tab-label">Build Partners</span></button>
+        <button class="tab nav-partners-item" data-panel="sponsorships" data-path="partners" onclick="showPanel('sponsorships',true)"><i class="ti ti-currency-dollar"></i><span class="tab-label">Build Partners</span></button>
         <button class="tab" data-panel="decisions" data-path="research" onclick="showPanel('decisions',true)"><i class="ti ti-search"></i><span class="tab-label">Research</span></button>
         <button class="tab" data-panel="milestones" data-path="milestones" onclick="showPanel('milestones',true)"><i class="ti ti-notebook"></i><span class="tab-label">Milestones</span></button>
       </div>
@@ -6372,7 +6407,7 @@ html[data-theme="light"] #panel-dashboard .completion-track{background:rgba(111,
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('dashboard')"><i class="ti ti-gauge"></i><span>Dashboard</span></button>
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('parts')"><i class="ti ti-tools"></i><span>Parts</span></button>
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('worklog')"><i class="ti ti-tool"></i><span>Work Log</span></button>
-          <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('sponsorships')"><i class="ti ti-currency-dollar"></i><span>Build Partners</span></button>
+          <button class="tracker-nav-dropdown-item nav-partners-item" type="button" role="menuitem" onclick="pickMobileNav('sponsorships')"><i class="ti ti-currency-dollar"></i><span>Build Partners</span></button>
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('decisions')"><i class="ti ti-search"></i><span>Research</span></button>
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('milestones')"><i class="ti ti-notebook"></i><span>Milestones</span></button>
           <div class="tracker-nav-mobile-divider" aria-hidden="true"></div>
@@ -6532,6 +6567,7 @@ html[data-theme="light"] #panel-dashboard .completion-track{background:rgba(111,
           <section class="settings-card" id="settings-profile-card">
             <div class="settings-card-body" style="padding-top:18px">
               <form class="settings-form" id="settings-profile-form" onsubmit="return false">
+                <div class="settings-save-banner" id="settings-profile-save-banner" role="status" aria-live="polite"><i class="ti ti-circle-check"></i><span>Profile saved successfully</span></div>
                 <div class="settings-field">
                   <label>Photo or logo <span class="settings-optional">(optional)</span></label>
                   <div class="settings-photo-wrap" id="profile-photo-host"></div>
@@ -6582,7 +6618,7 @@ html[data-theme="light"] #panel-dashboard .completion-track{background:rgba(111,
                 </label>
                 <div class="settings-note">Updates apply the next time you publish or save a public build link. Copy Public Link from the header to refresh live pages.</div>
                 <div class="settings-actions">
-                  <button class="ms-btn post" type="button" onclick="saveBuilderProfile()"><i class="ti ti-device-floppy"></i>Save profile</button>
+                  <button class="ms-btn post settings-profile-save-btn" id="settings-profile-save-btn" type="button" onclick="saveBuilderProfile()"><i class="ti ti-device-floppy" id="settings-profile-save-icon"></i><span id="settings-profile-save-label">Save profile</span></button>
                 </div>
               </form>
             </div>
@@ -6594,7 +6630,60 @@ html[data-theme="light"] #panel-dashboard .completion-track{background:rgba(111,
           <div class="settings-subpanel-title">Public Page</div>
           <div class="settings-subpanel-sub">Sharing, visibility, and default options for your public build page.</div>
         </div>
-        <div class="subpanel-placeholder"><i class="ti ti-world"></i><strong>Public page settings coming soon.</strong><span>Default visibility, sharing options, and page layout controls will appear here.</span></div>
+        <div class="settings-page">
+          <section class="settings-card">
+            <div class="settings-card-body" style="padding-top:18px">
+              <form class="settings-form" id="settings-public-form" onsubmit="return false">
+                <div class="settings-save-banner" id="settings-public-save-banner" role="status" aria-live="polite"><i class="ti ti-circle-check"></i><span>Public page settings saved</span></div>
+                <div class="settings-toggle-list">
+                  <div class="settings-toggle-row">
+                    <div class="settings-toggle-copy">
+                      <div class="settings-toggle-label">Public page enabled</div>
+                      <div class="settings-toggle-hint">When off, visitors see a disabled message instead of your build page.</div>
+                    </div>
+                    <label class="spon-switch-wrap settings-toggle-row-switch"><span class="spon-switch"><input type="checkbox" id="pub-settings-enabled" onchange="onPublicPageSettingChange()"><span class="spon-switch-slider"></span></span></label>
+                  </div>
+                  <div class="settings-toggle-row">
+                    <div class="settings-toggle-copy"><div class="settings-toggle-label">Show Build List</div></div>
+                    <label class="spon-switch-wrap settings-toggle-row-switch"><span class="spon-switch"><input type="checkbox" id="pub-settings-buildlist" onchange="onPublicPageSettingChange()"><span class="spon-switch-slider"></span></span></label>
+                  </div>
+                  <div class="settings-toggle-row">
+                    <div class="settings-toggle-copy"><div class="settings-toggle-label">Show Work Log</div></div>
+                    <label class="spon-switch-wrap settings-toggle-row-switch"><span class="spon-switch"><input type="checkbox" id="pub-settings-worklog" onchange="onPublicPageSettingChange()"><span class="spon-switch-slider"></span></span></label>
+                  </div>
+                  <div class="settings-toggle-row">
+                    <div class="settings-toggle-copy"><div class="settings-toggle-label">Show Milestones</div></div>
+                    <label class="spon-switch-wrap settings-toggle-row-switch"><span class="spon-switch"><input type="checkbox" id="pub-settings-milestones" onchange="onPublicPageSettingChange()"><span class="spon-switch-slider"></span></span></label>
+                  </div>
+                  <div class="settings-toggle-row">
+                    <div class="settings-toggle-copy">
+                      <div class="settings-toggle-label">Show Build Partners</div>
+                      <div class="settings-toggle-hint">Also hides Build Partners in the private app navigation and partner dashboard cards.</div>
+                    </div>
+                    <label class="spon-switch-wrap settings-toggle-row-switch"><span class="spon-switch"><input type="checkbox" id="pub-settings-partners" onchange="onPublicPageSettingChange()"><span class="spon-switch-slider"></span></span></label>
+                  </div>
+                  <div class="settings-toggle-row">
+                    <div class="settings-toggle-copy"><div class="settings-toggle-label">Comments enabled</div></div>
+                    <label class="spon-switch-wrap settings-toggle-row-switch"><span class="spon-switch"><input type="checkbox" id="pub-settings-comments" onchange="onPublicPageSettingChange()"><span class="spon-switch-slider"></span></span></label>
+                  </div>
+                  <div class="settings-toggle-row">
+                    <div class="settings-toggle-copy"><div class="settings-toggle-label">Likes enabled</div></div>
+                    <label class="spon-switch-wrap settings-toggle-row-switch"><span class="spon-switch"><input type="checkbox" id="pub-settings-likes" onchange="onPublicPageSettingChange()"><span class="spon-switch-slider"></span></span></label>
+                  </div>
+                </div>
+                <div class="settings-field">
+                  <label for="pub-settings-slug">Public slug</label>
+                  <input class="settings-input" id="pub-settings-slug" type="text" maxlength="48" placeholder="my-build-slug" autocomplete="off" oninput="syncPublicSlugPreview()" onchange="onPublicPageSettingChange()">
+                  <div class="pub-slug-preview" id="pub-settings-url-preview"></div>
+                  <div class="settings-note">Lowercase letters, numbers, and hyphens only. Changing the slug updates your public URL — use Copy Public Link to republish.</div>
+                </div>
+                <div class="settings-actions" style="justify-content:flex-start">
+                  <button class="ms-btn post" type="button" onclick="sharePublicBuild()"><i class="ti ti-copy"></i>Copy Public Link</button>
+                </div>
+              </form>
+            </div>
+          </section>
+        </div>
       </div>
       <div id="settings-sub-sections" class="settings-subpanel" data-settings-panel="sections">
         <div class="settings-subpanel-hdr">
@@ -7214,7 +7303,8 @@ function packState(){
       vehicleYear:VEHICLE_YEAR,
       vehicleMake:VEHICLE_MAKE,
       vehicleModel:VEHICLE_MODEL,
-      vehicleNickname:VEHICLE_NICKNAME
+      vehicleNickname:VEHICLE_NICKNAME,
+      publicPage:normalizePublicPageSettings(publicPageSettings)
     },
     meta:{
       appVersion:'v149-global-notifications',
@@ -7401,19 +7491,64 @@ function collectBuilderProfileFromForm(){
     showOnPublic:!(showEl&&!showEl.checked)
   });
 }
+function flashSettingsSaveFeedback(opts){
+  const o=opts||{};
+  const btn=document.getElementById(o.btnId||'settings-profile-save-btn');
+  const banner=document.getElementById(o.bannerId||'settings-profile-save-banner');
+  const icon=document.getElementById(o.iconId||'settings-profile-save-icon');
+  const label=document.getElementById(o.labelId||'settings-profile-save-label');
+  const card=document.getElementById(o.cardId||'settings-profile-card');
+  if(btn){
+    btn.classList.remove('is-saving');
+    btn.classList.add('is-saved');
+  }
+  if(icon)icon.className='ti ti-circle-check';
+  if(label)label.textContent=o.savedLabel||'Saved!';
+  if(banner)banner.classList.add('show');
+  if(card){
+    card.classList.remove('settings-saved-flash');
+    void card.offsetWidth;
+    card.classList.add('settings-saved-flash');
+  }
+  clearTimeout(flashSettingsSaveFeedback._t);
+  flashSettingsSaveFeedback._t=setTimeout(()=>{
+    if(btn)btn.classList.remove('is-saved');
+    if(icon)icon.className='ti ti-device-floppy';
+    if(label)label.textContent=o.defaultLabel||'Save profile';
+    if(banner)banner.classList.remove('show');
+    if(card)card.classList.remove('settings-saved-flash');
+  },o.duration||2400);
+}
 async function saveBuilderProfile(){
   if(!currentUser){showGarageToast('Sign in to save your profile.');return;}
+  const btn=document.getElementById('settings-profile-save-btn');
+  const icon=document.getElementById('settings-profile-save-icon');
+  const label=document.getElementById('settings-profile-save-label');
+  const banner=document.getElementById('settings-profile-save-banner');
+  if(banner)banner.classList.remove('show');
+  if(btn)btn.classList.add('is-saving');
+  if(label)label.textContent='Saving…';
   builderProfile=Object.assign({},builderProfile,collectBuilderProfileFromForm());
   const ref=getUserProfileRef();
-  if(!ref){showGarageToast('Profile storage unavailable.');return;}
+  if(!ref){
+    if(btn)btn.classList.remove('is-saving');
+    if(icon)icon.className='ti ti-device-floppy';
+    if(label)label.textContent='Save profile';
+    showGarageToast('Profile storage unavailable.');
+    return;
+  }
   try{
     await ref.set(sanitizeForFirestore(Object.assign({},builderProfile,{
       ownerUid:currentUser.uid,updatedAt:new Date().toISOString()
     })),{merge:true});
+    flashSettingsSaveFeedback();
     showGarageToast('Builder profile saved.');
     scheduleSave();
   }catch(e){
     console.warn(e);
+    if(btn)btn.classList.remove('is-saving');
+    if(icon)icon.className='ti ti-device-floppy';
+    if(label)label.textContent='Save profile';
     showGarageToast('Could not save profile.');
   }
 }
@@ -7432,6 +7567,8 @@ function showSettingsSubpanel(name){
 function renderSettingsPanel(){
   showSettingsSubpanel(activeSettingsSubpanel||'profile');
   syncSettingsProfileForm();
+  syncPublicPageSettingsForm();
+  applyBuildPartnersVisibility();
   loadUserProfile().then(()=>syncSettingsProfileForm()).catch(()=>{});
 }
 function slugifyBuildId(name,fallback){
@@ -8908,6 +9045,7 @@ function formatVehicleLabel(year,make,model){
   return parts.join(' ');
 }
 function publicPayload(){
+  const ps=normalizePublicPageSettings(publicPageSettings);
   return {
     buildTitle:BUILD_NAME||'My Build',
     buildSubtitle:'The story behind the build.',
@@ -8920,13 +9058,14 @@ function publicPayload(){
     truckCost:TRUCK_COST,
     targetBudget:TARGET_BUDGET,
     completion:masterCompletion(),
-    sections:publicSectionsPayload(),
-    milestones:publicMilestonesPayload(),
-    workLog:publicWorkLogPayload(),
-    sponsors:publicSponsorsPayload(),
+    publicPage:ps,
+    sections:ps.showBuildList!==false?publicSectionsPayload():[],
+    milestones:ps.showMilestones!==false?publicMilestonesPayload():[],
+    workLog:ps.showWorkLog!==false?publicWorkLogPayload():{stats:{},tasks:[]},
+    sponsors:ps.showBuildPartners!==false?publicSponsorsPayload():[],
     builderProfile:publicBuilderProfilePayload(),
     updatedAt:new Date().toISOString(),
-    publicVersion:'v7-builder-profile'
+    publicVersion:'v8-public-page-settings'
   };
 }
 function publicSponsorsPayload(){
@@ -9094,7 +9233,8 @@ async function saveCloudState(options){
 function publicPayloadFromState(state){
   const prev={
     BUILD_NAME,VEHICLE_YEAR,VEHICLE_MAKE,VEHICLE_MODEL,VEHICLE_NICKNAME,
-    TRUCK_COST,TARGET_BUDGET,vehicleImage,vehicleImageOriginal,sections,sponsors,milestones,workTasks
+    TRUCK_COST,TARGET_BUDGET,vehicleImage,vehicleImageOriginal,sections,sponsors,milestones,workTasks,
+    publicPageSettings
   };
   BUILD_NAME=state.buildName||state.settings?.buildName||BUILD_NAME;
   VEHICLE_YEAR=state.vehicleYear||state.settings?.vehicleYear||'';
@@ -9108,11 +9248,13 @@ function publicPayloadFromState(state){
   sponsors=state.sponsors||sponsors;
   milestones=state.milestones||milestones;
   workTasks=state.workTasks||workTasks;
+  if(state.settings?.publicPage)publicPageSettings=normalizePublicPageSettings(state.settings.publicPage);
   const payload=publicPayload();
   BUILD_NAME=prev.BUILD_NAME;VEHICLE_YEAR=prev.VEHICLE_YEAR;VEHICLE_MAKE=prev.VEHICLE_MAKE;VEHICLE_MODEL=prev.VEHICLE_MODEL;
   VEHICLE_NICKNAME=prev.VEHICLE_NICKNAME;TRUCK_COST=prev.TRUCK_COST;TARGET_BUDGET=prev.TARGET_BUDGET;
   vehicleImage=prev.vehicleImage;vehicleImageOriginal=prev.vehicleImageOriginal;
   sections=prev.sections;sponsors=prev.sponsors;milestones=prev.milestones;workTasks=prev.workTasks;
+  publicPageSettings=prev.publicPageSettings;
   return payload;
 }
 
@@ -9446,6 +9588,112 @@ function waitForAuth(){
   });
 }
 
+const DEFAULT_PUBLIC_PAGE_SETTINGS={
+  enabled:true,
+  showBuildList:true,
+  showWorkLog:true,
+  showMilestones:true,
+  showBuildPartners:true,
+  commentsEnabled:true,
+  likesEnabled:true
+};
+let publicPageSettings=Object.assign({},DEFAULT_PUBLIC_PAGE_SETTINGS);
+function normalizePublicPageSettings(raw){
+  const src=raw&&typeof raw==='object'?raw:{};
+  return{
+    enabled:src.enabled!==false,
+    showBuildList:src.showBuildList!==false,
+    showWorkLog:src.showWorkLog!==false,
+    showMilestones:src.showMilestones!==false,
+    showBuildPartners:src.showBuildPartners!==false,
+    commentsEnabled:src.commentsEnabled!==false,
+    likesEnabled:src.likesEnabled!==false
+  };
+}
+function normalizePublicSlugInput(raw){
+  return String(raw||'').toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,48);
+}
+function isBuildPartnersEnabled(){
+  return publicPageSettings.showBuildPartners!==false;
+}
+function applyBuildPartnersVisibility(){
+  const on=isBuildPartnersEnabled();
+  document.querySelectorAll('.nav-partners-item').forEach(el=>{el.hidden=!on;});
+  const stats=document.getElementById('spon-stats');
+  if(stats)stats.hidden=!on;
+}
+function publicUrlForSlug(slug){
+  const q='?build='+encodeURIComponent(slug||activePublicSlug||activeBuildId||LEGACY_BUILD_ID);
+  const fallback='https://leestuart38.github.io/goldstandardc10/public.html'+q;
+  if(window.location.protocol==='file:')return fallback;
+  const origin=window.location.origin;
+  let path=window.location.pathname||'/';
+  path=path.replace(/\/(index\.html|public\.html)$/,'');
+  if(!path.endsWith('/'))path+='/';
+  return origin+path+'public.html'+q;
+}
+function syncPublicSlugPreview(){
+  const preview=document.getElementById('pub-settings-url-preview');
+  const slugEl=document.getElementById('pub-settings-slug');
+  if(!preview)return;
+  const slug=normalizePublicSlugInput(slugEl&&slugEl.value)||activePublicSlug||activeBuildId||LEGACY_BUILD_ID;
+  preview.innerHTML='Public URL: <strong>'+esc(publicUrlForSlug(slug))+'</strong>';
+}
+function syncPublicPageSettingsForm(){
+  const p=normalizePublicPageSettings(publicPageSettings);
+  const setChk=(id,v)=>{const el=document.getElementById(id);if(el)el.checked=!!v;};
+  setChk('pub-settings-enabled',p.enabled);
+  setChk('pub-settings-buildlist',p.showBuildList);
+  setChk('pub-settings-worklog',p.showWorkLog);
+  setChk('pub-settings-milestones',p.showMilestones);
+  setChk('pub-settings-partners',p.showBuildPartners);
+  setChk('pub-settings-comments',p.commentsEnabled);
+  setChk('pub-settings-likes',p.likesEnabled);
+  const slugEl=document.getElementById('pub-settings-slug');
+  if(slugEl)slugEl.value=activePublicSlug||activeBuildId||'';
+  syncPublicSlugPreview();
+}
+function collectPublicPageSettingsFromForm(){
+  const chk=id=>{const el=document.getElementById(id);return!(el&&!el.checked);};
+  return normalizePublicPageSettings({
+    enabled:chk('pub-settings-enabled'),
+    showBuildList:chk('pub-settings-buildlist'),
+    showWorkLog:chk('pub-settings-worklog'),
+    showMilestones:chk('pub-settings-milestones'),
+    showBuildPartners:chk('pub-settings-partners'),
+    commentsEnabled:chk('pub-settings-comments'),
+    likesEnabled:chk('pub-settings-likes')
+  });
+}
+function applyPublicSlugFromSettings(){
+  const slugEl=document.getElementById('pub-settings-slug');
+  const next=normalizePublicSlugInput(slugEl&&slugEl.value)||activeBuildId||LEGACY_BUILD_ID;
+  if(!next)return false;
+  if(next===activePublicSlug)return true;
+  try{
+    bindActiveBuildRefs(activeBuildId||LEGACY_BUILD_ID,next);
+    if(slugEl)slugEl.value=next;
+    syncPublicSlugPreview();
+    return true;
+  }catch(e){
+    console.warn(e);
+    showGarageToast('Could not update public slug.');
+    return false;
+  }
+}
+function onPublicPageSettingChange(){
+  publicPageSettings=collectPublicPageSettingsFromForm();
+  applyPublicSlugFromSettings();
+  applyBuildPartnersVisibility();
+  syncPublicSlugPreview();
+  scheduleSave();
+  const banner=document.getElementById('settings-public-save-banner');
+  if(banner){
+    banner.classList.add('show');
+    clearTimeout(onPublicPageSettingChange._t);
+    onPublicPageSettingChange._t=setTimeout(()=>banner.classList.remove('show'),1800);
+  }
+}
 function applySettingsFromState(state){
   if(state){
     if(state.buildName!=null)BUILD_NAME=String(state.buildName||'').trim()||BUILD_NAME;
@@ -9462,7 +9710,9 @@ function applySettingsFromState(state){
     VEHICLE_MAKE=state.settings.vehicleMake!=null?String(state.settings.vehicleMake):VEHICLE_MAKE;
     VEHICLE_MODEL=state.settings.vehicleModel!=null?String(state.settings.vehicleModel):VEHICLE_MODEL;
     VEHICLE_NICKNAME=state.settings.vehicleNickname!=null?String(state.settings.vehicleNickname):VEHICLE_NICKNAME;
+    if(state.settings.publicPage)publicPageSettings=normalizePublicPageSettings(state.settings.publicPage);
   }
+  applyBuildPartnersVisibility();
   syncBuildMetaUI();
 }
 function buildPreviewTitle(){
@@ -12708,11 +12958,14 @@ function updateRoute(name,replace=false){
 
 function panelFromRoute(){
   const slug=(window.location.hash||'#dashboard').replace('#','').trim()||'dashboard';
-  return ROUTE_TO_PANEL[slug]||'dashboard';
+  let panel=ROUTE_TO_PANEL[slug]||'dashboard';
+  if(panel==='sponsorships'&&!isBuildPartnersEnabled())panel='dashboard';
+  return panel;
 }
 
 function showPanel(name,pushRoute=false){
   if(!document.getElementById('panel-'+name))name='dashboard';
+  if(name==='sponsorships'&&!isBuildPartnersEnabled())name='dashboard';
   closeMoreMenu();
   closeMobileNavMenu();
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
@@ -12745,6 +12998,7 @@ function build(){
   renderResearch();
   renderWorkLog();
   renderVehiclePanel();
+  applyBuildPartnersVisibility();
   showPanel(panelFromRoute(),false);
 }
 
@@ -12754,7 +13008,7 @@ async function bootTracker(){
   if(trackerBooted) return;
   trackerBooted=true;
 
-  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,setAppTheme,saveBuilderProfile,renderSettingsPanel,showSettingsSubpanel,handleProfilePhotoUpload,profilePhotoDrop,removeProfilePhoto,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,markAllNotificationsRead,markNotificationRead,openNotificationOnBuild,toggleNotifExpand,toggleNotifReplyForm,toggleMilestoneComments,ownerLikeComment,ownerReplyToComment,toggleReplyForm,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
+  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,setAppTheme,saveBuilderProfile,renderSettingsPanel,showSettingsSubpanel,onPublicPageSettingChange,syncPublicSlugPreview,syncPublicPageSettingsForm,applyBuildPartnersVisibility,isBuildPartnersEnabled,handleProfilePhotoUpload,profilePhotoDrop,removeProfilePhoto,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,markAllNotificationsRead,markNotificationRead,openNotificationOnBuild,toggleNotifExpand,toggleNotifReplyForm,toggleMilestoneComments,ownerLikeComment,ownerReplyToComment,toggleReplyForm,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
   document.addEventListener('click',e=>{
     if(!e.target.closest('.tracker-nav-more-wrap'))closeMoreMenu();
     if(!e.target.closest('.tracker-nav-mobile-wrap'))closeMobileNavMenu();

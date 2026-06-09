@@ -732,6 +732,18 @@ html[data-theme="light"] .pub-theme-toggle .ti-moon{display:block}
   padding:0;
 }
 .pub-news-read:hover{color:#fff;text-decoration:underline}
+.pub-disabled-banner{
+  display:flex;align-items:flex-start;gap:14px;padding:28px 24px;margin-bottom:16px;
+  border-radius:22px;border:1px solid rgba(241,209,122,.22);
+  background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(0,0,0,.28));
+  box-shadow:0 16px 40px rgba(0,0,0,.24);
+}
+.pub-disabled-banner i{font-size:34px;color:rgba(241,209,122,.75);line-height:1;margin-top:2px}
+.pub-disabled-banner strong{
+  display:block;font-family:var(--gs-display);font-size:22px;font-weight:700;
+  letter-spacing:var(--gs-tracking-tight);text-transform:uppercase;color:var(--cream);margin-bottom:6px;
+}
+.pub-disabled-banner span{display:block;font-size:13px;line-height:1.5;color:var(--muted)}
 .pub-sec-grid{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
@@ -1002,6 +1014,65 @@ const PUBLIC_COLLECTION='publicBuilds';
 const PUBLIC_ENGAGEMENT_COLLECTION='publicEngagement';
 const PUBLIC_ENGAGEMENT_INBOX_COLLECTION='publicEngagementInbox';
 let db,docRef,activePublicSlug='',pubBuildTitle='My Build',pubMilestonesById={};
+function normalizePublicPageSettings(raw){
+  const src=raw&&typeof raw==='object'?raw:{};
+  return{
+    enabled:src.enabled!==false,
+    showBuildList:src.showBuildList!==false,
+    showWorkLog:src.showWorkLog!==false,
+    showMilestones:src.showMilestones!==false,
+    showBuildPartners:src.showBuildPartners!==false,
+    commentsEnabled:src.commentsEnabled!==false,
+    likesEnabled:src.likesEnabled!==false
+  };
+}
+function applyPublicTabVisibility(ps){
+  const map={
+    buildlist:ps.showBuildList!==false,
+    worklog:ps.showWorkLog!==false,
+    milestones:ps.showMilestones!==false,
+    partners:ps.showBuildPartners!==false
+  };
+  Object.keys(map).forEach(name=>{
+    const tab=document.querySelector(`.tab[data-public-tab="${name}"]`);
+    if(tab)tab.hidden=!map[name];
+  });
+  const active=publicPanelFromHash();
+  if(active!=='dashboard'&&!map[active])showPublicPanel('dashboard',true,true);
+}
+function renderPublicDisabledState(){
+  let el=document.getElementById('pub-disabled-banner');
+  if(!el){
+    el=document.createElement('div');
+    el.id='pub-disabled-banner';
+    el.className='pub-disabled-banner';
+    const main=document.querySelector('.public-main');
+    if(main)main.insertBefore(el,main.firstChild);
+  }
+  el.innerHTML='<i class="ti ti-eye-off"></i><div><strong>Public page disabled</strong><span>The builder has turned off public access for this build.</span></div>';
+  document.querySelectorAll('.public-panel').forEach(p=>{p.classList.remove('active');p.hidden=true;});
+  const nav=document.querySelector('.tracker-nav');
+  if(nav)nav.hidden=true;
+}
+function clearPublicDisabledState(){
+  const el=document.getElementById('pub-disabled-banner');
+  if(el)el.remove();
+  document.querySelectorAll('.public-panel').forEach(p=>{p.hidden=false;});
+  const nav=document.querySelector('.tracker-nav');
+  if(nav)nav.hidden=false;
+}
+function publicPanelAllowed(name){
+  const ps=window.__pubPageSettings||normalizePublicPageSettings({});
+  if(ps.enabled===false)return name==='dashboard';
+  const map={
+    dashboard:true,
+    buildlist:ps.showBuildList!==false,
+    worklog:ps.showWorkLog!==false,
+    milestones:ps.showMilestones!==false,
+    partners:ps.showBuildPartners!==false
+  };
+  return !!map[name];
+}
 function applyPublicTheme(theme){
   const t=theme==='light'?'light':'dark';
   document.documentElement.setAttribute('data-theme',t);
@@ -1179,6 +1250,8 @@ function renderPublicPartners(sponsors){
   const wrap=document.getElementById('pub-partners-wrap');
   const el=document.getElementById('pub-partners-dash');
   if(!wrap||!el)return;
+  const ps=window.__pubPageSettings||normalizePublicPageSettings({});
+  if(ps.showBuildPartners===false){wrap.hidden=true;el.innerHTML='';return;}
   const list=sortPublicPartners((sponsors||[]).filter(s=>s&&String(s.name||'').trim()));
   if(!list.length){wrap.hidden=true;el.innerHTML='';return;}
   wrap.hidden=false;
@@ -1221,6 +1294,8 @@ function publicPartnerProfileCard(s){
 function renderPublicPartnerProfiles(sponsors){
   const el=document.getElementById('pub-partners-detail');
   if(!el)return;
+  const ps=window.__pubPageSettings||normalizePublicPageSettings({});
+  if(ps.showBuildPartners===false){el.innerHTML='';return;}
   const list=sortPublicPartners((sponsors||[]).filter(s=>s&&String(s.name||'').trim()));
   el.innerHTML=list.length?list.map(publicPartnerProfileCard).join(''):`<div class="empty">No public build partners published yet.</div>`;
   applyPublicPartnerLogoNormalize(el);
@@ -1307,6 +1382,8 @@ async function publicGuestLiked(milestoneId){
   }catch(e){return false}
 }
 async function togglePublicMilestoneLike(milestoneId){
+  const ps=window.__pubPageSettings||normalizePublicPageSettings({});
+  if(ps.likesEnabled===false)return;
   if(!db||!activePublicSlug||!milestoneId)return;
   const sumRef=msEngagementRef(milestoneId);
   if(!sumRef)return;
@@ -1362,6 +1439,8 @@ function renderPublicComments(milestoneId,comments){
   return html||'<div class="empty" style="padding:12px 0">No comments yet. Be the first.</div>';
 }
 async function togglePublicComments(milestoneId,forceOpen){
+  const ps=window.__pubPageSettings||normalizePublicPageSettings({});
+  if(ps.commentsEnabled===false)return;
   const panel=document.getElementById('pub-ms-comments-'+milestoneId);
   if(!panel)return;
   const open=forceOpen||panel.hidden;
@@ -1378,6 +1457,8 @@ async function togglePublicComments(milestoneId,forceOpen){
   }
 }
 async function submitPublicComment(milestoneId){
+  const ps=window.__pubPageSettings||normalizePublicPageSettings({});
+  if(ps.commentsEnabled===false)return;
   const nameEl=document.getElementById('pub-comment-name-'+milestoneId);
   const bodyEl=document.getElementById('pub-comment-body-'+milestoneId);
   const authorName=String((nameEl&&nameEl.value)||'').trim();
@@ -1407,25 +1488,30 @@ async function submitPublicComment(milestoneId){
     await refreshPublicMilestoneEngagement(milestoneId);
   }catch(e){alert(pubEngagementError(e,'Could not post comment.'));}
 }
+function buildPublicEngagementHtml(milestoneId,summary,liked){
+  const ps=window.__pubPageSettings||normalizePublicPageSettings({});
+  const likes=ps.likesEnabled!==false;
+  const comments=ps.commentsEnabled!==false;
+  if(!likes&&!comments)return '';
+  const actions=[];
+  if(likes)actions.push(`<button class="ms-engage-btn${liked?' liked':''}" type="button" onclick="togglePublicMilestoneLike('${milestoneId}')"><i class="ti ti-heart"></i>${(summary&&summary.likeCount)||0}</button>`);
+  if(comments)actions.push(`<button class="ms-engage-btn" type="button" onclick="togglePublicComments('${milestoneId}')"><i class="ti ti-message"></i>${(summary&&summary.commentCount)||0} comments</button>`);
+  const commentsPanel=comments?`<div class="ms-engage-comments" id="pub-ms-comments-${milestoneId}" hidden></div>`:'';
+  return `<div class="ms-engagement-actions">${actions.join('')}</div>${commentsPanel}`;
+}
 async function refreshPublicMilestoneEngagement(milestoneId){
+  const ps=window.__pubPageSettings||normalizePublicPageSettings({});
+  if(ps.likesEnabled===false&&ps.commentsEnabled===false)return;
   const summary=await loadPubEngagementSummary(milestoneId);
-  const liked=await publicGuestLiked(milestoneId);
+  const liked=ps.likesEnabled!==false?await publicGuestLiked(milestoneId):false;
   const host=document.getElementById('pub-ms-engage-'+milestoneId);
   if(!host)return;
-  host.innerHTML=`<div class="ms-engagement-actions">
-    <button class="ms-engage-btn${liked?' liked':''}" type="button" onclick="togglePublicMilestoneLike('${milestoneId}')"><i class="ti ti-heart"></i>${summary.likeCount||0}</button>
-    <button class="ms-engage-btn" type="button" onclick="togglePublicComments('${milestoneId}')"><i class="ti ti-message"></i>${summary.commentCount||0} comments</button>
-  </div>
-  <div class="ms-engage-comments" id="pub-ms-comments-${milestoneId}" hidden></div>`;
+  host.innerHTML=buildPublicEngagementHtml(milestoneId,summary,liked);
 }
 function renderPublicMilestoneEngagement(milestoneId){
-  return `<div class="ms-engagement" id="pub-ms-engage-${milestoneId}">
-    <div class="ms-engagement-actions">
-      <button class="ms-engage-btn" type="button" onclick="togglePublicMilestoneLike('${milestoneId}')"><i class="ti ti-heart"></i>0</button>
-      <button class="ms-engage-btn" type="button" onclick="togglePublicComments('${milestoneId}')"><i class="ti ti-message"></i>0 comments</button>
-    </div>
-    <div class="ms-engage-comments" id="pub-ms-comments-${milestoneId}" hidden></div>
-  </div>`;
+  const ps=window.__pubPageSettings||normalizePublicPageSettings({});
+  if(ps.likesEnabled===false&&ps.commentsEnabled===false)return '';
+  return `<div class="ms-engagement" id="pub-ms-engage-${milestoneId}">${buildPublicEngagementHtml(milestoneId,{likeCount:0,commentCount:0},false)}</div>`;
 }
 function prefetchPublicMilestoneEngagement(milestones){
   (milestones||[]).forEach(m=>{if(m&&m.id)refreshPublicMilestoneEngagement(m.id);});
@@ -1433,6 +1519,7 @@ function prefetchPublicMilestoneEngagement(milestones){
 
 function showPublicPanel(name,push=true,scrollTop=false){
   if(!['dashboard','buildlist','worklog','milestones','partners'].includes(name))name='dashboard';
+  if(!publicPanelAllowed(name))name='dashboard';
   document.querySelectorAll('.public-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab[data-public-tab]').forEach(t=>t.classList.remove('active'));
   const panel=document.getElementById('public-'+name);
@@ -1448,7 +1535,8 @@ function showPublicPanel(name,push=true,scrollTop=false){
 }
 function publicPanelFromHash(){
   const h=(window.location.hash||'#dashboard').replace('#','').trim();
-  return ['dashboard','buildlist','worklog','milestones','partners'].includes(h)?h:'dashboard';
+  const name=['dashboard','buildlist','worklog','milestones','partners'].includes(h)?h:'dashboard';
+  return publicPanelAllowed(name)?name:'dashboard';
 }
 window.addEventListener('popstate',()=>showPublicPanel(publicPanelFromHash(),false));
 window.addEventListener('hashchange',()=>showPublicPanel(publicPanelFromHash(),false));
@@ -1638,8 +1726,27 @@ function renderPublicBuilder(profile){
   </div>`;
 }
 function render(data){
+  const ps=normalizePublicPageSettings(data.publicPage);
+  window.__pubPageSettings=ps;
   pubBuildTitle=String(data.buildTitle||'My Build').trim()||'My Build';
   document.getElementById('build-title').textContent=pubBuildTitle;
+  if(ps.enabled===false){
+    clearPublicDisabledState();
+    renderPublicDisabledState();
+    const vehicleMeta=document.getElementById('vehicle-meta');
+    const vehicleLabel=formatPublicVehicleLabel(data);
+    if(vehicleMeta){
+      vehicleMeta.textContent=vehicleLabel;
+      vehicleMeta.hidden=!vehicleLabel;
+    }
+    document.getElementById('build-subtitle').textContent=data.buildSubtitle||'The story behind the build.';
+    document.getElementById('updated-at').textContent=data.updatedAt?'Last updated '+fmtDate(data.updatedAt):'';
+    return;
+  }
+  clearPublicDisabledState();
+  applyPublicTabVisibility(ps);
+  const dash=document.getElementById('public-dashboard');
+  if(dash)dash.classList.add('active');
   renderPublicBuilder(data.builderProfile);
   const vehicleMeta=document.getElementById('vehicle-meta');
   const vehicleLabel=formatPublicVehicleLabel(data);
@@ -1658,6 +1765,11 @@ function render(data){
   if(overallText)overallText.textContent=pct+'%';
   const bar=document.getElementById('overall-bar');
   if(bar)bar.style.width=Math.max(0,Math.min(100,pct))+'%';
+
+  const newsEl=document.getElementById('pub-news');
+  if(newsEl)newsEl.hidden=ps.showMilestones===false;
+  const secCard=document.getElementById('section-progress')?.closest('.sections-card');
+  if(secCard)secCard.hidden=ps.showBuildList===false;
 
   const sections=data.sections||[];
   document.getElementById('section-progress').innerHTML=sections.length?sections.map(sec=>{
