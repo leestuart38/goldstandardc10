@@ -5051,6 +5051,101 @@ body{margin:0}
   font-size:13px;
   line-height:1.5;
 }
+.admin-page{display:grid;gap:14px;max-width:920px}
+.admin-toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.admin-toolbar-copy{min-width:0;flex:1 1 220px}
+.admin-toolbar-title{
+  font-family:var(--gs-display);font-size:13px;font-weight:700;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--gs-cream);
+}
+.admin-toolbar-sub{font-size:12px;color:var(--gs-muted);line-height:1.45;margin-top:3px}
+.admin-user-list{display:grid;gap:8px}
+.admin-user-row{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:12px 14px;border-radius:14px;
+  border:1px solid rgba(241,209,122,.14);background:rgba(0,0,0,.2);
+}
+.admin-user-row.is-owner{
+  border-color:rgba(241,209,122,.34);
+  background:linear-gradient(180deg,rgba(197,155,53,.14),rgba(0,0,0,.22));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+}
+.admin-user-avatar{
+  width:42px;height:42px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(185,138,39,.18);border:1px solid rgba(241,209,122,.22);
+  color:var(--gs-gold-light);font-size:18px;overflow:hidden;
+}
+.admin-user-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.admin-user-main{flex:1;min-width:180px}
+.admin-user-name{
+  font-family:var(--gs-display);font-size:15px;font-weight:700;color:var(--gs-cream);letter-spacing:.03em;
+}
+.admin-user-email{font-size:12px;color:var(--gs-muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.admin-user-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px}
+.admin-you-badge{
+  font-size:9px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;
+  padding:4px 8px;border-radius:999px;background:rgba(185,138,39,.2);color:var(--gs-gold-light);
+  border:1px solid rgba(241,209,122,.28);
+}
+.admin-role-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:9px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;
+  padding:5px 10px;border-radius:999px;border:1px solid;font-family:var(--gs-display);
+}
+.admin-role-owner{border-color:rgba(241,209,122,.45);background:linear-gradient(180deg,rgba(197,155,53,.35),rgba(139,105,20,.22));color:var(--gs-gold-light)}
+.admin-role-editor{border-color:rgba(147,197,253,.4);background:linear-gradient(180deg,rgba(59,130,246,.28),rgba(29,78,216,.18));color:#dbeafe}
+.admin-role-viewer{border-color:rgba(148,163,184,.35);background:linear-gradient(180deg,rgba(100,116,139,.3),rgba(51,65,85,.22));color:#e2e8f0}
+.admin-user-actions{display:flex;gap:6px;flex-shrink:0;margin-left:auto}
+.admin-role-legend{display:grid;gap:8px}
+.admin-role-legend-item{
+  display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:12px;
+  border:1px solid rgba(241,209,122,.1);background:rgba(0,0,0,.16);
+}
+.admin-role-legend-copy{min-width:0}
+.admin-role-legend-title{font-size:12px;font-weight:800;color:var(--gs-cream);margin-bottom:3px}
+.admin-role-legend-desc{font-size:11px;line-height:1.45;color:var(--gs-muted)}
+.admin-coming-soon-note{
+  font-size:11px;line-height:1.5;color:var(--gs-muted);
+  padding:10px 12px;border-radius:10px;border:1px solid rgba(241,209,122,.12);
+  background:rgba(0,0,0,.18);
+}
+.admin-plan-hdr{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px}
+.admin-plan-name{
+  font-family:var(--gs-display);font-size:clamp(22px,3vw,28px);font-weight:700;
+  color:var(--gs-gold-light);letter-spacing:.03em;text-transform:uppercase;line-height:1.1;
+}
+.admin-plan-sub{font-size:12px;color:var(--gs-muted);margin-top:4px;line-height:1.45}
+.admin-status-pill{
+  display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;
+  font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;
+  font-family:var(--gs-display);border:1px solid;flex-shrink:0;
+}
+.admin-status-active{border-color:#86efac;background:linear-gradient(180deg,#22c55e,#15803d);color:#fff}
+.admin-status-trial{border-color:#fcd34d;background:linear-gradient(180deg,#d97706,#92400e);color:#fff}
+.admin-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.admin-stat{
+  padding:14px;border-radius:14px;border:1px solid rgba(241,209,122,.14);background:rgba(0,0,0,.22);
+}
+.admin-stat label{
+  display:block;font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--gs-muted);margin-bottom:6px;
+}
+.admin-stat .val{
+  font-family:var(--gs-display);font-size:22px;font-weight:700;color:var(--gs-cream);line-height:1.1;
+}
+.admin-stat .val small{font-size:12px;font-weight:700;color:var(--gs-muted)}
+.admin-storage-block{display:grid;gap:8px}
+.admin-storage-meta{display:flex;justify-content:space-between;gap:10px;font-size:11px;font-weight:700;color:var(--gs-muted)}
+.admin-storage-bar{height:10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.06);overflow:hidden}
+.admin-storage-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--gs-gold-dark),var(--gs-gold),var(--gs-gold-light))}
+.admin-actions-row{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end}
+.admin-placeholder-btn.is-disabled{opacity:.68;cursor:not-allowed}
+html[data-theme="light"] .admin-user-row,
+html[data-theme="light"] .admin-stat,
+html[data-theme="light"] .admin-role-legend-item{background:rgba(255,255,255,.72)}
+html[data-theme="light"] .admin-user-row.is-owner{background:linear-gradient(180deg,rgba(241,209,122,.22),rgba(255,255,255,.88))}
+html[data-theme="light"] .admin-coming-soon-note{background:rgba(255,255,255,.65)}
 @media(min-width:901px){
   .tracker-nav-inner{
     justify-content:center;
@@ -7031,19 +7126,19 @@ html[data-theme="light"] #panel-dashboard .completion-track{background:rgba(111,
   <div class="milestone-toolbar">
     <div>
       <div class="milestone-toolbar-title">Billing</div>
-      <div class="milestone-toolbar-sub">Plans, subscriptions, and invoices.</div>
+      <div class="milestone-toolbar-sub">Plan limits, usage, and subscription status. Payment processing is not connected yet.</div>
     </div>
   </div>
-  <div class="subpanel-placeholder"><i class="ti ti-credit-card"></i><strong>Billing is coming with SaaS launch.</strong><span>Subscription tiers and payment management will appear here.</span></div>
+  <div class="admin-page" id="billing-page"></div>
 </div>
 <div id="panel-users" class="panel">
   <div class="milestone-toolbar">
     <div>
       <div class="milestone-toolbar-title">Users</div>
-      <div class="milestone-toolbar-sub">Invite helpers, shops, or team members.</div>
+      <div class="milestone-toolbar-sub">Manage who can access your garage. Invites and permissions are coming soon.</div>
     </div>
   </div>
-  <div class="subpanel-placeholder"><i class="ti ti-users"></i><strong>User management is coming soon.</strong><span>Share access with friends, shops, or build partners.</span></div>
+  <div class="admin-page" id="users-page"></div>
 </div>
 <div id="panel-notifications" class="panel">
   <div class="milestone-toolbar">
@@ -7903,6 +7998,197 @@ function renderSettingsPanel(){
   renderSectionsSettingsPanel();
   applyBuildPartnersVisibility();
   loadUserProfile().then(()=>syncSettingsProfileForm()).catch(()=>{});
+}
+
+const USER_ROLE_DEFS=[
+  {id:'owner',label:'Owner',desc:'Full control — billing, users, builds, and settings.'},
+  {id:'editor',label:'Editor',desc:'Can edit builds, parts, and logs. Cannot manage billing or users.'},
+  {id:'viewer',label:'Viewer',desc:'Read-only access to shared builds and public pages.'}
+];
+const BILLING_PLACEHOLDER={
+  planName:'Starter',
+  planSubtitle:'Free during beta — paid tiers and invoices are coming soon.',
+  subscriptionStatus:'Active',
+  buildLimit:5,
+  userLimit:3,
+  storageLimitGb:2,
+  storageUsedMb:128
+};
+function adminRoleLabel(role){
+  const hit=USER_ROLE_DEFS.find(r=>r.id===role);
+  return hit?hit.label:String(role||'User').replace(/^\w/,c=>c.toUpperCase());
+}
+function getCurrentAccountUser(){
+  const p=builderProfile||{};
+  const email=String(p.email||currentUser?.email||'').trim();
+  const displayName=String(p.displayName||currentUser?.displayName||'').trim();
+  return {
+    id:currentUser?.uid||'local-owner',
+    displayName:displayName||(email?email.split('@')[0]:'Account owner'),
+    email:email||'Signed-in account',
+    photo:String(p.photo||'').trim(),
+    role:'owner',
+    isOwner:true,
+    isSelf:true
+  };
+}
+function getPlaceholderTeamUsers(){
+  return [getCurrentAccountUser()];
+}
+function renderAdminUserRow(user){
+  const avatar=user.photo
+    ?`<img src="${esc(user.photo)}" alt="">`
+    :`<i class="ti ti-user" aria-hidden="true"></i>`;
+  const roleClass='admin-role-'+String(user.role||'viewer').toLowerCase();
+  const removeBtn=user.isOwner
+    ?`<button type="button" class="ms-btn admin-placeholder-btn is-disabled" disabled title="Account owner cannot be removed"><i class="ti ti-lock"></i> Owner</button>`
+    :`<button type="button" class="ms-btn admin-placeholder-btn" onclick="placeholderRemoveUser('${esc(user.id)}')"><i class="ti ti-user-minus"></i> Remove</button>`;
+  return `<div class="admin-user-row${user.isOwner?' is-owner':''}">
+    <div class="admin-user-avatar">${avatar}</div>
+    <div class="admin-user-main">
+      <div class="admin-user-name">${esc(user.displayName)}</div>
+      <div class="admin-user-email">${esc(user.email)}</div>
+      <div class="admin-user-meta">
+        ${user.isSelf?'<span class="admin-you-badge">You</span>':''}
+        <span class="admin-role-badge ${roleClass}">${user.isOwner?'<i class="ti ti-crown" aria-hidden="true"></i> ':''}${esc(adminRoleLabel(user.role))}</span>
+      </div>
+    </div>
+    <div class="admin-user-actions">${removeBtn}</div>
+  </div>`;
+}
+function renderUsersPanel(){
+  const el=document.getElementById('users-page');
+  if(!el)return;
+  const users=getPlaceholderTeamUsers();
+  const listHtml=users.map(renderAdminUserRow).join('');
+  const legendHtml=USER_ROLE_DEFS.map(r=>`<div class="admin-role-legend-item">
+    <span class="admin-role-badge admin-role-${r.id}">${esc(r.label)}</span>
+    <div class="admin-role-legend-copy">
+      <div class="admin-role-legend-title">${esc(r.label)}</div>
+      <div class="admin-role-legend-desc">${esc(r.desc)}</div>
+    </div>
+  </div>`).join('');
+  el.innerHTML=`<section class="settings-card">
+    <div class="settings-card-hdr">
+      <div class="settings-card-title"><i class="ti ti-users"></i> Team members</div>
+      <div class="settings-card-sub">Current users on this account. Invitations and role changes are placeholders for now.</div>
+    </div>
+    <div class="settings-card-body">
+      <div class="admin-toolbar">
+        <div class="admin-toolbar-copy">
+          <div class="admin-toolbar-title">${users.length} user${users.length===1?'':'s'}</div>
+          <div class="admin-toolbar-sub">The signed-in account owner is identified below.</div>
+        </div>
+        <button type="button" class="ms-btn post" onclick="placeholderInviteUser()"><i class="ti ti-user-plus"></i> Invite user</button>
+      </div>
+      <div class="admin-user-list" id="users-page-list">${listHtml}</div>
+      <div class="admin-coming-soon-note"><i class="ti ti-info-circle" style="margin-right:4px"></i> Invites, Editors, and Viewers will connect to real permissions in a future release. Authentication stays as-is today.</div>
+    </div>
+  </section>
+  <section class="settings-card">
+    <div class="settings-card-hdr">
+      <div class="settings-card-title"><i class="ti ti-shield"></i> Roles</div>
+      <div class="settings-card-sub">Planned access levels for shared garage access.</div>
+    </div>
+    <div class="settings-card-body">
+      <div class="admin-role-legend">${legendHtml}</div>
+    </div>
+  </section>`;
+}
+function placeholderInviteUser(){
+  showGarageToast('User invites are coming soon. You will be able to add Editors and Viewers.');
+}
+function placeholderRemoveUser(userId){
+  if(!userId)return;
+  showGarageToast('User removal will be available when team access launches.');
+}
+function getBillingSnapshot(){
+  const activeBuilds=(garageBuilds||[]).filter(b=>!b.archived).length;
+  const userCount=getPlaceholderTeamUsers().length;
+  const storageUsedMb=BILLING_PLACEHOLDER.storageUsedMb;
+  const storageLimitMb=BILLING_PLACEHOLDER.storageLimitGb*1024;
+  const storagePct=Math.min(100,Math.round((storageUsedMb/storageLimitMb)*100));
+  return Object.assign({},BILLING_PLACEHOLDER,{
+    activeBuilds,
+    userCount,
+    storageUsedMb,
+    storageLimitMb,
+    storagePct
+  });
+}
+function formatStorageMb(mb){
+  const n=parseFloat(mb)||0;
+  if(n>=1024)return (n/1024).toFixed(n>=10240?0:1)+' GB';
+  return Math.round(n)+' MB';
+}
+function renderBillingPanel(){
+  const el=document.getElementById('billing-page');
+  if(!el)return;
+  const b=getBillingSnapshot();
+  const statusClass=b.subscriptionStatus==='Active'?'admin-status-active':'admin-status-trial';
+  el.innerHTML=`<section class="settings-card">
+    <div class="settings-card-body">
+      <div class="admin-plan-hdr">
+        <div>
+          <div class="admin-plan-name">${esc(b.planName)}</div>
+          <div class="admin-plan-sub">${esc(b.planSubtitle)}</div>
+        </div>
+        <span class="admin-status-pill ${statusClass}"><i class="ti ti-circle-check" aria-hidden="true"></i> ${esc(b.subscriptionStatus)}</span>
+      </div>
+      <div class="admin-stat-grid">
+        <div class="admin-stat">
+          <label>Builds used</label>
+          <div class="val">${b.activeBuilds} <small>/ ${b.buildLimit}</small></div>
+        </div>
+        <div class="admin-stat">
+          <label>Users</label>
+          <div class="val">${b.userCount} <small>/ ${b.userLimit}</small></div>
+        </div>
+        <div class="admin-stat">
+          <label>Storage limit</label>
+          <div class="val">${b.storageLimitGb} <small>GB</small></div>
+        </div>
+      </div>
+      <div class="admin-storage-block">
+        <div class="admin-storage-meta">
+          <span>Storage usage</span>
+          <span>${formatStorageMb(b.storageUsedMb)} / ${b.storageLimitGb} GB</span>
+        </div>
+        <div class="admin-storage-bar" role="progressbar" aria-valuenow="${b.storagePct}" aria-valuemin="0" aria-valuemax="100" aria-label="Storage usage">
+          <div class="admin-storage-fill" style="width:${b.storagePct}%"></div>
+        </div>
+      </div>
+      <div class="admin-coming-soon-note"><i class="ti ti-info-circle" style="margin-right:4px"></i> Placeholder plan data for layout preview. Stripe, Square, and other payment processors are not connected yet.</div>
+      <div class="admin-actions-row">
+        <button type="button" class="ms-btn post" onclick="placeholderUpgradePlan()"><i class="ti ti-arrow-up-circle"></i> Upgrade plan</button>
+      </div>
+    </div>
+  </section>
+  <section class="settings-card">
+    <div class="settings-card-hdr">
+      <div class="settings-card-title"><i class="ti ti-receipt"></i> Subscription</div>
+      <div class="settings-card-sub">Future-ready summary for billing history and renewal dates.</div>
+    </div>
+    <div class="settings-card-body">
+      <div class="admin-stat-grid">
+        <div class="admin-stat">
+          <label>Current plan</label>
+          <div class="val" style="font-size:18px">${esc(b.planName)}</div>
+        </div>
+        <div class="admin-stat">
+          <label>Status</label>
+          <div class="val" style="font-size:18px">${esc(b.subscriptionStatus)}</div>
+        </div>
+        <div class="admin-stat">
+          <label>Renewal</label>
+          <div class="val" style="font-size:18px">—</div>
+        </div>
+      </div>
+    </div>
+  </section>`;
+}
+function placeholderUpgradePlan(){
+  showGarageToast('Plan upgrades are coming soon. Payment processing is not connected yet.');
 }
 function slugifyBuildId(name,fallback){
   const base=String(name||fallback||'build').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,48);
@@ -14216,6 +14502,8 @@ function showPanel(name,pushRoute=false){
   if(name==='worklog')renderWorkLog();
   if(name==='vehicle')renderVehiclePanel();
   if(name==='settings')renderSettingsPanel();
+  if(name==='users')renderUsersPanel();
+  if(name==='billing')renderBillingPanel();
   if(name==='sponsorships')renderSponsors();
   if(name==='decisions')renderResearch();
   if(pushRoute)updateRoute(name,false);
@@ -14243,7 +14531,7 @@ async function bootTracker(){
   if(trackerBooted) return;
   trackerBooted=true;
 
-  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,setAppTheme,saveBuilderProfile,renderSettingsPanel,showSettingsSubpanel,renderSectionsSettingsPanel,applySectionPresetFromSettings,addCustomSectionFromSettings,renameSectionFromSettings,reorderSection,archiveSection,restoreSection,onSectionPublicSettingChange,pickSectionVisibility,toggleSectionSettingsRow,saveUserSectionPresetFromSettings,deleteUserSectionPreset,onPublicPageSettingChange,syncPublicSlugPreview,syncPublicPageSettingsForm,applyBuildPartnersVisibility,isBuildPartnersEnabled,handleProfilePhotoUpload,profilePhotoDrop,removeProfilePhoto,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,markAllNotificationsRead,markNotificationRead,openNotificationOnBuild,toggleNotifExpand,toggleNotifReplyForm,toggleMilestoneComments,ownerLikeComment,ownerReplyToComment,toggleReplyForm,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,movePart,openMovePartModal,closeMovePartModal,confirmMovePart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
+  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,setAppTheme,saveBuilderProfile,renderSettingsPanel,renderUsersPanel,renderBillingPanel,placeholderInviteUser,placeholderRemoveUser,placeholderUpgradePlan,showSettingsSubpanel,renderSectionsSettingsPanel,applySectionPresetFromSettings,addCustomSectionFromSettings,renameSectionFromSettings,reorderSection,archiveSection,restoreSection,onSectionPublicSettingChange,pickSectionVisibility,toggleSectionSettingsRow,saveUserSectionPresetFromSettings,deleteUserSectionPreset,onPublicPageSettingChange,syncPublicSlugPreview,syncPublicPageSettingsForm,applyBuildPartnersVisibility,isBuildPartnersEnabled,handleProfilePhotoUpload,profilePhotoDrop,removeProfilePhoto,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,markAllNotificationsRead,markNotificationRead,openNotificationOnBuild,toggleNotifExpand,toggleNotifReplyForm,toggleMilestoneComments,ownerLikeComment,ownerReplyToComment,toggleReplyForm,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,movePart,openMovePartModal,closeMovePartModal,confirmMovePart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
   document.addEventListener('click',e=>{
     if(!e.target.closest('.tracker-nav-more-wrap'))closeMoreMenu();
     if(!e.target.closest('.tracker-nav-mobile-wrap'))closeMobileNavMenu();
