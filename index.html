@@ -2859,20 +2859,30 @@ button,.tab,.section-hdr,.chip,.chip-opt,.ss-card{touch-action:manipulation;-web
   padding:10px 12px;cursor:pointer;
 }
 .section-settings-row-hdr-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
-.section-settings-row-vis{
-  display:flex;flex-wrap:wrap;align-items:center;gap:8px;
-  padding:0 12px 12px 52px;border-top:1px solid rgba(241,209,122,.1);
+.section-active-title{padding:22px 18px 10px;margin:0}
+.settings-card-active-sections{padding-top:10px}
+.section-add-block-in-card{margin:20px 18px 0}
+.settings-card>.section-settings-list{padding:10px 18px 18px}
+.section-settings-row-actions .sec-vis-collapsed{
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap;max-width:min(240px,36vw);margin-right:4px;
 }
-.section-settings-row.is-expanded .section-settings-row-vis{
-  background:rgba(0,0,0,.12);
+.sec-vis-badge{
+  display:inline-flex;align-items:center;border-radius:999px;padding:6px 11px;
+  font-size:9px;font-weight:800;letter-spacing:.06em;font-family:var(--gs-display);
+  text-transform:uppercase;white-space:nowrap;flex-shrink:0;
 }
-.section-active-title{padding:22px 18px 14px;margin:0}
-.section-add-block-in-card{margin:16px 18px 0}
-.settings-card>.section-settings-list{padding-top:0}
+.sec-vis-badge.vis-visible{background:linear-gradient(180deg,#22c55e,#15803d);color:#fff;border:2px solid #86efac}
+.sec-vis-badge.vis-hidden{background:linear-gradient(180deg,#64748b,#334155);color:#f8fafc;border:2px solid #cbd5e1}
+.sec-vis-badge.vis-coming-soon{background:linear-gradient(180deg,var(--gs-gold),var(--gs-gold-dark));color:#120e08;border:2px solid var(--gs-gold-light)}
+.sec-vis-badge.vis-countdown{background:linear-gradient(180deg,#3b82f6,#1d4ed8);color:#fff;border:2px solid #bfdbfe}
 .sec-vis-summary-meta{
-  font-size:11px;font-weight:700;color:var(--gs-gold-light);line-height:1.35;
-  padding:4px 10px;border-radius:8px;background:rgba(197,155,53,.12);
-  border:1px solid rgba(241,209,122,.2);max-width:100%;
+  font-size:10px;font-weight:700;color:var(--gs-gold-light);line-height:1.3;
+  padding:3px 8px;border-radius:8px;background:rgba(197,155,53,.12);
+  border:1px solid rgba(241,209,122,.2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px;
+}
+.section-user-presets-list{padding:0 18px 14px}
+.section-user-presets-empty{
+  font-size:12px;color:var(--gs-muted);line-height:1.45;padding:2px 0 0;
 }
 .section-settings-row-title{
   font-family:var(--gs-display);font-size:16px;font-weight:700;color:var(--gs-cream);
@@ -2949,7 +2959,7 @@ button,.tab,.section-hdr,.chip,.chip-opt,.ss-card{touch-action:manipulation;-web
   box-shadow:0 8px 20px rgba(0,0,0,.25);
 }
 .section-add-block-btn:hover{border-color:rgba(241,209,122,.8);filter:brightness(1.06)}
-.section-user-presets-list{display:grid;gap:8px;margin-top:10px}
+.section-user-presets-list{display:grid;gap:8px}
 .section-user-preset-row{
   display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
   border-radius:12px;border:1px solid rgba(241,209,122,.14);background:rgba(0,0,0,.18);padding:10px 12px;
@@ -6867,7 +6877,7 @@ html[data-theme="light"] #panel-dashboard .completion-track{background:rgba(111,
           </div>
           <div id="section-user-presets-list" class="section-user-presets-list"></div>
         </section>
-        <section class="settings-card">
+        <section class="settings-card settings-card-active-sections">
           <div class="section-add-block section-add-block-in-card">
             <div class="section-add-block-title"><i class="ti ti-plus"></i> Add New Section</div>
             <div class="section-add-block-sub">Create a custom section for parts that do not fit a preset category.</div>
@@ -9759,6 +9769,13 @@ function formatSectionRevealDate(iso){
     return d.toLocaleString(undefined,{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
   }catch(e){return''}
 }
+function renderSectionVisibilityBadge(sec){
+  const vis=normalizePublicVisibility(sec.publicVisibility);
+  return `<span class="sec-vis-badge vis-${vis}">${PUBLIC_VISIBILITY_LABELS[vis]}</span>`;
+}
+function renderSectionVisibilityCollapsed(sec){
+  return `<div class="sec-vis-collapsed">${renderSectionVisibilityBadge(sec)}${renderSectionVisibilityMeta(sec,false)}</div>`;
+}
 function renderSectionVisibilityMeta(sec,expanded){
   if(expanded)return'';
   const vis=normalizePublicVisibility(sec.publicVisibility);
@@ -9956,16 +9973,13 @@ function renderSectionSettingsRow(sec,opts){
           <div class="section-settings-row-title">${esc(sec.name)}${partCount?` <span style="font-size:11px;color:var(--gs-muted);font-weight:600">(${partCount} parts)</span>`:''}</div>
         </div>
         <div class="section-settings-row-actions" onclick="event.stopPropagation()">
+          ${archived||expanded?'':renderSectionVisibilityCollapsed(sec)}
           ${archived?'':`<button type="button" class="ms-btn" onclick="reorderSection('${sec.key}',-1)"${idx<=0?' disabled':''} title="Move up"><i class="ti ti-arrow-up"></i></button>
           <button type="button" class="ms-btn" onclick="reorderSection('${sec.key}',1)"${idx<0||idx>=activeList.length-1?' disabled':''} title="Move down"><i class="ti ti-arrow-down"></i></button>`}
           ${archived?`<button type="button" class="ms-btn" onclick="restoreSection('${sec.key}')"><i class="ti ti-arrow-back-up"></i> Restore</button>`:
             `<button type="button" class="ms-btn" onclick="archiveSection('${sec.key}')" title="Archive"><i class="ti ti-archive"></i></button>`}
         </div>
       </div>
-      ${archived?'':`<div class="section-settings-row-vis" onclick="event.stopPropagation()">
-        ${renderSectionVisibilityPills(sec)}
-        ${renderSectionVisibilityMeta(sec,expanded)}
-      </div>`}
     </div>
     ${archived?'':`<div class="section-settings-row-body${expanded?'':' collapsed'}">
       <div class="section-settings-row-body-inner">
@@ -9974,6 +9988,10 @@ function renderSectionSettingsRow(sec,opts){
             <label>Section name</label>
             <input class="veh-editor-input" type="text" value="${esc(sec.name)}"
               onchange="renameSectionFromSettings('${sec.key}',this.value)"/>
+          </div>
+          <div class="settings-field" style="grid-column:1/-1">
+            <label>Public visibility</label>
+            ${renderSectionVisibilityPills(sec)}
           </div>
           <div class="section-settings-extra-fields" style="grid-column:1/-1">${sectionSettingsVisibilityFields(sec)}</div>
         </div>
@@ -9992,7 +10010,7 @@ function renderUserSectionPresetsList(){
     </div>
     <button type="button" class="ms-btn" onclick="deleteUserSectionPreset('${p.id}')" title="Delete preset"><i class="ti ti-trash"></i></button>
   </div>`).join(''):
-    `<div class="settings-card-desc" style="padding:0">No saved presets yet.</div>`;
+    `<div class="section-user-presets-empty">No saved presets yet.</div>`;
 }
 function renderSectionsSettingsPanel(){
   syncSectionPresetSelect();
