@@ -792,6 +792,24 @@ html[data-theme="light"] .pub-theme-toggle .ti-moon{display:block}
 .pub-sec-item-meta{
   margin-top:5px;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);
 }
+.pub-sec-teaser{
+  border-radius:14px;border:1px dashed rgba(197,155,53,.35);
+  background:rgba(0,0,0,.22);padding:14px 16px;display:grid;gap:6px;
+}
+.pub-sec-teaser-kicker{
+  font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-light);
+}
+.pub-sec-teaser-msg{
+  font-size:12px;line-height:1.45;color:var(--muted);font-weight:600;
+}
+.pub-sec-countdown{
+  display:flex;flex-wrap:wrap;gap:10px 16px;align-items:baseline;
+  font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--cream);
+}
+.pub-sec-countdown strong{
+  font-family:var(--gs-display);font-size:22px;font-weight:800;color:var(--gold-light);
+  letter-spacing:.02em;margin-right:4px;
+}
 @media(max-width:700px){
   .pub-sec-grid{grid-template-columns:1fr}
   .pub-sec-item:last-child:nth-child(odd){grid-column:auto}
@@ -1134,6 +1152,92 @@ function publicMediaDocIds(slug){
 }
 
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function normalizePublicVisibility(v){
+  const s=String(v||'').toLowerCase().trim().replace(/_/g,'-');
+  if(s==='hidden')return 'hidden';
+  if(s==='coming-soon'||s==='comingsoon')return 'coming-soon';
+  if(s==='countdown')return 'countdown';
+  return 'visible';
+}
+function effectivePublicVisibility(sec){
+  const v=normalizePublicVisibility(sec&&sec.publicVisibility);
+  if(v==='countdown'&&sec&&sec.publicRevealAt){
+    const t=Date.parse(sec.publicRevealAt);
+    if(!isNaN(t)&&Date.now()>=t)return 'visible';
+  }
+  return v;
+}
+function publicCountdownParts(revealAt){
+  const end=Date.parse(revealAt);
+  if(!end||isNaN(end))return {days:0,hours:0,minutes:0,expired:true};
+  const diff=Math.max(0,end-Date.now());
+  if(!diff)return {days:0,hours:0,minutes:0,expired:true};
+  const days=Math.floor(diff/86400000);
+  const hours=Math.floor((diff%86400000)/3600000);
+  const minutes=Math.floor((diff%3600000)/60000);
+  return {days,hours,minutes,expired:false};
+}
+function publicCountdownHtml(revealAt){
+  const c=publicCountdownParts(revealAt);
+  if(c.expired)return '<span class="pub-sec-teaser-msg">Revealed</span>';
+  return `<div class="pub-sec-countdown" data-reveal-at="${esc(revealAt)}">
+    <span><strong class="pub-cd-days">${c.days}</strong> Days</span>
+    <span><strong class="pub-cd-hours">${c.hours}</strong> Hours</span>
+    <span><strong class="pub-cd-mins">${c.minutes}</strong> Min</span>
+  </div>`;
+}
+function renderPublicSectionProgressItem(sec){
+  const vis=effectivePublicVisibility(sec);
+  if(vis==='coming-soon'){
+    const msg=String(sec.publicMessage||'').trim();
+    return `<div class="pub-sec-teaser">
+      <div class="pub-sec-teaser-kicker">Coming Soon</div>
+      <div class="pub-sec-item-name">${esc(sec.name)}</div>
+      ${msg?`<div class="pub-sec-teaser-msg">${esc(msg)}</div>`:''}
+    </div>`;
+  }
+  if(vis==='countdown'){
+    const msg=String(sec.publicMessage||'').trim();
+    return `<div class="pub-sec-teaser">
+      <div class="pub-sec-teaser-kicker">Reveal In</div>
+      <div class="pub-sec-item-name">${esc(sec.name)}</div>
+      ${publicCountdownHtml(sec.publicRevealAt||'')}
+      ${msg?`<div class="pub-sec-teaser-msg">${esc(msg)}</div>`:''}
+    </div>`;
+  }
+  const sp=parseInt(sec.completion||0)||0;
+  return `<div class="pub-sec-item">
+    <div class="pub-sec-ring-sm">${ringSvg(sp,56,6,'pub-sec-ring')}</div>
+    <div class="pub-sec-item-body">
+      <div class="pub-sec-item-top">
+        <div class="pub-sec-item-name">${esc(sec.name)}</div>
+        <div class="pub-sec-item-pct">${sp}%</div>
+      </div>
+      <div class="progress-track pub-sec-item-bar"><div class="progress-fill" style="width:${Math.max(0,Math.min(100,sp))}%"></div></div>
+      <div class="pub-sec-item-meta">${parseInt(sec.installed||0)||0} installed · ${parseInt(sec.totalParts||0)||0} parts</div>
+    </div>
+  </div>`;
+}
+let publicCountdownTimer=null;
+function updatePublicCountdowns(){
+  document.querySelectorAll('.pub-sec-countdown[data-reveal-at]').forEach(el=>{
+    const revealAt=el.getAttribute('data-reveal-at')||'';
+    const c=publicCountdownParts(revealAt);
+    const d=el.querySelector('.pub-cd-days');
+    const h=el.querySelector('.pub-cd-hours');
+    const m=el.querySelector('.pub-cd-mins');
+    if(d)d.textContent=c.days;
+    if(h)h.textContent=c.hours;
+    if(m)m.textContent=c.minutes;
+  });
+}
+function startPublicCountdownTimers(){
+  if(publicCountdownTimer)clearInterval(publicCountdownTimer);
+  updatePublicCountdowns();
+  if(document.querySelector('.pub-sec-countdown[data-reveal-at]')){
+    publicCountdownTimer=setInterval(updatePublicCountdowns,60000);
+  }
+}
 function publicPartUrl(url){
   const u=String(url||'').trim();
   if(!u)return '';
@@ -1803,27 +1907,17 @@ function render(data){
   if(secCard)secCard.hidden=ps.showBuildList===false;
 
   const sections=data.sections||[];
-  document.getElementById('section-progress').innerHTML=sections.length?sections.map(sec=>{
-    const sp=parseInt(sec.completion||0)||0;
-    return `<div class="pub-sec-item">
-      <div class="pub-sec-ring-sm">${ringSvg(sp,56,6,'pub-sec-ring')}</div>
-      <div class="pub-sec-item-body">
-        <div class="pub-sec-item-top">
-          <div class="pub-sec-item-name">${esc(sec.name)}</div>
-          <div class="pub-sec-item-pct">${sp}%</div>
-        </div>
-        <div class="progress-track pub-sec-item-bar"><div class="progress-fill" style="width:${Math.max(0,Math.min(100,sp))}%"></div></div>
-        <div class="pub-sec-item-meta">${parseInt(sec.installed||0)||0} installed · ${parseInt(sec.totalParts||0)||0} parts</div>
-      </div>
-    </div>`;
-  }).join(''):`<div class="empty">No section progress published yet.</div>`;
+  document.getElementById('section-progress').innerHTML=sections.length?sections.map(sec=>renderPublicSectionProgressItem(sec)).join(''):
+    `<div class="empty">No section progress published yet.</div>`;
+  startPublicCountdownTimers();
 
-  const allParts=sections.flatMap(s=>(s.parts||[]).map(p=>({...p,sectionName:s.name})))
+  const visibleSections=sections.filter(s=>effectivePublicVisibility(s)==='visible');
+  const allParts=visibleSections.flatMap(s=>(s.parts||[]).map(p=>({...p,sectionName:s.name})))
     .sort((a,b)=>priorityRank(a.priority)-priorityRank(b.priority)||String(a.sectionName).localeCompare(String(b.sectionName))||String(a.name).localeCompare(String(b.name)));
 
   const partsEl=document.getElementById('public-parts-list');
   if(partsEl){
-    partsEl.innerHTML=sections.some(s=>(s.parts||[]).length)?sections.map((s,idx)=>{
+    partsEl.innerHTML=visibleSections.some(s=>(s.parts||[]).length)?visibleSections.map((s,idx)=>{
       const parts=(s.parts||[]).slice().sort((a,b)=>priorityRank(a.priority)-priorityRank(b.priority)||String(a.name).localeCompare(String(b.name)));
       if(!parts.length)return '';
       return `<div class="public-section-drop">

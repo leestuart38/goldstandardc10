@@ -2738,6 +2738,12 @@ button,.tab,.section-hdr,.chip,.chip-opt,.ss-card{touch-action:manipulation;-web
 .settings-card-title{
   font-size:13px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--gs-gold-light);
 }
+.settings-card-desc{
+  font-size:12px;color:var(--gs-muted);line-height:1.5;margin:0;padding:4px 18px 12px;
+}
+.settings-card>.settings-card-title{padding:16px 18px 0}
+.settings-card>.section-settings-toolbar{padding:0 18px 14px}
+.settings-card>.section-settings-list{padding:0 18px 18px}
 .settings-card-sub{
   margin-top:4px;font-size:12px;line-height:1.45;color:var(--gs-muted);
 }
@@ -2820,6 +2826,31 @@ button,.tab,.section-hdr,.chip,.chip-opt,.ss-card{touch-action:manipulation;-web
   margin-top:6px;font-size:11px;line-height:1.45;color:var(--gs-muted);word-break:break-all;
 }
 .pub-slug-preview strong{color:var(--gs-gold-light);font-weight:800}
+.section-settings-toolbar{
+  display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:14px;
+}
+.section-settings-toolbar .settings-field{flex:1 1 220px;margin:0}
+.section-settings-list{display:grid;gap:10px}
+.section-settings-row{
+  border-radius:14px;border:1px solid rgba(241,209,122,.16);
+  background:rgba(0,0,0,.2);padding:12px 14px;display:grid;gap:10px;
+}
+.section-settings-row.is-archived{opacity:.72;border-style:dashed}
+.section-settings-row-hdr{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+}
+.section-settings-row-title{
+  font-family:var(--gs-display);font-size:16px;font-weight:700;color:var(--gs-cream);
+  text-transform:uppercase;letter-spacing:.03em;
+}
+.section-settings-row-actions{display:flex;gap:6px;flex-wrap:wrap}
+.section-settings-row-actions .ms-btn{padding:6px 10px;font-size:10px}
+.section-settings-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.section-settings-archived-hdr{
+  margin:18px 0 10px;font-size:11px;font-weight:900;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--gs-muted);
+}
+@media(max-width:700px){.section-settings-fields{grid-template-columns:1fr}}
 .settings-photo-wrap{max-width:220px}
 .settings-photo-wrap .image-drop-single .image-drop-preview{
   border-radius:16px;overflow:hidden;aspect-ratio:1;max-height:180px;
@@ -6695,9 +6726,34 @@ html[data-theme="light"] #panel-dashboard .completion-track{background:rgba(111,
       <div id="settings-sub-sections" class="settings-subpanel" data-settings-panel="sections">
         <div class="settings-subpanel-hdr">
           <div class="settings-subpanel-title">Sections</div>
-          <div class="settings-subpanel-sub">Organize and customize the parts sections used across your build.</div>
+          <div class="settings-subpanel-sub">Organize build sections, apply presets, and control what appears on your public page.</div>
         </div>
-        <div class="subpanel-placeholder"><i class="ti ti-layout-grid"></i><strong>Section settings coming soon.</strong><span>Rename, reorder, and manage default build sections from here.</span></div>
+        <section class="settings-card">
+          <div class="settings-card-title">Apply Section Preset</div>
+          <p class="settings-card-desc">Adds missing sections from a preset. Existing sections, parts, and renames are never removed.</p>
+          <div class="section-settings-toolbar">
+            <div class="settings-field">
+              <label for="section-preset-select">Preset</label>
+              <select class="veh-editor-input" id="section-preset-select"></select>
+            </div>
+            <button type="button" class="ms-btn" onclick="applySectionPresetFromSettings()"><i class="ti ti-layout-grid-add"></i> Apply Preset</button>
+          </div>
+        </section>
+        <section class="settings-card">
+          <div class="settings-card-title">Active Sections</div>
+          <div class="section-settings-toolbar">
+            <div class="settings-field">
+              <label for="section-custom-name">New section name</label>
+              <input class="veh-editor-input" id="section-custom-name" type="text" maxlength="80" placeholder="Custom section" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomSectionFromSettings();}"/>
+            </div>
+            <button type="button" class="ms-btn" onclick="addCustomSectionFromSettings()"><i class="ti ti-plus"></i> Add Section</button>
+          </div>
+          <div id="section-settings-active-list" class="section-settings-list"></div>
+        </section>
+        <section class="settings-card" id="section-settings-archived-wrap" hidden>
+          <div class="section-settings-archived-hdr">Archived Sections</div>
+          <div id="section-settings-archived-list" class="section-settings-list"></div>
+        </section>
       </div>
       <div id="settings-sub-statuses" class="settings-subpanel" data-settings-panel="statuses">
         <div class="settings-subpanel-hdr">
@@ -7169,25 +7225,30 @@ function snapshotFromPublic(pub){
     }
   };
 }
-const BLANK_BUILD_SECTIONS=[
-  {key:'engine',name:'Engine',budget:0,parts:[]},
-  {key:'drivetrain',name:'Drivetrain',budget:0,parts:[]},
-  {key:'chassis',name:'Suspension',budget:0,parts:[]},
-  {key:'brakes',name:'Brakes',budget:0,parts:[]},
-  {key:'wheels',name:'Wheels / Tires',budget:0,parts:[]},
-  {key:'interior',name:'Interior',budget:0,parts:[]},
-  {key:'body',name:'Body / Paint',budget:0,parts:[]},
-  {key:'electrical',name:'Electrical',budget:0,parts:[]},
-  {key:'tools',name:'Other',budget:0,parts:[]}
-];
+const PUBLIC_VISIBILITY_MODES=['visible','hidden','coming-soon','countdown'];
+const PUBLIC_VISIBILITY_LABELS={'visible':'Visible','hidden':'Hidden','coming-soon':'Coming Soon','countdown':'Countdown'};
+const SECTION_PRESET_NAMES={
+  'street-vehicle':['Engine','Fuel System','Cooling','Transmission','Drivetrain','Suspension','Steering','Brakes','Wheels & Tires','Electrical','Interior','Audio','Body','Paint','Exterior Trim','Lighting'],
+  'race-vehicle':['Engine','Fuel System','Cooling','Transmission','Drivetrain','Suspension','Steering','Brakes','Wheels & Tires','Electrical','Safety','Chassis','Aerodynamics','Data & Electronics'],
+  'offroad-overland':['Engine','Transmission','Drivetrain','Suspension','Steering','Brakes','Wheels & Tires','Armor','Recovery','Electrical','Lighting','Storage','Camping','Communications'],
+  motorcycle:['Engine','Fuel System','Transmission','Primary Drive','Suspension','Brakes','Wheels & Tires','Electrical','Controls','Exhaust','Bodywork','Paint'],
+  'atv-utv':['Engine','Fuel System','Cooling','Transmission / CVT','Drivetrain','Suspension','Steering','Brakes','Wheels & Tires','Electrical','Lighting','Protection / Armor','Accessories','Storage / Utility'],
+  snowmobile:['Engine','Fuel System','Cooling','Clutching / Drive','Track & Suspension','Steering','Brakes','Electrical','Lighting','Bodywork','Performance Mods','Accessories'],
+  blank:[]
+};
 const BUILD_TEMPLATES={
-  blank:{label:'Blank Build',sections:()=>cloneDefaultData(BLANK_BUILD_SECTIONS)},
+  blank:{label:'Blank Build',sections:()=>createSectionsFromPreset('blank')},
+  'street-vehicle':{label:'Street Vehicle',sections:()=>createSectionsFromPreset('street-vehicle')},
+  'race-vehicle':{label:'Race Vehicle',sections:()=>createSectionsFromPreset('race-vehicle')},
+  'offroad-overland':{label:'Off-Road / Overland',sections:()=>createSectionsFromPreset('offroad-overland')},
+  motorcycle:{label:'Motorcycle',sections:()=>createSectionsFromPreset('motorcycle')},
+  'atv-utv':{label:'ATV / UTV',sections:()=>createSectionsFromPreset('atv-utv')},
+  snowmobile:{label:'Snowmobile',sections:()=>createSectionsFromPreset('snowmobile')},
   'custom-truck':{label:'Custom Truck',sections:()=>cloneDefaultData(DEFAULT_SECTIONS)},
-  'classic-car':{label:'Classic Car',sections:()=>cloneDefaultData(BLANK_BUILD_SECTIONS)},
-  motorcycle:{label:'Motorcycle',sections:()=>cloneDefaultData(BLANK_BUILD_SECTIONS)},
-  'race-car':{label:'Race Car',sections:()=>cloneDefaultData(BLANK_BUILD_SECTIONS)},
-  overland:{label:'Off-Road / Overland',sections:()=>cloneDefaultData(BLANK_BUILD_SECTIONS)},
-  other:{label:'Other',sections:()=>cloneDefaultData(BLANK_BUILD_SECTIONS)}
+  'classic-car':{label:'Classic Car',sections:()=>createSectionsFromPreset('street-vehicle')},
+  'race-car':{label:'Race Car',sections:()=>createSectionsFromPreset('race-vehicle')},
+  overland:{label:'Off-Road / Overland',sections:()=>createSectionsFromPreset('offroad-overland')},
+  other:{label:'Other',sections:()=>createSectionsFromPreset('blank')}
 };
 const FIREBASE_CONFIG={
   apiKey:'AIzaSyAAkSCcoeOLVJ3bghyABrbTgvaFmu16UcQ',
@@ -7570,11 +7631,13 @@ function showSettingsSubpanel(name){
   document.querySelectorAll('.settings-subpanel').forEach(panel=>{
     panel.classList.toggle('active',panel.dataset.settingsPanel===name);
   });
+  if(name==='sections')renderSectionsSettingsPanel();
 }
 function renderSettingsPanel(){
   showSettingsSubpanel(activeSettingsSubpanel||'profile');
   syncSettingsProfileForm();
   syncPublicPageSettingsForm();
+  renderSectionsSettingsPanel();
   applyBuildPartnersVisibility();
   loadUserProfile().then(()=>syncSettingsProfileForm()).catch(()=>{});
 }
@@ -7702,7 +7765,7 @@ function applyCloudStateToApp(cloud,options){
   activeBuildCreatedAt=cloud.createdAt||'';
   if(cloud.buildId)activeBuildId=cloud.buildId;
   if(cloud.publicSlug)activePublicSlug=cloud.publicSlug;
-  const structOk=Array.isArray(sections)&&sections.length>=5&&sections.every(s=>s&&s.key&&Array.isArray(s.parts));
+  const structOk=hasSectionStructure(sections);
   if(opts.skipRepair&&structOk){
     workTasks=repairWorkTasks(workTasks);
     normalizeBoardOrders();
@@ -8548,7 +8611,9 @@ function stateTime(d){
 }
 
 function hasUsableCloudState(d){
-  return d && hasUsableSections(d.sections);
+  if(!d)return false;
+  if(Array.isArray(d.sections)&&hasSectionStructure(d.sections))return true;
+  return hasUsableSections(d.sections);
 }
 
 let firestorePersistenceReady=null;
@@ -8969,24 +9034,45 @@ function getPublicUrl(){
   return origin+path+'public.html'+q;
 }
 
+function publicMasterCompletion(){
+  const visible=sections.filter(s=>!s.archived&&effectivePublicVisibility(s)==='visible');
+  const all=visible.flatMap(s=>s.parts).filter(p=>p.status!=='N/A');
+  const total=all.length;
+  if(!total)return 100;
+  const done=all.filter(p=>p.status==='Installed').length;
+  return Math.round((done/total)*100);
+}
 function publicSectionsPayload(){
-  return sections.map(sec=>({
-    key:sec.key,
-    name:sec.name,
-    completion:sectionCompletion(sec),
-    totalParts:(sec.parts||[]).filter(p=>p.status!=='N/A').length,
-    installed:(sec.parts||[]).filter(p=>p.status==='Installed').length,
-    parts:(sec.parts||[])
-      .filter(p=>p.status!=='N/A')
-      .map(p=>({
-        id:p.id,
-        name:p.name||'Untitled part',
-        vendor:p.vendor||'',
-        priority:p.priority||'Medium',
-        status:p.status||'Need to Buy',
-        link:String(p.link||'').trim()
-      }))
-  }));
+  return sections.filter(s=>!s.archived).map(sec=>{
+    const vis=effectivePublicVisibility(sec);
+    const base={
+      key:sec.key,
+      name:sec.name,
+      icon:sec.icon||'',
+      publicVisibility:vis,
+      publicMessage:sec.publicMessage||'',
+      publicRevealAt:sec.publicRevealAt||''
+    };
+    if(vis==='hidden')return null;
+    if(vis==='visible'){
+      return Object.assign(base,{
+        completion:sectionCompletion(sec),
+        totalParts:(sec.parts||[]).filter(p=>p.status!=='N/A').length,
+        installed:(sec.parts||[]).filter(p=>p.status==='Installed').length,
+        parts:(sec.parts||[])
+          .filter(p=>p.status!=='N/A')
+          .map(p=>({
+            id:p.id,
+            name:p.name||'Untitled part',
+            vendor:p.vendor||'',
+            priority:p.priority||'Medium',
+            status:p.status||'Need to Buy',
+            link:String(p.link||'').trim()
+          }))
+      });
+    }
+    return Object.assign(base,{completion:0,totalParts:0,installed:0,parts:[]});
+  }).filter(Boolean);
 }
 
 function publicMilestonesPayload(){
@@ -9064,7 +9150,7 @@ function publicPayload(){
     vehicleImageOriginal:vehicleImageOriginal||'',
     truckCost:TRUCK_COST,
     targetBudget:TARGET_BUDGET,
-    completion:masterCompletion(),
+    completion:publicMasterCompletion(),
     publicPage:ps,
     sections:ps.showBuildList!==false?publicSectionsPayload():[],
     milestones:ps.showMilestones!==false?publicMilestonesPayload():[],
@@ -9072,7 +9158,7 @@ function publicPayload(){
     sponsors:ps.showBuildPartners!==false?publicSponsorsPayload():[],
     builderProfile:publicBuilderProfilePayload(),
     updatedAt:new Date().toISOString(),
-    publicVersion:'v8-public-page-settings'
+    publicVersion:'v9-section-visibility'
   };
 }
 function publicSponsorsPayload(){
@@ -9278,39 +9364,248 @@ let wlPartsModalFilters={sec:'',q:''};
 function cloneDefaultData(x){ return JSON.parse(JSON.stringify(x)); }
 
 function hasUsableSections(arr){
-  return Array.isArray(arr) && arr.length >= 5 && arr.some(s => s && Array.isArray(s.parts) && s.parts.length > 0);
+  return Array.isArray(arr)&&arr.length>0&&arr.some(s=>s&&Array.isArray(s.parts)&&s.parts.length>0);
 }
 function hasSectionStructure(arr){
-  return Array.isArray(arr)&&arr.length>=5&&arr.every(s=>s&&s.key&&Array.isArray(s.parts));
+  return Array.isArray(arr)&&arr.every(s=>s&&typeof s.key==='string'&&s.key&&Array.isArray(s.parts));
 }
-
-function repairSections(savedSections){
-  const defaults = cloneDefaultData(DEFAULT_SECTIONS);
-  if(!hasSectionStructure(savedSections)){
-    if(!hasUsableSections(savedSections)) return defaults;
+function normalizePublicVisibility(v){
+  const s=String(v||'').toLowerCase().trim().replace(/_/g,'-');
+  if(s==='hidden')return 'hidden';
+  if(s==='coming-soon'||s==='comingsoon')return 'coming-soon';
+  if(s==='countdown')return 'countdown';
+  return 'visible';
+}
+function effectivePublicVisibility(sec){
+  const v=normalizePublicVisibility(sec&&sec.publicVisibility);
+  if(v==='countdown'&&sec&&sec.publicRevealAt){
+    const t=Date.parse(sec.publicRevealAt);
+    if(!isNaN(t)&&Date.now()>=t)return 'visible';
   }
-  const savedByKey = new Map(savedSections.filter(Boolean).map(s => [s.key, s]));
-  const baseKeys=hasSectionStructure(savedSections)
-    ?savedSections.filter(Boolean).map(s=>s.key)
-    :defaults.map(d=>d.key);
-  const repaired = baseKeys.map(key=>{
-    const defSec=defaults.find(d=>d.key===key)||savedByKey.get(key)||{key,name:key,budget:0,parts:[]};
-    const savedSec = savedByKey.get(defSec.key) || {};
-    const mergedSec = Object.assign({}, defSec, savedSec);
-    const savedParts = Array.isArray(savedSec.parts) ? savedSec.parts : [];
-    if(savedParts.length === 0){ mergedSec.parts = []; return mergedSec; }
-    const savedPartsById = new Map(savedParts.filter(Boolean).map(p => [p.id, p]));
-    const used = new Set();
-    const mergedParts = defSec.parts.map(defPart => {
-      const savedPart = savedPartsById.get(defPart.id);
-      if(savedPart) used.add(defPart.id);
-      return Object.assign({}, defPart, savedPart || {});
-    });
-    savedParts.forEach(p => { if(p && p.id && !used.has(p.id)) mergedParts.push(p); });
-    mergedSec.parts = mergedParts;
-    return mergedSec;
+  return v;
+}
+function slugifySectionKey(name,existingKeys){
+  const base=String(name||'section').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,48)||'section';
+  let key=base,i=0;
+  const used=existingKeys instanceof Set?existingKeys:new Set(existingKeys||[]);
+  while(used.has(key)){i++;key=base+'-'+i;}
+  used.add(key);
+  return key;
+}
+function normalizeSection(raw,idx){
+  if(!raw||typeof raw!=='object')return null;
+  const sec=Object.assign({
+    key:'',name:'Section',budget:0,parts:[],
+    sortOrder:typeof idx==='number'?idx:0,
+    archived:false,icon:'',
+    publicVisibility:'visible',publicMessage:'',publicRevealAt:''
+  },raw);
+  sec.key=String(sec.key||'').trim();
+  sec.name=String(sec.name||sec.key||'Section').trim()||'Section';
+  sec.budget=parseFloat(sec.budget)||0;
+  sec.parts=Array.isArray(sec.parts)?sec.parts.filter(Boolean):[];
+  sec.sortOrder=typeof sec.sortOrder==='number'&&!isNaN(sec.sortOrder)?sec.sortOrder:(typeof idx==='number'?idx:0);
+  sec.archived=!!sec.archived;
+  sec.icon=String(sec.icon||'');
+  sec.publicVisibility=normalizePublicVisibility(sec.publicVisibility);
+  sec.publicMessage=String(sec.publicMessage||'').trim();
+  sec.publicRevealAt=String(sec.publicRevealAt||'').trim();
+  return sec;
+}
+function orderedSections(arr){
+  return (arr||[]).slice().sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0)||String(a.name||'').localeCompare(String(b.name||'')));
+}
+function activeSections(arr){
+  return orderedSections((arr||sections||[]).filter(s=>s&&!s.archived));
+}
+function createSectionsFromPreset(presetId){
+  const names=SECTION_PRESET_NAMES[presetId];
+  if(!Array.isArray(names)||!names.length)return [];
+  const keys=new Set();
+  return names.map((name,i)=>normalizeSection({
+    key:slugifySectionKey(name,keys),
+    name,budget:0,parts:[],sortOrder:i
+  }));
+}
+function createSectionFromName(name,sortOrder){
+  const keys=new Set((sections||[]).map(s=>s&&s.key).filter(Boolean));
+  return normalizeSection({
+    key:slugifySectionKey(name,keys),
+    name:String(name||'').trim()||'Section',
+    budget:0,parts:[],
+    sortOrder:sortOrder!=null?sortOrder:(sections||[]).length
   });
-  savedSections.forEach(sec => { if(sec && sec.key && !defaults.some(d => d.key === sec.key)) repaired.push(sec); });
+}
+function applySectionPreset(presetId){
+  const presetNames=SECTION_PRESET_NAMES[presetId];
+  if(!Array.isArray(presetNames))return;
+  const existingNames=new Set((sections||[]).map(s=>String(s&&s.name||'').toLowerCase().trim()).filter(Boolean));
+  let maxSort=(sections||[]).reduce((m,s)=>Math.max(m,s.sortOrder||0),-1);
+  presetNames.forEach(name=>{
+    const norm=String(name||'').toLowerCase().trim();
+    if(!norm||existingNames.has(norm))return;
+    maxSort++;
+    const sec=createSectionFromName(name,maxSort);
+    sections.push(sec);
+    existingNames.add(norm);
+  });
+  scheduleSave();doSave();
+  renderSectionsSettingsPanel();
+  build();
+}
+function applySectionPresetFromSettings(){
+  const sel=document.getElementById('section-preset-select');
+  const presetId=sel?sel.value:'blank';
+  applySectionPreset(presetId);
+}
+function addCustomSectionFromSettings(){
+  const inp=document.getElementById('section-custom-name');
+  const name=String((inp&&inp.value)||'').trim();
+  if(!name)return;
+  const maxSort=(sections||[]).reduce((m,s)=>Math.max(m,s.sortOrder||0),-1);
+  sections.push(createSectionFromName(name,maxSort+1));
+  if(inp)inp.value='';
+  scheduleSave();doSave();
+  renderSectionsSettingsPanel();
+  build();
+}
+function findSectionByKey(key){return (sections||[]).find(s=>s&&s.key===key)}
+function renameSectionFromSettings(key,name){
+  const sec=findSectionByKey(key);if(!sec)return;
+  const next=String(name||'').trim();
+  if(!next)return;
+  sec.name=next;
+  scheduleSave();doSave();
+  renderSectionsSettingsPanel();
+  build();
+}
+function reorderSection(key,direction){
+  const active=orderedSections((sections||[]).filter(s=>!s.archived));
+  const idx=active.findIndex(s=>s.key===key);
+  if(idx<0)return;
+  const swapIdx=idx+direction;
+  if(swapIdx<0||swapIdx>=active.length)return;
+  [active[idx],active[swapIdx]]=[active[swapIdx],active[idx]];
+  const archived=orderedSections((sections||[]).filter(s=>s.archived));
+  [...active,...archived].forEach((s,i)=>{s.sortOrder=i;});
+  scheduleSave();doSave();
+  renderSectionsSettingsPanel();
+  build();
+}
+function archiveSection(key){
+  const sec=findSectionByKey(key);if(!sec||sec.archived)return;
+  sec.archived=true;
+  const maxSort=(sections||[]).reduce((m,s)=>Math.max(m,s.sortOrder||0),-1);
+  sec.sortOrder=maxSort+1;
+  scheduleSave();doSave();
+  renderSectionsSettingsPanel();
+  build();
+}
+function restoreSection(key){
+  const sec=findSectionByKey(key);if(!sec||!sec.archived)return;
+  sec.archived=false;
+  const maxActive=activeSections().reduce((m,s)=>Math.max(m,s.sortOrder||0),-1);
+  sec.sortOrder=maxActive+1;
+  scheduleSave();doSave();
+  renderSectionsSettingsPanel();
+  build();
+}
+function onSectionPublicSettingChange(key,field,value){
+  const sec=findSectionByKey(key);if(!sec)return;
+  if(field==='publicVisibility')sec.publicVisibility=normalizePublicVisibility(value);
+  else if(field==='publicMessage')sec.publicMessage=String(value||'').trim();
+  else if(field==='publicRevealAt')sec.publicRevealAt=String(value||'').trim();
+  scheduleSave();doSave();
+  renderSectionsSettingsPanel();
+}
+function sectionSettingsVisibilityFields(sec){
+  const vis=normalizePublicVisibility(sec.publicVisibility);
+  const msg=esc(sec.publicMessage||'');
+  const date=esc((sec.publicRevealAt||'').slice(0,16));
+  if(vis==='coming-soon'){
+    return `<div class="settings-field" style="grid-column:1/-1">
+      <label>Custom message</label>
+      <input class="veh-editor-input" type="text" value="${msg}" placeholder="The final color reveal is coming soon."
+        onchange="onSectionPublicSettingChange('${sec.key}','publicMessage',this.value)"/>
+    </div>`;
+  }
+  if(vis==='countdown'){
+    return `<div class="settings-field">
+      <label>Reveal date</label>
+      <input class="veh-editor-input" type="datetime-local" value="${date}"
+        onchange="onSectionPublicSettingChange('${sec.key}','publicRevealAt',this.value)"/>
+    </div>
+    <div class="settings-field">
+      <label>Custom message (optional)</label>
+      <input class="veh-editor-input" type="text" value="${msg}" placeholder="Presented soon"
+        onchange="onSectionPublicSettingChange('${sec.key}','publicMessage',this.value)"/>
+    </div>`;
+  }
+  return '';
+}
+function renderSectionSettingsRow(sec,opts){
+  const archived=!!(opts&&opts.archived);
+  const activeList=activeSections();
+  const idx=activeList.findIndex(s=>s.key===sec.key);
+  const visOpts=PUBLIC_VISIBILITY_MODES.map(m=>`<option value="${m}"${normalizePublicVisibility(sec.publicVisibility)===m?' selected':''}>${PUBLIC_VISIBILITY_LABELS[m]}</option>`).join('');
+  const partCount=(sec.parts||[]).length;
+  return `<div class="section-settings-row${archived?' is-archived':''}" data-section-key="${esc(sec.key)}">
+    <div class="section-settings-row-hdr">
+      <div class="section-settings-row-title">${esc(sec.name)}${partCount?` <span style="font-size:11px;color:var(--gs-muted);font-weight:600">(${partCount} parts)</span>`:''}</div>
+      <div class="section-settings-row-actions">
+        ${archived?'':`<button type="button" class="ms-btn" onclick="reorderSection('${sec.key}',-1)"${idx<=0?' disabled':''} title="Move up"><i class="ti ti-arrow-up"></i></button>
+        <button type="button" class="ms-btn" onclick="reorderSection('${sec.key}',1)"${idx<0||idx>=activeList.length-1?' disabled':''} title="Move down"><i class="ti ti-arrow-down"></i></button>`}
+        ${archived?`<button type="button" class="ms-btn" onclick="restoreSection('${sec.key}')"><i class="ti ti-arrow-back-up"></i> Restore</button>`:
+          `<button type="button" class="ms-btn" onclick="archiveSection('${sec.key}')" title="Archive"><i class="ti ti-archive"></i></button>`}
+      </div>
+    </div>
+    ${archived?'':`<div class="section-settings-fields">
+      <div class="settings-field">
+        <label>Section name</label>
+        <input class="veh-editor-input" type="text" value="${esc(sec.name)}"
+          onchange="renameSectionFromSettings('${sec.key}',this.value)"/>
+      </div>
+      <div class="settings-field">
+        <label>Public visibility</label>
+        <select class="veh-editor-input" onchange="onSectionPublicSettingChange('${sec.key}','publicVisibility',this.value)">${visOpts}</select>
+      </div>
+      ${sectionSettingsVisibilityFields(sec)}
+    </div>`}
+  </div>`;
+}
+function renderSectionsSettingsPanel(){
+  const presetSel=document.getElementById('section-preset-select');
+  if(presetSel&&!presetSel.dataset.bound){
+    presetSel.innerHTML=Object.keys(SECTION_PRESET_NAMES).map(id=>{
+      const tpl=BUILD_TEMPLATES[id];
+      const label=tpl?tpl.label:id;
+      return `<option value="${id}">${esc(label)}</option>`;
+    }).join('');
+    presetSel.dataset.bound='1';
+  }
+  const activeList=document.getElementById('section-settings-active-list');
+  const archivedList=document.getElementById('section-settings-archived-list');
+  const archivedWrap=document.getElementById('section-settings-archived-wrap');
+  if(!activeList)return;
+  const active=activeSections();
+  const archived=orderedSections((sections||[]).filter(s=>s&&s.archived));
+  activeList.innerHTML=active.length?active.map(sec=>renderSectionSettingsRow(sec)).join(''):
+    `<div class="subpanel-placeholder" style="padding:20px 0"><span>No active sections yet. Apply a preset or add a custom section.</span></div>`;
+  if(archivedList){
+    archivedList.innerHTML=archived.map(sec=>renderSectionSettingsRow(sec,{archived:true})).join('');
+    if(archivedWrap)archivedWrap.hidden=!archived.length;
+  }
+}
+function repairSections(savedSections){
+  if(!Array.isArray(savedSections))return cloneDefaultData(DEFAULT_SECTIONS);
+  if(!savedSections.length)return [];
+  if(!hasSectionStructure(savedSections)){
+    if(hasUsableSections(savedSections))return savedSections.filter(Boolean).map((s,i)=>normalizeSection(s,i)).filter(Boolean);
+    return cloneDefaultData(DEFAULT_SECTIONS);
+  }
+  const repaired=savedSections.filter(Boolean).map((s,i)=>normalizeSection(s,i)).filter(Boolean);
+  repaired.sort((a,b)=>(a.sortOrder||0)-(b.sortOrder||0));
+  repaired.forEach((s,i)=>{s.sortOrder=i;});
   return repaired;
 }
 
@@ -9959,7 +10254,7 @@ function quickApplyBuildUI(){
     const route=panelFromRoute();
     if(route==='parts'){
       const ps=document.getElementById('parts-sections');
-      if(ps){ps.innerHTML='';sections.forEach(sec=>buildSection(sec));}
+      if(ps){ps.innerHTML='';activeSections().forEach(sec=>buildSection(sec));}
     }else if(route==='milestones')renderMilestones();
     else if(route==='worklog')renderWorkLog();
     else if(route==='sponsorships')renderSponsors();
@@ -10143,7 +10438,7 @@ function sectionCompletion(sec){
   return Math.round((done/total)*100);
 }
 function masterCompletion(){
-  const all=sections.flatMap(s=>s.parts).filter(p=>p.status!=='N/A');
+  const all=activeSections().flatMap(s=>s.parts).filter(p=>p.status!=='N/A');
   const total=all.length;
   if(!total)return 100;
   const done=all.filter(p=>p.status==='Installed').length;
@@ -10209,7 +10504,7 @@ function setPartFilters(){
     status:st?st.value:'',
     priority:pr?pr.value:''
   };
-  sections.forEach(sec=>{updateSecHeader(sec);renderRows(sec);});
+  activeSections().forEach(sec=>{updateSecHeader(sec);renderRows(sec);});
 }
 function pcls(p){return{Critical:'p-critical',High:'p-high',Medium:'p-medium',Low:'p-low'}[p]||'p-low'}
 const PC={
@@ -10496,7 +10791,7 @@ function buildWorkLinkedPartsList(task,allowRemove,compact){
   }).join('')}</div>`;
 }
 function workPartsSectionFilterOptions(selected){
-  return`<option value="">All sections</option>`+sections.map(s=>`<option value="${s.key}"${selected===s.key?' selected':''}>${esc(s.name)}</option>`).join('');
+  return`<option value="">All sections</option>`+activeSections().map(s=>`<option value="${s.key}"${selected===s.key?' selected':''}>${esc(s.name)}</option>`).join('');
 }
 function buildWorkPartsFace(task,allowRemove,compact){
   const links=task.linkedPartIds||[];
@@ -10518,7 +10813,8 @@ function buildWorkPartsModalContent(task){
   const linked=new Set(links.map(l=>l.secKey+'::'+l.partId));
   const filterSec=wlPartsModalFilters.sec||'';
   const filterQ=(wlPartsModalFilters.q||'').toLowerCase();
-  const secs=filterSec?sections.filter(s=>s.key===filterSec):sections;
+  const active=activeSections();
+  const secs=filterSec?active.filter(s=>s.key===filterSec):active;
   const assignedBox=`<div class="wl-assigned-parts">
     <div class="wl-assigned-hdr"><i class="ti ti-check"></i> Assigned to this task (${links.length})</div>
     ${buildWorkLinkedPartsList(task,true)}
@@ -11937,7 +12233,7 @@ function updateDashboard(){
   updateAccountCard();
   renderVehicleImage();
   const g=document.getElementById('ss-grid');g.innerHTML='';
-  sections.forEach(sec=>{
+  activeSections().forEach(sec=>{
     const a=secActual(sec),p2=sec.budget>0?Math.min(100,Math.round((a/sec.budget)*100)):0;
     const c=document.createElement('div');c.className='ss-card';
     const comp=sectionCompletion(sec),done=sectionDoneCount(sec),track=sectionTrackableCount(sec);
@@ -12732,7 +13028,7 @@ function closeResearchDecidedModal(){
 }
 function prefillResearchPartForm(r){
   const item=normalizeResearchItem(r);
-  const sk=researchSectionKeyForCategory(item.category)||sections[0]?.key||'chassis';
+  const sk=researchSectionKeyForCategory(item.category)||activeSections()[0]?.key||sections[0]?.key||'chassis';
   const set=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val==null?'':val;};
   set('research-part-name',item.title);
   set('research-part-section',sk);
@@ -12762,13 +13058,13 @@ function openResearchToPartModal(id){
   openResearchDecidedModal(id);
 }
 function researchPartSectionOptions(selectedKey){
-  return sections.map(s=>`<option value="${s.key}"${s.key===selectedKey?' selected':''}>${esc(s.name)}</option>`).join('');
+  return activeSections().map(s=>`<option value="${s.key}"${s.key===selectedKey?' selected':''}>${esc(s.name)}</option>`).join('');
 }
 function refreshResearchPartSectionSelect(){
   const sel=document.getElementById('research-part-section');
   if(!sel||!researchModalId)return;
   const r=decisions.find(x=>x.id===researchModalId);
-  const sk=sel.value||researchSectionKeyForCategory(r?.category)||sections[0]?.key||'chassis';
+  const sk=sel.value||researchSectionKeyForCategory(r?.category)||activeSections()[0]?.key||sections[0]?.key||'chassis';
   sel.innerHTML=researchPartSectionOptions(sk);
 }
 function researchDecidedPromptAdd(){
@@ -13009,7 +13305,7 @@ function build(){
   syncBuildMetaUI();
   const ps=document.getElementById('parts-sections');
   if(ps) ps.innerHTML='';
-  sections.forEach(sec=>buildSection(sec));
+  activeSections().forEach(sec=>buildSection(sec));
   updateDashboard();
   renderMilestones();
   renderSponsors();
@@ -13026,7 +13322,7 @@ async function bootTracker(){
   if(trackerBooted) return;
   trackerBooted=true;
 
-  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,setAppTheme,saveBuilderProfile,renderSettingsPanel,showSettingsSubpanel,onPublicPageSettingChange,syncPublicSlugPreview,syncPublicPageSettingsForm,applyBuildPartnersVisibility,isBuildPartnersEnabled,handleProfilePhotoUpload,profilePhotoDrop,removeProfilePhoto,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,markAllNotificationsRead,markNotificationRead,openNotificationOnBuild,toggleNotifExpand,toggleNotifReplyForm,toggleMilestoneComments,ownerLikeComment,ownerReplyToComment,toggleReplyForm,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
+  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,setAppTheme,saveBuilderProfile,renderSettingsPanel,showSettingsSubpanel,renderSectionsSettingsPanel,applySectionPresetFromSettings,addCustomSectionFromSettings,renameSectionFromSettings,reorderSection,archiveSection,restoreSection,onSectionPublicSettingChange,onPublicPageSettingChange,syncPublicSlugPreview,syncPublicPageSettingsForm,applyBuildPartnersVisibility,isBuildPartnersEnabled,handleProfilePhotoUpload,profilePhotoDrop,removeProfilePhoto,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,markAllNotificationsRead,markNotificationRead,openNotificationOnBuild,toggleNotifExpand,toggleNotifReplyForm,toggleMilestoneComments,ownerLikeComment,ownerReplyToComment,toggleReplyForm,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
   document.addEventListener('click',e=>{
     if(!e.target.closest('.tracker-nav-more-wrap'))closeMoreMenu();
     if(!e.target.closest('.tracker-nav-mobile-wrap'))closeMobileNavMenu();
@@ -13213,15 +13509,15 @@ window.addEventListener('pageshow',()=>setTimeout(()=>{ if(!document.querySelect
           <input class="veh-editor-input" id="garage-create-nickname" type="text" maxlength="60" placeholder="Gold Standard"/>
         </div>
         <div class="veh-editor-field">
-          <label for="garage-create-template">Starting template</label>
+          <label for="garage-create-template">Section preset</label>
           <select class="veh-editor-input" id="garage-create-template">
-            <option value="blank">Blank Build</option>
-            <option value="custom-truck">Custom Truck</option>
-            <option value="classic-car">Classic Car</option>
+            <option value="street-vehicle">Street Vehicle</option>
+            <option value="race-vehicle">Race Vehicle</option>
+            <option value="offroad-overland">Off-Road / Overland</option>
             <option value="motorcycle">Motorcycle</option>
-            <option value="race-car">Race Car</option>
-            <option value="overland">Off-Road / Overland</option>
-            <option value="other">Other</option>
+            <option value="atv-utv">ATV / UTV</option>
+            <option value="snowmobile">Snowmobile</option>
+            <option value="blank">Blank Build</option>
           </select>
         </div>
       </div>
