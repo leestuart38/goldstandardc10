@@ -2838,26 +2838,106 @@ button,.tab,.section-hdr,.chip,.chip-opt,.ss-card{touch-action:manipulation;-web
   display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:14px;
 }
 .section-settings-toolbar .settings-field{flex:1 1 220px;margin:0}
-.section-settings-list{display:grid;gap:10px}
+.section-settings-list{display:grid;gap:8px;position:relative}
 .section-settings-row{
   border-radius:14px;border:1px solid rgba(241,209,122,.16);
-  background:rgba(0,0,0,.2);padding:12px 14px;display:grid;gap:10px;
+  background:rgba(0,0,0,.2);display:grid;gap:0;transition:border-color .15s,box-shadow .15s,transform .15s;
 }
 .section-settings-row.is-archived{opacity:.72;border-style:dashed}
-.section-settings-row-hdr{
-  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+.section-settings-row.dragging{
+  opacity:1!important;border-color:rgba(241,209,122,.62)!important;
+  background:linear-gradient(180deg,#2f281c,#15120d)!important;
+  box-shadow:0 22px 48px rgba(0,0,0,.55)!important;
+  pointer-events:none;transition:none;
 }
+.section-settings-row-hdr{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:nowrap;
+  padding:10px 12px;cursor:pointer;user-select:none;
+}
+.section-settings-row-hdr-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
 .section-settings-row-title{
   font-family:var(--gs-display);font-size:16px;font-weight:700;color:var(--gs-cream);
-  text-transform:uppercase;letter-spacing:.03em;
+  letter-spacing:.03em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
-.section-settings-row-actions{display:flex;gap:6px;flex-wrap:wrap}
+.section-settings-row-actions{display:flex;gap:4px;flex-wrap:nowrap;flex-shrink:0}
 .section-settings-row-actions .ms-btn{padding:6px 10px;font-size:10px}
+.section-settings-row-body{
+  display:grid;gap:10px;padding:0 14px 14px;
+  grid-template-rows:1fr;transition:grid-template-rows .22s ease,padding .22s ease,opacity .18s ease;
+}
+.section-settings-row-body.collapsed{
+  grid-template-rows:0fr;padding-top:0;padding-bottom:0;opacity:0;pointer-events:none;overflow:hidden;
+}
+.section-settings-row-body-inner{min-height:0;overflow:hidden}
 .section-settings-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .section-settings-archived-hdr{
-  margin:18px 0 10px;font-size:11px;font-weight:900;letter-spacing:.08em;
-  text-transform:uppercase;color:var(--gs-muted);
+  margin:18px 0 10px;font-size:11px;font-weight:900;letter-spacing:.08em;color:var(--gs-muted);
 }
+.sec-drag-handle{
+  flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;
+  width:28px;height:28px;border-radius:8px;border:1px solid rgba(241,209,122,.2);
+  background:rgba(0,0,0,.28);color:var(--gs-muted);cursor:grab;touch-action:none;
+}
+.sec-drag-handle:active{cursor:grabbing}
+.sec-drag-handle:hover{color:rgba(241,209,122,.95);background:rgba(255,255,255,.06)}
+.sec-expand-btn{
+  flex-shrink:0;width:28px;height:28px;border-radius:8px;border:none;background:transparent;
+  color:var(--gs-muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
+}
+.sec-expand-btn:hover{color:var(--gs-gold-light)}
+.sec-drop-indicator{
+  height:4px;border-radius:999px;flex-shrink:0;
+  background:linear-gradient(90deg,#8b6914,#c59b35,#f0cd73);
+  box-shadow:0 0 14px rgba(197,155,53,.65),0 0 4px rgba(241,209,122,.45);
+  margin:2px 4px;pointer-events:none;animation:secDropPulse .85s ease infinite alternate;
+}
+@keyframes secDropPulse{from{opacity:.82;transform:scaleX(.985)}to{opacity:1;transform:scaleX(1)}}
+.sec-vis-pills{display:flex;flex-wrap:wrap;gap:6px}
+.sec-vis-pill{
+  border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.28);
+  color:var(--gs-cream);padding:7px 12px;font-size:10px;font-weight:800;letter-spacing:.05em;
+  cursor:pointer;transition:transform .12s,border-color .12s,background .12s,box-shadow .12s;
+  font-family:var(--gs-display);
+}
+.sec-vis-pill:hover{transform:translateY(-1px)}
+.sec-vis-pill.active{box-shadow:0 0 0 1px rgba(255,255,255,.08),0 6px 16px rgba(0,0,0,.28)}
+.sec-vis-pill.vis-visible{border-color:rgba(34,197,94,.45);color:#bbf7d0}
+.sec-vis-pill.vis-visible.active{background:rgba(34,197,94,.2)}
+.sec-vis-pill.vis-hidden{border-color:rgba(148,163,184,.35);color:#cbd5e1}
+.sec-vis-pill.vis-hidden.active{background:rgba(100,116,139,.22)}
+.sec-vis-pill.vis-coming-soon{border-color:rgba(245,158,11,.45);color:#fde68a}
+.sec-vis-pill.vis-coming-soon.active{background:rgba(245,158,11,.18)}
+.sec-vis-pill.vis-countdown{border-color:rgba(96,165,250,.45);color:#bfdbfe}
+.sec-vis-pill.vis-countdown.active{background:rgba(59,130,246,.18)}
+.section-add-block{
+  margin:0 18px 16px;border-radius:16px;border:1px solid rgba(241,209,122,.38);
+  background:linear-gradient(180deg,rgba(197,155,53,.2),rgba(0,0,0,.22));
+  box-shadow:0 10px 28px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.06);
+  padding:16px 18px;display:grid;gap:12px;
+}
+.section-add-block-title{
+  font-family:var(--gs-display);font-size:15px;font-weight:700;color:var(--gs-gold-light);letter-spacing:.04em;
+}
+.section-add-block-sub{font-size:12px;color:var(--gs-muted);line-height:1.45}
+.section-add-block-row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.section-add-block-row .settings-field{flex:1 1 240px;margin:0}
+.section-add-block-btn{
+  border-radius:999px;border:1px solid rgba(241,209,122,.55);
+  background:linear-gradient(180deg,rgba(197,155,53,.5),rgba(139,105,20,.38));
+  color:var(--gs-cream);padding:12px 18px;font-size:11px;font-weight:900;letter-spacing:.06em;
+  cursor:pointer;font-family:var(--gs-display);text-transform:uppercase;
+  box-shadow:0 8px 20px rgba(0,0,0,.25);
+}
+.section-add-block-btn:hover{border-color:rgba(241,209,122,.8);filter:brightness(1.06)}
+.section-user-presets-list{display:grid;gap:8px;margin-top:10px}
+.section-user-preset-row{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  border-radius:12px;border:1px solid rgba(241,209,122,.14);background:rgba(0,0,0,.18);padding:10px 12px;
+}
+.section-user-preset-row-name{
+  font-family:var(--gs-display);font-size:13px;font-weight:700;color:var(--gs-cream);letter-spacing:.03em;
+}
+.section-user-preset-row-meta{font-size:10px;font-weight:700;color:var(--gs-muted);text-transform:uppercase;letter-spacing:.05em}
 @media(max-width:700px){.section-settings-fields{grid-template-columns:1fr}}
 .settings-photo-wrap{max-width:220px}
 .settings-photo-wrap .image-drop-single .image-drop-preview{
@@ -3780,6 +3860,14 @@ body.garage-op-active .garage-page-actions .vehicle-edit-btn{pointer-events:none
   --gs-display:'Oswald',system-ui,sans-serif;
   --gs-tracking-tight:-0.018em;
 }
+/* Oswald / --gs-display titles render uppercase */
+.top-bar h1,.section-title,.ss-name,.tab,.stat label,.completion-pill,
+.settings-subpanel-title,.settings-card-title,.section-settings-row-title,
+.section-settings-archived-hdr,.section-add-block-title,.section-user-preset-row-name,
+.sec-vis-pill,.vehicle-editor-title,.vehicle-current-name,.wl-parts-modal-title,
+.garage-confirm-title,.garage-op-title,.ms-title,.pub-sec-item-name,.pub-sec-item-pct,
+.pub-sec-teaser-kicker,.wl-parts-modal-sub,.veh-editor-field>label,.settings-field>label
+{text-transform:uppercase}
 body{margin:0}
 .tracker{
   max-width:none!important;
@@ -6748,13 +6836,29 @@ html[data-theme="light"] #panel-dashboard .completion-track{background:rgba(111,
           </div>
         </section>
         <section class="settings-card">
-          <div class="settings-card-title">Active Sections</div>
+          <div class="settings-card-title">My Presets</div>
+          <p class="settings-card-desc">Save your current active section layout as a reusable preset. It will appear in Create New Build.</p>
           <div class="section-settings-toolbar">
             <div class="settings-field">
-              <label for="section-custom-name">New section name</label>
-              <input class="veh-editor-input" id="section-custom-name" type="text" maxlength="80" placeholder="Custom section" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomSectionFromSettings();}"/>
+              <label for="section-user-preset-name">Preset name</label>
+              <input class="veh-editor-input" id="section-user-preset-name" type="text" maxlength="60" placeholder="My Street Build" onkeydown="if(event.key==='Enter'){event.preventDefault();saveUserSectionPresetFromSettings();}"/>
             </div>
-            <button type="button" class="ms-btn" onclick="addCustomSectionFromSettings()"><i class="ti ti-plus"></i> Add Section</button>
+            <button type="button" class="ms-btn" onclick="saveUserSectionPresetFromSettings()"><i class="ti ti-bookmark"></i> Save Preset</button>
+          </div>
+          <div id="section-user-presets-list" class="section-user-presets-list"></div>
+        </section>
+        <section class="settings-card">
+          <div class="settings-card-title">Active Sections</div>
+          <div class="section-add-block">
+            <div class="section-add-block-title"><i class="ti ti-plus"></i> Add New Section</div>
+            <div class="section-add-block-sub">Create a custom section for parts that do not fit a preset category.</div>
+            <div class="section-add-block-row">
+              <div class="settings-field">
+                <label for="section-custom-name">Section name</label>
+                <input class="veh-editor-input" id="section-custom-name" type="text" maxlength="80" placeholder="e.g. Turbo System" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomSectionFromSettings();}"/>
+              </div>
+              <button type="button" class="section-add-block-btn" onclick="addCustomSectionFromSettings()"><i class="ti ti-plus"></i> Add Section</button>
+            </div>
           </div>
           <div id="section-settings-active-list" class="section-settings-list"></div>
         </section>
@@ -7380,7 +7484,8 @@ function packState(){
       vehicleMake:VEHICLE_MAKE,
       vehicleModel:VEHICLE_MODEL,
       vehicleNickname:VEHICLE_NICKNAME,
-      publicPage:normalizePublicPageSettings(publicPageSettings)
+      publicPage:normalizePublicPageSettings(publicPageSettings),
+      userSectionPresets:normalizeUserSectionPresets(userSectionPresets)
     },
     meta:{
       appVersion:'v149-global-notifications',
@@ -8521,6 +8626,7 @@ function openGarageCreateModal(){
   const n=document.getElementById('garage-create-name');
   if(n){n.value='';n.focus();}
   ['garage-create-year','garage-create-make','garage-create-model','garage-create-nickname'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  syncGarageCreateTemplateOptions();
   const tpl=document.getElementById('garage-create-template');
   if(tpl)tpl.value='blank';
 }
@@ -8536,7 +8642,7 @@ async function confirmGarageCreateBuild(){
   const model=String((document.getElementById('garage-create-model')||{}).value||'').trim();
   const nickname=String((document.getElementById('garage-create-nickname')||{}).value||'').trim();
   const template=(document.getElementById('garage-create-template')||{}).value||'blank';
-  const tpl=BUILD_TEMPLATES[template]||BUILD_TEMPLATES.blank;
+  const tpl=resolveBuildTemplate(template);
   closeGarageCreateModal();
   beginGarageOp('Creating new build');
   try{
@@ -9426,14 +9532,107 @@ function orderedSections(arr){
 function activeSections(arr){
   return orderedSections((arr||sections||[]).filter(s=>s&&!s.archived));
 }
-function createSectionsFromPreset(presetId){
-  const names=SECTION_PRESET_NAMES[presetId];
+function normalizeUserSectionPreset(raw){
+  if(!raw||typeof raw!=='object')return null;
+  const names=Array.isArray(raw.names)?raw.names.map(n=>String(n||'').trim()).filter(Boolean):[];
+  if(!names.length)return null;
+  const label=String(raw.label||raw.name||'My Preset').trim()||'My Preset';
+  const id=String(raw.id||'').trim()||('user-preset-'+slugifyBuildId(label,'preset'));
+  return {id,label,names,createdAt:String(raw.createdAt||'')};
+}
+function normalizeUserSectionPresets(arr){
+  if(!Array.isArray(arr))return [];
+  const seen=new Set();
+  return arr.map(normalizeUserSectionPreset).filter(p=>{
+    if(!p||seen.has(p.id))return false;
+    seen.add(p.id);
+    return true;
+  });
+}
+function getUserSectionPresets(){return normalizeUserSectionPresets(userSectionPresets)}
+function getPresetNames(presetId){
+  if(Array.isArray(SECTION_PRESET_NAMES[presetId]))return SECTION_PRESET_NAMES[presetId];
+  const user=getUserSectionPresets().find(p=>p.id===presetId);
+  return user?user.names:[];
+}
+function createSectionsFromPresetNames(names){
   if(!Array.isArray(names)||!names.length)return [];
   const keys=new Set();
   return names.map((name,i)=>normalizeSection({
     key:slugifySectionKey(name,keys),
     name,budget:0,parts:[],sortOrder:i
   }));
+}
+function createSectionsFromPreset(presetId){
+  return createSectionsFromPresetNames(getPresetNames(presetId));
+}
+function resolveBuildTemplate(templateId){
+  if(BUILD_TEMPLATES[templateId])return BUILD_TEMPLATES[templateId];
+  const user=getUserSectionPresets().find(p=>p.id===templateId);
+  if(user)return {label:user.label,sections:()=>createSectionsFromPresetNames(user.names),userPreset:true};
+  return BUILD_TEMPLATES.blank;
+}
+function buildTemplateSelectHtml(selected){
+  const builtin=Object.keys(SECTION_PRESET_NAMES).map(id=>{
+    const tpl=BUILD_TEMPLATES[id];
+    const label=tpl?tpl.label:id;
+    return `<option value="${id}"${id===selected?' selected':''}>${esc(label)}</option>`;
+  }).join('');
+  const user=getUserSectionPresets();
+  const userHtml=user.length?user.map(p=>`<option value="${esc(p.id)}"${p.id===selected?' selected':''}>${esc(p.label)}</option>`).join(''):'';
+  if(!userHtml)return builtin;
+  return `<optgroup label="Built-in Presets">${builtin}</optgroup><optgroup label="My Presets">${userHtml}</optgroup>`;
+}
+function templateSelectHasValue(sel,val){
+  return !!sel&&[...sel.querySelectorAll('option')].some(o=>o.value===val);
+}
+function syncGarageCreateTemplateOptions(){
+  const sel=document.getElementById('garage-create-template');
+  if(!sel)return;
+  const cur=sel.value||'blank';
+  sel.innerHTML=buildTemplateSelectHtml(cur);
+  if(templateSelectHasValue(sel,cur))sel.value=cur;
+}
+function syncSectionPresetSelect(){
+  const sel=document.getElementById('section-preset-select');
+  if(!sel)return;
+  const cur=sel.value||'street-vehicle';
+  sel.innerHTML=buildTemplateSelectHtml(cur);
+  if(templateSelectHasValue(sel,cur))sel.value=cur;
+}
+async function uniqueUserPresetId(base){
+  const presets=getUserSectionPresets();
+  let i=0;
+  while(i<100){
+    const id=i?`${base}-${i}`:base;
+    if(!presets.some(p=>p.id===id))return id;
+    i++;
+  }
+  return base+'-'+Date.now();
+}
+function saveUserSectionPresetFromSettings(){
+  const inp=document.getElementById('section-user-preset-name');
+  const label=String((inp&&inp.value)||'').trim();
+  if(!label){wlNotify('Enter a preset name.');return;}
+  const names=activeSections().map(s=>String(s.name||'').trim()).filter(Boolean);
+  if(!names.length){wlNotify('Add at least one active section before saving a preset.');return;}
+  const baseId=slugifyBuildId(label,'preset');
+  uniqueUserPresetId('user-preset-'+baseId).then(id=>{
+    userSectionPresets=getUserSectionPresets().concat([{
+      id,label,names,createdAt:new Date().toISOString()
+    }]);
+    if(inp)inp.value='';
+    scheduleSave();doSave();
+    renderSectionsSettingsPanel();
+    syncGarageCreateTemplateOptions();
+    wlNotify('Preset saved.');
+  });
+}
+function deleteUserSectionPreset(id){
+  userSectionPresets=getUserSectionPresets().filter(p=>p.id!==id);
+  scheduleSave();doSave();
+  renderSectionsSettingsPanel();
+  syncGarageCreateTemplateOptions();
 }
 function createSectionFromName(name,sortOrder){
   const keys=new Set((sections||[]).map(s=>s&&s.key).filter(Boolean));
@@ -9445,7 +9644,7 @@ function createSectionFromName(name,sortOrder){
   });
 }
 function applySectionPreset(presetId){
-  const presetNames=SECTION_PRESET_NAMES[presetId];
+  const presetNames=getPresetNames(presetId);
   if(!Array.isArray(presetNames))return;
   const existingNames=new Set((sections||[]).map(s=>String(s&&s.name||'').toLowerCase().trim()).filter(Boolean));
   let maxSort=(sections||[]).reduce((m,s)=>Math.max(m,s.sortOrder||0),-1);
@@ -9471,7 +9670,9 @@ function addCustomSectionFromSettings(){
   const name=String((inp&&inp.value)||'').trim();
   if(!name)return;
   const maxSort=(sections||[]).reduce((m,s)=>Math.max(m,s.sortOrder||0),-1);
-  sections.push(createSectionFromName(name,maxSort+1));
+  const sec=createSectionFromName(name,maxSort+1);
+  sections.push(sec);
+  sectionSettingsExpanded.add(sec.key);
   if(inp)inp.value='';
   scheduleSave();doSave();
   renderSectionsSettingsPanel();
@@ -9495,7 +9696,7 @@ function reorderSection(key,direction){
   if(swapIdx<0||swapIdx>=active.length)return;
   [active[idx],active[swapIdx]]=[active[swapIdx],active[idx]];
   const archived=orderedSections((sections||[]).filter(s=>s.archived));
-  [...active,...archived].forEach((s,i)=>{s.sortOrder=i;});
+  assignSectionSortOrders(active,archived);
   scheduleSave();doSave();
   renderSectionsSettingsPanel();
   build();
@@ -9526,6 +9727,155 @@ function onSectionPublicSettingChange(key,field,value){
   scheduleSave();doSave();
   renderSectionsSettingsPanel();
 }
+function pickSectionVisibility(key,mode){
+  onSectionPublicSettingChange(key,'publicVisibility',mode);
+}
+function renderSectionVisibilityPills(sec){
+  const cur=normalizePublicVisibility(sec.publicVisibility);
+  return `<div class="sec-vis-pills">${PUBLIC_VISIBILITY_MODES.map(m=>{
+    const cls=m.replace('coming-soon','coming-soon');
+    return `<button type="button" class="sec-vis-pill vis-${cls}${cur===m?' active':''}" onclick="pickSectionVisibility('${sec.key}','${m}')">${PUBLIC_VISIBILITY_LABELS[m]}</button>`;
+  }).join('')}</div>`;
+}
+function toggleSectionSettingsRow(key,e){
+  if(e&&e.target.closest('.sec-drag-handle,.section-settings-row-actions,.ms-btn'))return;
+  if(sectionSettingsExpanded.has(key))sectionSettingsExpanded.delete(key);
+  else sectionSettingsExpanded.add(key);
+  const row=document.querySelector(`.section-settings-row[data-section-key="${key}"]`);
+  const body=row&&row.querySelector('.section-settings-row-body');
+  const btn=row&&row.querySelector('.sec-expand-btn i');
+  if(body)body.classList.toggle('collapsed',!sectionSettingsExpanded.has(key));
+  if(btn){
+    btn.className=sectionSettingsExpanded.has(key)?'ti ti-chevron-down':'ti ti-chevron-right';
+  }
+}
+function assignSectionSortOrders(active,archived){
+  [...active,...archived].forEach((s,i)=>{s.sortOrder=i;});
+}
+function reorderSectionsToIndex(fromKey,toIndex){
+  const active=orderedSections((sections||[]).filter(s=>!s.archived));
+  const fromIdx=active.findIndex(s=>s.key===fromKey);
+  if(fromIdx<0)return;
+  const item=active.splice(fromIdx,1)[0];
+  let idx=Math.max(0,Math.min(toIndex,active.length));
+  if(fromIdx<idx)idx--;
+  active.splice(idx,0,item);
+  const archived=orderedSections((sections||[]).filter(s=>s.archived));
+  assignSectionSortOrders(active,archived);
+  scheduleSave();doSave();
+  renderSectionsSettingsPanel();
+  build();
+}
+function secDragBlockedTarget(el){
+  return el&&!!el.closest('input,textarea,button:not(.sec-expand-btn),select,a,.sec-vis-pill,.ms-btn');
+}
+function secRemoveDropIndicator(list){
+  list?.querySelectorAll('.sec-drop-indicator').forEach(el=>el.remove());
+}
+function secGetDropInsertIndex(list,clientY){
+  const rows=[...list.querySelectorAll('.section-settings-row:not(.dragging)')];
+  for(let i=0;i<rows.length;i++){
+    const rect=rows[i].getBoundingClientRect();
+    if(clientY<rect.top+rect.height/2)return i;
+  }
+  return rows.length;
+}
+function secUpdateDropIndicator(list,clientY){
+  secRemoveDropIndicator(list);
+  const idx=secGetDropInsertIndex(list,clientY);
+  const rows=[...list.querySelectorAll('.section-settings-row:not(.dragging)')];
+  const indicator=document.createElement('div');
+  indicator.className='sec-drop-indicator';
+  indicator.dataset.dropIdx=String(idx);
+  if(idx>=rows.length)list.appendChild(indicator);
+  else list.insertBefore(indicator,rows[idx]);
+}
+function secStartFloatingDrag(active,e){
+  const rect=active.row.getBoundingClientRect();
+  active.originRect={left:rect.left,top:rect.top,width:rect.width,height:rect.height};
+  active.placeholder=document.createElement('div');
+  active.placeholder.className='wl-drag-placeholder';
+  active.placeholder.style.height=rect.height+'px';
+  if(active.row.parentNode)active.row.parentNode.insertBefore(active.placeholder,active.row);
+  active.row.classList.add('dragging');
+  active.row.style.position='fixed';
+  active.row.style.left=rect.left+'px';
+  active.row.style.top=rect.top+'px';
+  active.row.style.width=rect.width+'px';
+  active.row.style.margin='0';
+  active.row.style.zIndex='9000';
+  document.body.appendChild(active.row);
+  secUpdateFloatingDrag(active,e);
+}
+function secUpdateFloatingDrag(active,e){
+  if(!active.originRect)return;
+  const x=active.originRect.left+(e.clientX-active.startX);
+  const y=active.originRect.top+(e.clientY-active.startY);
+  active.row.style.left=x+'px';
+  active.row.style.top=y+'px';
+  active.row.style.transform='rotate(.8deg)';
+  const list=document.getElementById('section-settings-active-list');
+  if(list)secUpdateDropIndicator(list,e.clientY);
+}
+function secCleanupFloatingDrag(active,restore){
+  secRemoveDropIndicator(document.getElementById('section-settings-active-list'));
+  if(active?.placeholder?.parentNode)active.placeholder.parentNode.removeChild(active.placeholder);
+  if(active?.row?.parentNode===document.body)document.body.removeChild(active.row);
+  if(active?.row){
+    active.row.classList.remove('dragging');
+    active.row.style.cssText='';
+  }
+  if(restore)renderSectionsSettingsPanel();
+}
+function ensureSectionSettingsDragBound(){
+  const list=document.getElementById('section-settings-active-list');
+  if(!list||list.dataset.secDragBound)return;
+  list.dataset.secDragBound='1';
+  let active=null;
+  list.addEventListener('pointerdown',e=>{
+    if(secDragBlockedTarget(e.target))return;
+    const handle=e.target.closest('.sec-drag-handle');
+    if(!handle)return;
+    const row=handle.closest('.section-settings-row');
+    if(!row||row.classList.contains('is-archived'))return;
+    active={
+      key:row.dataset.sectionKey,
+      row,
+      pointerId:e.pointerId,
+      startX:e.clientX,
+      startY:e.clientY,
+      moved:false,
+      placeholder:null,
+      originRect:null
+    };
+    if(handle.setPointerCapture)handle.setPointerCapture(e.pointerId);
+  });
+  list.addEventListener('pointermove',e=>{
+    if(!active||active.pointerId!==e.pointerId)return;
+    const dx=Math.abs(e.clientX-active.startX);
+    const dy=Math.abs(e.clientY-active.startY);
+    if(!active.moved&&(dx>6||dy>6)){
+      active.moved=true;
+      secStartFloatingDrag(active,e);
+    }
+    if(!active.moved)return;
+    secUpdateFloatingDrag(active,e);
+  });
+  const finishDrag=(e)=>{
+    if(!active||active.pointerId!==e.pointerId)return;
+    const {key,moved}=active;
+    if(moved){
+      const listEl=document.getElementById('section-settings-active-list');
+      const indicator=listEl?.querySelector('.sec-drop-indicator');
+      const toIndex=indicator?parseInt(indicator.dataset.dropIdx||'0',10):secGetDropInsertIndex(listEl,e.clientY);
+      secCleanupFloatingDrag(active,false);
+      reorderSectionsToIndex(key,toIndex);
+    }else secCleanupFloatingDrag(active,false);
+    active=null;
+  };
+  list.addEventListener('pointerup',finishDrag);
+  list.addEventListener('pointercancel',finishDrag);
+}
 function sectionSettingsVisibilityFields(sec){
   const vis=normalizePublicVisibility(sec.publicVisibility);
   const msg=esc(sec.publicMessage||'');
@@ -9555,42 +9905,57 @@ function renderSectionSettingsRow(sec,opts){
   const archived=!!(opts&&opts.archived);
   const activeList=activeSections();
   const idx=activeList.findIndex(s=>s.key===sec.key);
-  const visOpts=PUBLIC_VISIBILITY_MODES.map(m=>`<option value="${m}"${normalizePublicVisibility(sec.publicVisibility)===m?' selected':''}>${PUBLIC_VISIBILITY_LABELS[m]}</option>`).join('');
   const partCount=(sec.parts||[]).length;
+  const expanded=sectionSettingsExpanded.has(sec.key);
+  const chev=expanded?'ti-chevron-down':'ti-chevron-right';
   return `<div class="section-settings-row${archived?' is-archived':''}" data-section-key="${esc(sec.key)}">
-    <div class="section-settings-row-hdr">
-      <div class="section-settings-row-title">${esc(sec.name)}${partCount?` <span style="font-size:11px;color:var(--gs-muted);font-weight:600">(${partCount} parts)</span>`:''}</div>
-      <div class="section-settings-row-actions">
+    <div class="section-settings-row-hdr" onclick="toggleSectionSettingsRow('${sec.key}',event)">
+      <div class="section-settings-row-hdr-left">
+        ${archived?'':`<div class="sec-drag-handle" title="Drag to reorder" onclick="event.stopPropagation()"><i class="ti ti-grip-vertical"></i></div>`}
+        <button type="button" class="sec-expand-btn" onclick="toggleSectionSettingsRow('${sec.key}',event)" title="${expanded?'Collapse':'Expand'}"><i class="ti ${chev}"></i></button>
+        <div class="section-settings-row-title">${esc(sec.name)}${partCount?` <span style="font-size:11px;color:var(--gs-muted);font-weight:600">(${partCount} parts)</span>`:''}</div>
+      </div>
+      <div class="section-settings-row-actions" onclick="event.stopPropagation()">
         ${archived?'':`<button type="button" class="ms-btn" onclick="reorderSection('${sec.key}',-1)"${idx<=0?' disabled':''} title="Move up"><i class="ti ti-arrow-up"></i></button>
         <button type="button" class="ms-btn" onclick="reorderSection('${sec.key}',1)"${idx<0||idx>=activeList.length-1?' disabled':''} title="Move down"><i class="ti ti-arrow-down"></i></button>`}
         ${archived?`<button type="button" class="ms-btn" onclick="restoreSection('${sec.key}')"><i class="ti ti-arrow-back-up"></i> Restore</button>`:
           `<button type="button" class="ms-btn" onclick="archiveSection('${sec.key}')" title="Archive"><i class="ti ti-archive"></i></button>`}
       </div>
     </div>
-    ${archived?'':`<div class="section-settings-fields">
-      <div class="settings-field">
-        <label>Section name</label>
-        <input class="veh-editor-input" type="text" value="${esc(sec.name)}"
-          onchange="renameSectionFromSettings('${sec.key}',this.value)"/>
+    ${archived?'':`<div class="section-settings-row-body${expanded?'':' collapsed'}">
+      <div class="section-settings-row-body-inner">
+        <div class="section-settings-fields">
+          <div class="settings-field">
+            <label>Section name</label>
+            <input class="veh-editor-input" type="text" value="${esc(sec.name)}"
+              onchange="renameSectionFromSettings('${sec.key}',this.value)"/>
+          </div>
+          <div class="settings-field" style="grid-column:1/-1">
+            <label>Public visibility</label>
+            ${renderSectionVisibilityPills(sec)}
+          </div>
+          <div class="section-settings-extra-fields" style="grid-column:1/-1">${sectionSettingsVisibilityFields(sec)}</div>
+        </div>
       </div>
-      <div class="settings-field">
-        <label>Public visibility</label>
-        <select class="veh-editor-input" onchange="onSectionPublicSettingChange('${sec.key}','publicVisibility',this.value)">${visOpts}</select>
-      </div>
-      ${sectionSettingsVisibilityFields(sec)}
     </div>`}
   </div>`;
 }
+function renderUserSectionPresetsList(){
+  const el=document.getElementById('section-user-presets-list');
+  if(!el)return;
+  const presets=getUserSectionPresets();
+  el.innerHTML=presets.length?presets.map(p=>`<div class="section-user-preset-row">
+    <div>
+      <div class="section-user-preset-row-name">${esc(p.label)}</div>
+      <div class="section-user-preset-row-meta">${p.names.length} section${p.names.length===1?'':'s'}</div>
+    </div>
+    <button type="button" class="ms-btn" onclick="deleteUserSectionPreset('${p.id}')" title="Delete preset"><i class="ti ti-trash"></i></button>
+  </div>`).join(''):
+    `<div class="settings-card-desc" style="padding:0">No saved presets yet.</div>`;
+}
 function renderSectionsSettingsPanel(){
-  const presetSel=document.getElementById('section-preset-select');
-  if(presetSel&&!presetSel.dataset.bound){
-    presetSel.innerHTML=Object.keys(SECTION_PRESET_NAMES).map(id=>{
-      const tpl=BUILD_TEMPLATES[id];
-      const label=tpl?tpl.label:id;
-      return `<option value="${id}">${esc(label)}</option>`;
-    }).join('');
-    presetSel.dataset.bound='1';
-  }
+  syncSectionPresetSelect();
+  renderUserSectionPresetsList();
   const activeList=document.getElementById('section-settings-active-list');
   const archivedList=document.getElementById('section-settings-archived-list');
   const archivedWrap=document.getElementById('section-settings-archived-wrap');
@@ -9603,6 +9968,7 @@ function renderSectionsSettingsPanel(){
     archivedList.innerHTML=archived.map(sec=>renderSectionSettingsRow(sec,{archived:true})).join('');
     if(archivedWrap)archivedWrap.hidden=!archived.length;
   }
+  ensureSectionSettingsDragBound();
 }
 function repairSections(savedSections){
   if(!Array.isArray(savedSections))return cloneDefaultData(DEFAULT_SECTIONS);
@@ -9908,6 +10274,8 @@ const DEFAULT_PUBLIC_PAGE_SETTINGS={
   likesEnabled:true
 };
 let publicPageSettings=Object.assign({},DEFAULT_PUBLIC_PAGE_SETTINGS);
+let userSectionPresets=[];
+const sectionSettingsExpanded=new Set();
 function normalizePublicPageSettings(raw){
   const src=raw&&typeof raw==='object'?raw:{};
   return{
@@ -10032,6 +10400,7 @@ function applySettingsFromState(state){
     VEHICLE_MODEL=state.settings.vehicleModel!=null?String(state.settings.vehicleModel):VEHICLE_MODEL;
     VEHICLE_NICKNAME=state.settings.vehicleNickname!=null?String(state.settings.vehicleNickname):VEHICLE_NICKNAME;
     if(state.settings.publicPage)publicPageSettings=normalizePublicPageSettings(state.settings.publicPage);
+    if(state.settings.userSectionPresets)userSectionPresets=normalizeUserSectionPresets(state.settings.userSectionPresets);
   }
   applyBuildPartnersVisibility();
   syncBuildMetaUI();
@@ -13413,7 +13782,7 @@ async function bootTracker(){
   if(trackerBooted) return;
   trackerBooted=true;
 
-  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,setAppTheme,saveBuilderProfile,renderSettingsPanel,showSettingsSubpanel,renderSectionsSettingsPanel,applySectionPresetFromSettings,addCustomSectionFromSettings,renameSectionFromSettings,reorderSection,archiveSection,restoreSection,onSectionPublicSettingChange,onPublicPageSettingChange,syncPublicSlugPreview,syncPublicPageSettingsForm,applyBuildPartnersVisibility,isBuildPartnersEnabled,handleProfilePhotoUpload,profilePhotoDrop,removeProfilePhoto,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,markAllNotificationsRead,markNotificationRead,openNotificationOnBuild,toggleNotifExpand,toggleNotifReplyForm,toggleMilestoneComments,ownerLikeComment,ownerReplyToComment,toggleReplyForm,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,movePart,openMovePartModal,closeMovePartModal,confirmMovePart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
+  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,setAppTheme,saveBuilderProfile,renderSettingsPanel,showSettingsSubpanel,renderSectionsSettingsPanel,applySectionPresetFromSettings,addCustomSectionFromSettings,renameSectionFromSettings,reorderSection,archiveSection,restoreSection,onSectionPublicSettingChange,pickSectionVisibility,toggleSectionSettingsRow,saveUserSectionPresetFromSettings,deleteUserSectionPreset,onPublicPageSettingChange,syncPublicSlugPreview,syncPublicPageSettingsForm,applyBuildPartnersVisibility,isBuildPartnersEnabled,handleProfilePhotoUpload,profilePhotoDrop,removeProfilePhoto,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,markAllNotificationsRead,markNotificationRead,openNotificationOnBuild,toggleNotifExpand,toggleNotifReplyForm,toggleMilestoneComments,ownerLikeComment,ownerReplyToComment,toggleReplyForm,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,movePart,openMovePartModal,closeMovePartModal,confirmMovePart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
   document.addEventListener('click',e=>{
     if(!e.target.closest('.tracker-nav-more-wrap'))closeMoreMenu();
     if(!e.target.closest('.tracker-nav-mobile-wrap'))closeMobileNavMenu();
