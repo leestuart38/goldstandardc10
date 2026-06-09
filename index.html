@@ -7500,13 +7500,29 @@ let VEHICLE_MODEL='';
 let VEHICLE_NICKNAME='';
 const LEGACY_LOCAL_SAVE_KEY='c10tracker_v3';
 const LAST_BUILD_KEY='c10tracker_last_build';
-function localSaveKey(){return 'c10tracker_v3_'+(activeBuildId||LEGACY_BUILD_ID);}
+function accountStorageUid(){return currentUser&&currentUser.uid?currentUser.uid:'';}
+function localSaveKey(){
+  const uid=accountStorageUid();
+  const build=activeBuildId||LEGACY_BUILD_ID;
+  return uid?'c10tracker_v3_'+uid+'_'+build:'c10tracker_v3_'+build;
+}
+function lastBuildStorageKey(){
+  const uid=accountStorageUid();
+  return uid?LAST_BUILD_KEY+'_'+uid:LAST_BUILD_KEY;
+}
 function loadLocalBuildState(buildId){
   if(!buildId)return null;
-  try{
-    const raw=localStorage.getItem('c10tracker_v3_'+buildId);
-    return raw?JSON.parse(raw):null;
-  }catch(e){return null;}
+  const keys=[];
+  const uid=accountStorageUid();
+  if(uid)keys.push('c10tracker_v3_'+uid+'_'+buildId);
+  keys.push('c10tracker_v3_'+buildId);
+  for(const k of keys){
+    try{
+      const raw=localStorage.getItem(k);
+      if(raw)return JSON.parse(raw);
+    }catch(e){}
+  }
+  return null;
 }
 function fetchLegacyLocalPayload(){
   try{
@@ -7547,12 +7563,18 @@ function collectAllLocalTrackerSnapshots(){
     seen.add(key);
     out.push(obj);
   };
-  add(fetchLegacyLocalPayload(),LEGACY_LOCAL_SAVE_KEY);
+  const uid=accountStorageUid();
+  if(!uid){
+    add(fetchLegacyLocalPayload(),LEGACY_LOCAL_SAVE_KEY);
+    try{add(JSON.parse(localStorage.getItem(localSaveKey())||'null'),localSaveKey());}catch(e){}
+    return out;
+  }
+  const prefix='c10tracker_v3_'+uid+'_';
   try{add(JSON.parse(localStorage.getItem(localSaveKey())||'null'),localSaveKey());}catch(e){}
   try{
     for(let i=0;i<localStorage.length;i++){
       const k=localStorage.key(i);
-      if(!k||!k.startsWith('c10tracker_v3'))continue;
+      if(!k||!k.startsWith(prefix))continue;
       try{add(JSON.parse(localStorage.getItem(k)),k);}catch(e){}
     }
   }catch(e){}
@@ -8824,24 +8846,44 @@ function wrapC10GarageDoc(source){
     meta:Object.assign({},payload.meta||{},{appVersion:'v140-garage-restore',buildId:LEGACY_BUILD_ID,publicSlug:LEGACY_BUILD_ID,updatedAt:now})
   });
 }
+async function userOwnsPublicSlug(slug){
+  if(!firebaseDb||!currentUser||!slug)return false;
+  try{
+    const snap=await firebaseDb.collection(PUBLIC_COLLECTION).doc(slug).get();
+    if(!snap.exists)return true;
+    const owner=snap.data().ownerUid||'';
+    return !owner||owner===currentUser.uid;
+  }catch(e){return false;}
+}
+async function isPublicSlugAvailable(slug){
+  if(!firebaseDb||!currentUser||!slug)return true;
+  try{
+    const snap=await firebaseDb.collection(PUBLIC_COLLECTION).doc(slug).get();
+    if(!snap.exists)return true;
+    const owner=snap.data().ownerUid||'';
+    return owner===currentUser.uid;
+  }catch(e){return false;}
+}
+async function uniquePublicSlug(base){
+  const normalized=normalizePublicSlugInput(base)||'build';
+  let i=0;
+  while(i<100){
+    const candidate=i?normalized+'-'+i:normalized;
+    if(await isPublicSlugAvailable(candidate))return candidate;
+    i++;
+  }
+  return normalized+'-'+Date.now();
+}
 async function restoreC10BuildCompletely(userData){
-  const sources=[userData];
-  const legacyCore=await fetchLegacyTrackerCore();
-  if(legacyCore)sources.push(legacyCore);
-  const legacyFull=await fetchLegacyTrackerPayload();
-  if(legacyFull)sources.push(legacyFull);
+  const sources=[userData].filter(Boolean);
   sources.push(...collectAllLocalTrackerSnapshots());
-  const pubSnap=await fetchPublicC10Snapshot();
-  if(pubSnap)sources.push(pubSnap);
   let merged=mergeBuildStateFieldwise.apply(null,sources);
   merged=wrapC10GarageDoc(merged);
-  await loadLegacyPrivateMedia(merged);
-  await probeMilestoneShards(LEGACY_TRACKER_COLLECTION,LEGACY_MEDIA_MS_PREFIX,merged,true);
   if(currentUser){
     const userMediaCol=getUserMediaCol();
     if(userMediaCol)await probeMilestoneShards(userMediaCol,LEGACY_BUILD_ID+'-ms-',merged,true);
     try{
-      const vSnap=await withTimeout(firebaseDb.collection('users').doc(uid).collection(USER_MEDIA_SUB).doc(LEGACY_BUILD_ID+'-vehicle').get(),8000,'User C10 vehicle media');
+      const vSnap=await withTimeout(firebaseDb.collection('users').doc(currentUser.uid).collection(USER_MEDIA_SUB).doc(LEGACY_BUILD_ID+'-vehicle').get(),8000,'User C10 vehicle media');
       if(vSnap.exists){
         const v=vSnap.data()||{};
         if(!merged.vehicleImage&&v.vehicleImage)merged.vehicleImage=v.vehicleImage;
@@ -8849,15 +8891,17 @@ async function restoreC10BuildCompletely(userData){
       }
     }catch(e){console.warn(e);}
   }
-  try{
-    const vSnap=await firebaseDb.collection(PUBLIC_COLLECTION).doc(LEGACY_BUILD_ID+'-media-vehicle').get();
-    if(vSnap.exists){
-      const v=vSnap.data()||{};
-      if(!merged.vehicleImage&&v.vehicleImage)merged.vehicleImage=v.vehicleImage;
-      if(!merged.vehicleImageOriginal&&v.vehicleImageOriginal)merged.vehicleImageOriginal=v.vehicleImageOriginal;
-    }
-    await probeMilestoneShards(PUBLIC_COLLECTION,LEGACY_BUILD_ID+'-media-ms-',merged,true);
-  }catch(e){console.warn(e);}
+  if(await userOwnsPublicSlug(LEGACY_BUILD_ID)){
+    try{
+      const vSnap=await firebaseDb.collection(PUBLIC_COLLECTION).doc(LEGACY_BUILD_ID+'-media-vehicle').get();
+      if(vSnap.exists){
+        const v=vSnap.data()||{};
+        if(!merged.vehicleImage&&v.vehicleImage)merged.vehicleImage=v.vehicleImage;
+        if(!merged.vehicleImageOriginal&&v.vehicleImageOriginal)merged.vehicleImageOriginal=v.vehicleImageOriginal;
+      }
+      await probeMilestoneShards(PUBLIC_COLLECTION,LEGACY_BUILD_ID+'-media-ms-',merged,true);
+    }catch(e){console.warn(e);}
+  }
   const before=buildRichnessScore(userData);
   const after=buildRichnessScore(merged);
   const restored=
@@ -8913,47 +8957,15 @@ async function migrateLegacyBuildIfNeeded(){
     await metaRef.set({legacyMigrated:true,activeBuildId:meta.activeBuildId||LEGACY_BUILD_ID},{merge:true});
     return Object.assign({},meta,{legacyMigrated:true,activeBuildId:meta.activeBuildId||LEGACY_BUILD_ID});
   }
-  const legacyRef=firebaseDb.collection(LEGACY_TRACKER_COLLECTION).doc(LEGACY_BUILD_ID);
-  const legacySnap=await withTimeout(legacyRef.get(),12000,'Legacy build load');
-  const buildId=LEGACY_BUILD_ID;
-  const publicSlug=LEGACY_BUILD_ID;
-  let payload;
-  if(legacySnap.exists&&hasUsableCloudState(legacySnap.data())){
-    payload=Object.assign({},legacySnap.data());
-    await loadLegacyPrivateMedia(payload);
-  }else{
-    payload={
-      sections:cloneDefaultData(DEFAULT_SECTIONS),
-      sponsors:cloneDefaultData(DEFAULT_SPONSORS),
-      decisions:cloneDefaultData(DEFAULT_DECISIONS),
-      milestones:[],
-      workTasks:[],
-      settings:{buildName:BUILD_NAME,targetBudget:TARGET_BUDGET,truckCost:TRUCK_COST}
-    };
-  }
   const now=new Date().toISOString();
-  const buildDoc=Object.assign({},payload,{
-    buildId,publicSlug,
-    buildName:payload.settings?.buildName||BUILD_NAME||'Gold Standard 38',
-    vehicleYear:payload.settings?.vehicleYear||'',
-    vehicleMake:payload.settings?.vehicleMake||'',
-    vehicleModel:payload.settings?.vehicleModel||'',
-    vehicleNickname:'',
-    archived:false,
-    template:'custom-truck',
-    createdAt:now,
-    updatedAt:now,
-    meta:Object.assign({},payload.meta||{},{appVersion:'v139-garage-multibuild',buildId,publicSlug,updatedAt:now})
-  });
-  await buildsCol.doc(buildId).set(sanitizeForFirestore(buildDoc),{merge:true});
   await metaRef.set({
     legacyMigrated:true,
     legacyMigratedAt:now,
-    activeBuildId:buildId,
-    migrationVersion:1
+    migrationVersion:2,
+    skippedSharedLegacyImport:true
   },{merge:true});
-  console.log('Migrated legacy build to users/'+currentUser.uid+'/builds/'+buildId);
-  return {legacyMigrated:true,activeBuildId:buildId};
+  console.log('New garage for users/'+currentUser.uid+' — skipped shared legacy tracker import');
+  return Object.assign({},meta,{legacyMigrated:true,skippedSharedLegacyImport:true});
 }
 async function saveUserGarageMeta(patch){
   const metaRef=getUserMetaRef();
@@ -8963,11 +8975,28 @@ async function saveUserGarageMeta(patch){
 async function resolveActiveBuildId(meta){
   if(!garageBuilds.length)await loadGarageBuildList();
   let buildId=meta&&meta.activeBuildId;
-  if(!buildId||!garageBuilds.some(b=>b.buildId===buildId)){
-    const preferred=garageBuilds.find(b=>!b.archived);
-    return (preferred||garageBuilds[0]||{}).buildId||LEGACY_BUILD_ID;
-  }
-  return buildId;
+  if(buildId&&garageBuilds.some(b=>b.buildId===buildId))return buildId;
+  const preferred=garageBuilds.find(b=>!b.archived);
+  return preferred?preferred.buildId:(garageBuilds[0]?garageBuilds[0].buildId:null);
+}
+function bootEmptyGarageWorkspace(){
+  activeBuildId=null;
+  activePublicSlug=null;
+  clearActiveBuildRefs();
+  sections=cloneDefaultData(DEFAULT_SECTIONS);
+  sponsors=cloneDefaultData(DEFAULT_SPONSORS);
+  decisions=[];
+  milestones=[];
+  milestoneCtr=0;
+  workTasks=[];
+  workTaskCtr=0;
+  workHourCtr=0;
+  vehicleImage='';
+  vehicleImageOriginal='';
+  repairTrackerState();
+  safeBuild();
+  renderGarageUI();
+  showPanel('vehicle',false);
 }
 function captureBuildRefs(){
   return{
@@ -9035,7 +9064,8 @@ async function hydrateBuildMedia(state,fastLoad){
   }).catch(e=>console.warn('Milestone media hydrate failed:',e));
 }
 function tryInstantLocalBoot(){
-  const lastId=localStorage.getItem(LAST_BUILD_KEY);
+  if(!accountStorageUid())return false;
+  const lastId=localStorage.getItem(lastBuildStorageKey());
   if(!lastId)return false;
   const local=loadLocalBuildState(lastId);
   if(!local||!hasUsableCloudState(local))return false;
@@ -9061,7 +9091,7 @@ function runInitBackgroundTasks(meta,buildId){
   Promise.resolve().then(async()=>{
     try{
       if(!garageBuilds.length)await loadGarageBuildList();
-      if(!meta||meta.activeBuildId!==buildId)await saveUserGarageMeta({activeBuildId:buildId});
+      if(buildId&&(!meta||meta.activeBuildId!==buildId))await saveUserGarageMeta({activeBuildId:buildId});
       await loadUserProfile();
       startEngagementInboxListener();
       const thumbGen=++garageThumbGen;
@@ -9074,7 +9104,7 @@ function runInitBackgroundTasks(meta,buildId){
   });
 }
 function runSwitchBackgroundTasks(departingRefs,departingState,buildId){
-  localStorage.setItem(LAST_BUILD_KEY,buildId);
+  localStorage.setItem(lastBuildStorageKey(),buildId);
   queueDepartingCloudSave(departingRefs,departingState);
   milestoneEngagementCache={};
   milestoneCommentsCache={};
@@ -9227,7 +9257,7 @@ async function loadBuildById(buildId,options){
   throwIfGarageOpCancelled();
   applyCloudStateToApp(deferMedia?stripMediaFromState(data):data,{skipRepair});
   saveLocalStateNow();
-  localStorage.setItem(LAST_BUILD_KEY,buildId);
+  localStorage.setItem(lastBuildStorageKey(),buildId);
   if(opts.lightRender)quickApplyBuildUI();
   else{safeBuild();repairAllSponsorLogos();}
   cachedQuickMediaFingerprint=quickMediaFingerprint({
@@ -9548,7 +9578,7 @@ async function confirmGarageCreateBuild(){
     if(!buildsCol)throw new Error('Garage unavailable. Sign in and try again.');
     const baseId=slugifyBuildId(name,'build');
     const buildId=await uniqueBuildId(baseId);
-    const publicSlug=buildId;
+    const publicSlug=await uniquePublicSlug(buildId);
     const now=new Date().toISOString();
     clearTimeout(saveTimer);
     saveTimer=null;
@@ -10182,15 +10212,21 @@ function publicSponsorsPayload(){
 
 async function savePublicState(){
   if(!firebaseReady||!publicDocRef)return false;
+  const slug=activePublicSlug||activeBuildId||'';
+  if(slug&&!await isPublicSlugAvailable(slug)){
+    throw new Error('Public slug "'+slug+'" is already in use by another account.');
+  }
   const {core,media}=splitPublicPayload(publicPayload());
-  const mediaMsShardCount=await savePublicMedia(media);
   const corePayload=sanitizeForFirestore(core);
-  corePayload.mediaMsShardCount=mediaMsShardCount;
+  corePayload.mediaMsShardCount=0;
   corePayload.ownerUid=currentUser?currentUser.uid:'';
   corePayload.savedAt=firebase.firestore.FieldValue.serverTimestamp();
   const coreBytes=estimatePayloadBytes(corePayload);
   if(coreBytes>CLOUD_DOC_BYTE_LIMIT)throw new Error('Public build data is too large ('+coreBytes+' bytes).');
   await publicDocRef.set(corePayload);
+  const mediaMsShardCount=await savePublicMedia(media);
+  corePayload.mediaMsShardCount=mediaMsShardCount;
+  if(mediaMsShardCount)await publicDocRef.set({mediaMsShardCount:mediaMsShardCount},{merge:true});
   cachedPublicMediaMsShardCount=mediaMsShardCount;
   console.log('Published public build data','shards='+mediaMsShardCount);
   return true;
@@ -10242,11 +10278,7 @@ async function saveCloudState(options){
   const coreBytes=estimatePayloadBytes(corePayload);
   if(coreBytes>CLOUD_DOC_BYTE_LIMIT)throw new Error('Build data is too large ('+coreBytes+' bytes). Try shortening long notes.');
   if(opts.coreOnly){
-    const ops=[refs.firestoreDocRef.set(corePayload,{merge:true})];
-    if(refs.isLegacy){
-      ops.push(firebaseDb.collection(LEGACY_TRACKER_COLLECTION).doc(LEGACY_BUILD_ID).set(corePayload,{merge:true}));
-    }
-    await Promise.all(ops);
+    await refs.firestoreDocRef.set(corePayload,{merge:true});
     return true;
   }
   const quickFp=quickMediaFingerprint(media);
@@ -10281,37 +10313,29 @@ async function saveCloudState(options){
   if(pubCoreBytes>CLOUD_DOC_BYTE_LIMIT)throw new Error('Public build data is too large ('+pubCoreBytes+' bytes).');
   const privateMediaChanged=!mediaUnchanged&&privateMediaFp!==refs.cachedPrivateMediaPlanFingerprint;
   const publicMediaChanged=!mediaUnchanged&&publicMediaFp!==refs.cachedPublicMediaPlanFingerprint;
-  const ops=[
-    refs.firestoreDocRef.set(corePayload,{merge:true}),
-    refs.publicDocRef.set(pubCorePayload)
-  ];
+  const slug=refs.publicSlug||activePublicSlug||refs.buildId||'';
+  if(slug&&!await isPublicSlugAvailable(slug)){
+    throw new Error('Public slug "'+slug+'" is already in use by another account.');
+  }
+  const privateOps=[refs.firestoreDocRef.set(corePayload,{merge:true})];
   if(privateMediaChanged&&privatePlan){
-    const mediaColRef=getUserMediaCol()||firebaseDb.collection(LEGACY_TRACKER_COLLECTION);
+    const mediaColRef=getUserMediaCol();
+    if(!mediaColRef)throw new Error('Garage unavailable.');
     const msPrefix=refs.privateMediaMsPrefix||FIRESTORE_MEDIA_MS_PREFIX;
-    ops.push(
+    privateOps.push(
       writeVehicleMediaDoc(refs.mediaVehicleDocRef,privatePlan.vehiclePayload,'private'),
       writeMediaShards(mediaColRef,msPrefix,privatePlan.shardPayloads,refs.cachedMediaMsShardCount)
     );
   }
+  await Promise.all(privateOps);
+  await refs.publicDocRef.set(pubCorePayload);
   if(publicMediaChanged&&publicPlan){
     const pubMsPrefix=refs.publicMediaMsPrefix||PUBLIC_MEDIA_MS_PREFIX;
-    ops.push(
+    await Promise.all([
       writeVehicleMediaDoc(refs.publicMediaVehicleDocRef,publicPlan.vehiclePayload,'public'),
       writeMediaShards(PUBLIC_COLLECTION,pubMsPrefix,publicPlan.shardPayloads,refs.cachedPublicMediaMsShardCount)
-    );
+    ]);
   }
-  if(refs.isLegacy){
-    const legacyCoreRef=firebaseDb.collection(LEGACY_TRACKER_COLLECTION).doc(LEGACY_BUILD_ID);
-    const legacyVehicleRef=firebaseDb.collection(LEGACY_TRACKER_COLLECTION).doc(LEGACY_BUILD_ID+'-media-vehicle');
-    ops.push(legacyCoreRef.set(corePayload,{merge:true}));
-    if(privateMediaChanged&&privatePlan){
-      ops.push(
-        writeVehicleMediaDoc(legacyVehicleRef,privatePlan.vehiclePayload,'private'),
-        writeMediaShards(LEGACY_TRACKER_COLLECTION,LEGACY_MEDIA_MS_PREFIX,privatePlan.shardPayloads,refs.cachedMediaMsShardCount)
-      );
-    }
-  }
-  await Promise.all(ops);
   if(!opts.refs){
     if(privateMediaChanged&&privatePlan){
       cachedPrivateMediaPlanFingerprint=privateMediaFp;
@@ -11386,6 +11410,7 @@ async function loginWithEmail(e){
 async function logoutUser(){
   try{
     try{await flushCloudSave();}catch(e){console.warn('Pre-logout save:',e);}
+    stopEngagementInboxListener();
     appLoaded=false;
     currentUser=null;
     activeBuildId=null;
@@ -11550,12 +11575,18 @@ function collectPublicPageSettingsFromForm(){
     likesEnabled:chk('pub-settings-likes')
   });
 }
-function applyPublicSlugFromSettings(){
+async function applyPublicSlugFromSettings(){
   const slugEl=document.getElementById('pub-settings-slug');
   const next=normalizePublicSlugInput(slugEl&&slugEl.value)||activeBuildId||LEGACY_BUILD_ID;
   if(!next)return false;
   if(next===activePublicSlug)return true;
   try{
+    if(!await isPublicSlugAvailable(next)){
+      showGarageToast('Public slug "'+next+'" is already in use.');
+      if(slugEl)slugEl.value=activePublicSlug||activeBuildId||'';
+      syncPublicSlugPreview();
+      return false;
+    }
     bindActiveBuildRefs(activeBuildId||LEGACY_BUILD_ID,next);
     if(slugEl)slugEl.value=next;
     syncPublicSlugPreview();
@@ -11566,9 +11597,9 @@ function applyPublicSlugFromSettings(){
     return false;
   }
 }
-function onPublicPageSettingChange(){
+async function onPublicPageSettingChange(){
   publicPageSettings=collectPublicPageSettingsFromForm();
-  applyPublicSlugFromSettings();
+  if(!await applyPublicSlugFromSettings())return;
   applyBuildPartnersVisibility();
   syncPublicSlugPreview();
   scheduleSave();
@@ -11862,9 +11893,19 @@ async function initData(){
         }
         initMeta=meta;
         applyUserMetaPreferences(meta);
-        const buildId=(meta&&meta.activeBuildId)||LEGACY_BUILD_ID;
+        await loadGarageBuildList();
+        const buildId=await resolveActiveBuildId(meta);
         initBuildId=buildId;
-        localStorage.setItem(LAST_BUILD_KEY,buildId);
+        if(!buildId){
+          bootEmptyGarageWorkspace();
+          stopGarageProgressNudge();
+          setGarageOpProgress(100,'Ready');
+          setSaveInd('saved','Garage ready');
+          setTimeout(()=>setSaveInd('idle','Cloud sync on'),1800);
+          runInitBackgroundTasks(meta,null);
+          return;
+        }
+        localStorage.setItem(lastBuildStorageKey(),buildId);
         const col=getUserBuildsCol();
         const buildPrefetch=col?col.doc(buildId).get():null;
         setGarageOpProgress(42,'Loading build...');
@@ -14999,6 +15040,7 @@ async function bootTracker(){
 
   firebaseAuth.onAuthStateChanged(user=>{
     if(user){
+      if(currentUser&&currentUser.uid!==user.uid)appLoaded=false;
       startAuthenticatedApp(user);
     }else{
       currentUser=null;

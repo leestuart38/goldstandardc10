@@ -2,9 +2,34 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Legacy single-build docs (kept for migration; do not delete)
+    // --- helpers for publicBuilds (core + media shard docs share one collection) ---
+
+    function isPublicCoreDoc(docId) {
+      return !docId.matches('.*-media-vehicle$')
+        && !docId.matches('.*-media-ms-[0-9]+$');
+    }
+
+    function publicSlugFromDocId(docId) {
+      return docId.matches('.*-media-ms-[0-9]+$')
+        ? docId.split('-media-ms-')[0]
+        : (docId.matches('.*-media-vehicle$')
+          ? docId.replace('-media-vehicle', '')
+          : docId);
+    }
+
+    function publicBuildDoc(slug) {
+      return /databases/$(database)/documents/publicBuilds/$(slug);
+    }
+
+    function isPublicBuildOwner(slug) {
+      return request.auth != null
+        && exists(publicBuildDoc(slug))
+        && get(publicBuildDoc(slug)).data.ownerUid == request.auth.uid;
+    }
+
+    // Legacy single-build docs — frozen (live data is under users/{uid}/)
     match /tracker/{docId} {
-      allow read, write: if request.auth != null;
+      allow read, write: if false;
     }
 
     // Per-user garage: private builds + media shards + meta
@@ -12,10 +37,28 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Public build pages (readable by anyone; writes require sign-in)
+    // Public build pages — global slug namespace, owner-scoped writes
     match /publicBuilds/{docId} {
       allow read: if true;
-      allow write: if request.auth != null;
+
+      // Core build doc (publicBuilds/{slug})
+      allow create: if request.auth != null
+        && isPublicCoreDoc(docId)
+        && request.resource.data.ownerUid == request.auth.uid;
+
+      allow update: if request.auth != null
+        && isPublicCoreDoc(docId)
+        && isPublicBuildOwner(docId)
+        && request.resource.data.ownerUid == request.auth.uid;
+
+      allow delete: if request.auth != null
+        && isPublicCoreDoc(docId)
+        && isPublicBuildOwner(docId);
+
+      // Media docs ({slug}-media-vehicle, {slug}-media-ms-{n}) — ownership via core doc
+      allow create, update, delete: if request.auth != null
+        && !isPublicCoreDoc(docId)
+        && isPublicBuildOwner(publicSlugFromDocId(docId));
     }
 
     // Milestone likes/comments — top-level collection (anonymous public writes)
@@ -43,12 +86,12 @@ service cloud.firestore {
     match /publicEngagementInbox/{slug} {
       match /items/{itemId} {
         allow read: if request.auth != null
-          && exists(/databases/$(database)/documents/publicBuilds/$(slug))
-          && get(/databases/$(database)/documents/publicBuilds/$(slug)).data.ownerUid == request.auth.uid;
+          && exists(publicBuildDoc(slug))
+          && get(publicBuildDoc(slug)).data.ownerUid == request.auth.uid;
         allow create: if true;
         allow update: if request.auth != null
-          && exists(/databases/$(database)/documents/publicBuilds/$(slug))
-          && get(/databases/$(database)/documents/publicBuilds/$(slug)).data.ownerUid == request.auth.uid;
+          && exists(publicBuildDoc(slug))
+          && get(publicBuildDoc(slug)).data.ownerUid == request.auth.uid;
       }
     }
   }
