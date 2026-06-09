@@ -8235,8 +8235,7 @@ function placeholderUpgradePlan(){
   showGarageToast('Plan upgrades are coming soon. Payment processing is not connected yet.');
 }
 
-const PARTS_CSV_HEADERS=['Section','Name','Priority','Vendor','Budget','Actual','Sponsored','Status','Link','Notes'];
-const PARTS_CSV_TEMPLATE_HEADERS=['Part Name','Section','Priority','Status','Budget','Actual Cost','Sponsored Value','Vendor','Link','Notes'];
+const PARTS_CSV_HEADERS=['Part Name','Section','Priority','Part Status','Budget','Actual Cost','Sponsored Value','Vendor','Link','Notes'];
 const SPONSORS_CSV_HEADERS=['Name','Status','Value','Tier','Contact Name','Email','Website','Deliverables','Notes','Public Visible'];
 let partsImportDraft=null;
 
@@ -8271,16 +8270,16 @@ function exportPartsCsv(){
   activeSections().forEach(sec=>{
     (sec.parts||[]).forEach(p=>{
       rows.push({
-        Section:sec.name||sec.key,
-        Name:p.name||'',
-        Priority:p.priority||'Medium',
-        Vendor:p.vendor||'',
-        Budget:parseFloat(p.budget)||0,
-        Actual:parseFloat(p.actual)||0,
-        Sponsored:parseFloat(p.sponsored)||0,
-        Status:p.status||'Need to Buy',
-        Link:p.link||'',
-        Notes:p.notes||''
+        'Part Name':p.name||'',
+        'Section':sec.name||sec.key,
+        'Priority':p.priority||'Medium',
+        'Part Status':p.status||'Need to Buy',
+        'Budget':parseFloat(p.budget)||0,
+        'Actual Cost':parseFloat(p.actual)||0,
+        'Sponsored Value':parseFloat(p.sponsored)||0,
+        'Vendor':p.vendor||'',
+        'Link':p.link||'',
+        'Notes':p.notes||''
       });
     });
   });
@@ -8294,7 +8293,7 @@ function downloadPartsCsvTemplate(){
     'Part Name':'Example coilover kit (delete this row)',
     'Section':exampleSection,
     'Priority':'Medium',
-    'Status':'Need to Buy',
+    'Part Status':'Need to Buy',
     'Budget':'0',
     'Actual Cost':'0',
     'Sponsored Value':'0',
@@ -8302,7 +8301,7 @@ function downloadPartsCsvTemplate(){
     'Link':'',
     'Notes':'Replace with your own parts below.'
   };
-  downloadCsvFile(dataToolsFileSlug()+'-parts-template.csv',PARTS_CSV_TEMPLATE_HEADERS,[exampleRow]);
+  downloadCsvFile(dataToolsFileSlug()+'-parts-template.csv',PARTS_CSV_HEADERS,[exampleRow]);
   const hint=sections.length
     ?'Template downloaded with example section "'+exampleSection+'". Active sections: '+sections.map(s=>s.name).join(', ')+'.'
     :'Template downloaded. Add sections in Build Sections, then fill in the Section column.';
@@ -8421,7 +8420,7 @@ function normalizeImportPartRow(raw){
   if(!name)return null;
   let priority=importCsvPickField(raw,'priority')||'Medium';
   if(!PK.includes(priority))priority='Medium';
-  let status=importCsvPickField(raw,'status')||'Need to Buy';
+  let status=importCsvPickField(raw,'status','partstatus')||'Need to Buy';
   if(!SK.includes(status))status='Need to Buy';
   return {
     id:'cx-'+(++partCtr),
@@ -8441,7 +8440,7 @@ function partsImportPreviewHeaders(rows){
   rows.slice(0,20).forEach(r=>{
     Object.keys(r).forEach(k=>set.add(k));
   });
-  const preferred=['Part Name','Name','Section','Priority','Status','Budget','Actual Cost','Vendor','Notes'];
+  const preferred=['Part Name','Name','Section','Priority','Part Status','Status','Budget','Actual Cost','Vendor','Notes'];
   const all=[...set].map(k=>{
     const orig=Object.keys(rows[0]||{}).find(h=>h.toLowerCase()===k)||k;
     return orig;
