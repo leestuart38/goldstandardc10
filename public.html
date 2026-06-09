@@ -540,6 +540,27 @@ body{margin:0}
   .public-header-brand{gap:10px}
 }
 
+.pub-builder-card{
+  margin-bottom:16px;padding:18px 20px;border-radius:24px;
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+}
+.pub-builder-kicker{
+  font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-light);margin-bottom:8px;
+}
+.pub-builder-name{
+  font-family:var(--gs-display);font-size:clamp(22px,3.5vw,30px);line-height:1.05;
+  text-transform:uppercase;color:var(--cream);margin-bottom:6px;
+}
+.pub-builder-tagline{font-size:14px;line-height:1.55;color:var(--cream);opacity:.92;margin-bottom:10px}
+.pub-builder-meta{font-size:12px;color:var(--muted);margin-bottom:12px;display:flex;flex-wrap:wrap;gap:10px}
+.pub-builder-links{display:flex;flex-wrap:wrap;gap:8px}
+.pub-builder-link{
+  display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;
+  border:1px solid rgba(241,209,122,.24);background:rgba(0,0,0,.22);color:var(--cream);
+  font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;text-decoration:none;
+}
+.pub-builder-link:hover{border-color:rgba(241,209,122,.45);background:rgba(185,138,39,.12)}
 .pub-dash-progress{
   margin-bottom:16px;
   padding:18px;
@@ -710,6 +731,7 @@ body{margin:0}
       <div class="progress-track pub-dash-bar"><div class="progress-fill" id="overall-bar" style="width:0%"></div></div>
       <div class="pub-dash-sub"><span id="milestone-count">0</span> published milestones</div>
     </div>
+    <div class="pub-builder-card" id="pub-builder-card" hidden></div>
     <div class="pub-news" id="pub-news"></div>
     <div class="sections-card pub-partners-wrap pub-partners-wrap--dash" id="pub-partners-wrap" hidden>
       <div class="card-title">Build Partners</div>
@@ -1361,9 +1383,36 @@ function formatPublicVehicleLabel(data){
   const saved=data&&data.vehicleLabel?String(data.vehicleLabel).trim():'';
   return built||saved;
 }
+function renderPublicBuilder(profile){
+  const el=document.getElementById('pub-builder-card');
+  if(!el)return;
+  const p=profile&&typeof profile==='object'?profile:null;
+  const hasInfo=p&&(p.displayName||p.tagline||p.location||p.website||p.email||p.instagram||p.facebook||p.youtube||p.tiktok);
+  if(!hasInfo||p.showOnPublic===false){
+    el.hidden=true;
+    el.innerHTML='';
+    return;
+  }
+  const links=[];
+  const web=publicPartnerUrl(p.website);
+  if(web)links.push(`<a class="pub-builder-link" href="${esc(web)}" target="_blank" rel="noopener noreferrer"><i class="ti ti-world"></i>Website</a>`);
+  if(p.email)links.push(`<a class="pub-builder-link" href="mailto:${esc(p.email)}"><i class="ti ti-mail"></i>Email</a>`);
+  [['instagram','brand-instagram'],['facebook','brand-facebook'],['youtube','brand-youtube'],['tiktok','brand-tiktok']].forEach(([key,icon])=>{
+    const href=publicSocialUrl(key,p[key]);
+    if(href)links.push(`<a class="pub-builder-link" href="${esc(href)}" target="_blank" rel="noopener noreferrer"><i class="ti ti-${icon}"></i>${esc(key.charAt(0).toUpperCase()+key.slice(1))}</a>`);
+  });
+  const loc=p.location?`<span><i class="ti ti-map-pin"></i> ${esc(p.location)}</span>`:'';
+  el.hidden=false;
+  el.innerHTML=`<div class="pub-builder-kicker">About the builder</div>
+    <div class="pub-builder-name">${esc(p.displayName||'The Builder')}</div>
+    ${p.tagline?`<div class="pub-builder-tagline">${esc(p.tagline)}</div>`:''}
+    ${loc?`<div class="pub-builder-meta">${loc}</div>`:''}
+    ${links.length?`<div class="pub-builder-links">${links.join('')}</div>`:''}`;
+}
 function render(data){
   pubBuildTitle=String(data.buildTitle||'My Build').trim()||'My Build';
   document.getElementById('build-title').textContent=pubBuildTitle;
+  renderPublicBuilder(data.builderProfile);
   const vehicleMeta=document.getElementById('vehicle-meta');
   const vehicleLabel=formatPublicVehicleLabel(data);
   if(vehicleMeta){

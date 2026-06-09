@@ -1,7 +1,15 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
+<script>
+(function(){
+  try{
+    var t=localStorage.getItem('gsTheme');
+    if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);
+  }catch(e){}
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b0b0c">
 <title>Build Tracker</title>
@@ -2665,6 +2673,147 @@ button,.tab,.section-hdr,.chip,.chip-opt,.ss-card{touch-action:manipulation;-web
   color:var(--gs-muted);padding:10px 4px 4px;
 }
 .notif-section-label:first-child{padding-top:2px}
+
+.settings-page{display:grid;gap:14px;max-width:920px}
+.settings-card{
+  border-radius:18px;border:1px solid rgba(241,209,122,.16);
+  background:rgba(0,0,0,.22);overflow:hidden;
+}
+.settings-card-hdr{
+  padding:14px 18px 12px;border-bottom:1px solid rgba(241,209,122,.1);
+  background:linear-gradient(180deg,rgba(185,138,39,.08),transparent);
+}
+.settings-card-title{
+  font-size:13px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--gs-gold-light);
+}
+.settings-card-sub{
+  margin-top:4px;font-size:12px;line-height:1.45;color:var(--gs-muted);
+}
+.settings-card-body{padding:16px 18px 18px;display:grid;gap:14px}
+.settings-form{display:grid;gap:12px}
+.settings-field label{
+  display:block;font-size:10px;font-weight:800;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--gs-muted);margin-bottom:6px;
+}
+.settings-field label .settings-optional{font-weight:600;opacity:.75;text-transform:none;letter-spacing:0}
+.settings-input,.settings-textarea{
+  width:100%;border-radius:12px;border:1px solid rgba(241,209,122,.2);
+  background:rgba(0,0,0,.32);color:var(--gs-cream);padding:10px 12px;
+  font:inherit;font-size:14px;line-height:1.4;outline:none;
+}
+.settings-textarea{min-height:88px;resize:vertical}
+.settings-input:focus,.settings-textarea:focus{
+  border-color:rgba(241,209,122,.45);box-shadow:0 0 0 3px rgba(185,138,39,.14);
+}
+.settings-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.settings-social-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.settings-check{
+  display:flex;align-items:flex-start;gap:10px;cursor:pointer;
+  font-size:13px;line-height:1.45;color:var(--gs-cream);
+}
+.settings-check input{width:16px;height:16px;margin-top:2px;accent-color:var(--gs-gold)}
+.settings-theme-row{display:flex;flex-wrap:wrap;gap:10px}
+.settings-theme-opt{
+  display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;
+  border:1px solid rgba(241,209,122,.22);background:rgba(0,0,0,.28);color:var(--gs-cream);
+  font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;
+}
+.settings-theme-opt:hover{border-color:rgba(241,209,122,.4);background:rgba(185,138,39,.1)}
+.settings-theme-opt.active{
+  border-color:rgba(241,209,122,.5);background:rgba(185,138,39,.18);color:var(--gs-gold-light);
+}
+.settings-account-line{font-size:14px;color:var(--gs-cream)}
+.settings-account-line strong{color:var(--gs-gold-light)}
+.settings-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;padding-top:4px}
+.settings-note{
+  font-size:11px;line-height:1.5;color:var(--gs-muted);
+  padding:10px 12px;border-radius:10px;border:1px solid rgba(241,209,122,.12);
+  background:rgba(0,0,0,.18);
+}
+.settings-coming{
+  font-size:12px;color:var(--gs-muted);font-style:italic;
+}
+@media(max-width:700px){
+  .settings-row-2,.settings-social-grid{grid-template-columns:1fr}
+}
+
+html[data-theme="light"]{
+  --gs-bg:#f3efe6;
+  --gs-panel:#ffffff;
+  --gs-panel-2:#f7f3ec;
+  --gs-card:#ffffff;
+  --gs-text:#1c1916;
+  --gs-muted:#6b6358;
+  --gs-line:rgba(111,79,18,.2);
+  --gs-black:#f3efe6;
+  --gs-charcoal:#ebe6dc;
+  --gs-charcoal-2:#e3ddd2;
+  --gs-cream:#1c1916;
+  --gs-border:rgba(111,79,18,.22);
+  color-scheme:light;
+}
+html[data-theme="light"] body{
+  background:
+    radial-gradient(circle at 20% -10%,rgba(185,138,39,.14),transparent 38%),
+    radial-gradient(circle at 90% 10%,rgba(0,0,0,.04),transparent 26%),
+    linear-gradient(135deg,#faf7f0 0%,#efe9de 52%,#f5f1ea 100%)!important;
+  color:var(--gs-cream)!important;
+}
+html[data-theme="light"] .tracker{
+  background:linear-gradient(180deg,rgba(255,255,255,.94),rgba(255,255,255,.82))!important;
+  border-color:rgba(111,79,18,.16)!important;
+  box-shadow:0 22px 70px rgba(111,79,18,.08)!important;
+}
+html[data-theme="light"] .top-bar{
+  background:linear-gradient(135deg,rgba(185,138,39,.12),rgba(255,255,255,.7)),linear-gradient(180deg,#fff,#f7f2e8)!important;
+}
+html[data-theme="light"] .top-bar:before{color:rgba(111,79,18,.07)}
+html[data-theme="light"] .top-bar h1{color:var(--gs-cream)!important;text-shadow:none}
+html[data-theme="light"] .save-indicator,
+html[data-theme="light"] .dl-btn,
+html[data-theme="light"] .share-build-btn{
+  background:rgba(255,255,255,.85)!important;color:var(--gs-cream)!important;
+}
+html[data-theme="light"] .tab{
+  background:linear-gradient(180deg,#fff,#f8f4ec)!important;
+  color:var(--gs-cream)!important;
+  box-shadow:0 6px 18px rgba(0,0,0,.05)!important;
+}
+html[data-theme="light"] .stat,
+html[data-theme="light"] .section-card,
+html[data-theme="light"] .tbl-card,
+html[data-theme="light"] .ss-card,
+html[data-theme="light"] .settings-card,
+html[data-theme="light"] .notif-card,
+html[data-theme="light"] .milestone-card{
+  background:linear-gradient(180deg,#fff,#faf7f1)!important;
+  border-color:rgba(111,79,18,.14)!important;
+  box-shadow:0 10px 28px rgba(0,0,0,.05)!important;
+}
+html[data-theme="light"] .notif-card.unread{background:rgba(185,138,39,.1)!important}
+html[data-theme="light"] .section-hdr{background:linear-gradient(135deg,rgba(185,138,39,.1),rgba(255,255,255,.5))!important}
+html[data-theme="light"] .settings-input,
+html[data-theme="light"] .settings-textarea,
+html[data-theme="light"] .veh-editor-input,
+html[data-theme="light"] .inline-edit,
+html[data-theme="light"] .budget-inp,
+html[data-theme="light"] .vendor-inp,
+html[data-theme="light"] .note-inp{
+  background:rgba(255,255,255,.92)!important;color:var(--gs-cream)!important;
+  border-color:rgba(111,79,18,.2)!important;
+}
+html[data-theme="light"] .settings-theme-opt{background:rgba(255,255,255,.9);color:var(--gs-cream)}
+html[data-theme="light"] .settings-theme-opt.active{background:rgba(185,138,39,.14)}
+html[data-theme="light"] .ms-btn,
+html[data-theme="light"] .vehicle-edit-btn,
+html[data-theme="light"] .vehicle-create-btn{
+  background:rgba(255,255,255,.88)!important;color:var(--gs-cream)!important;
+}
+html[data-theme="light"] .subpanel-placeholder{background:rgba(255,255,255,.65)!important}
+html[data-theme="light"] .tracker-nav-dropdown,
+html[data-theme="light"] .chip-dd{background:#fff!important;border-color:rgba(111,79,18,.2)!important}
+html[data-theme="light"] .parts-table th,
+html[data-theme="light"] .spon-tbl th{background:rgba(240,235,225,.9)!important}
 
 @media(max-width:700px){
   .milestone-post-photo:first-child{
@@ -5977,10 +6126,115 @@ body{margin:0}
   <div class="milestone-toolbar">
     <div>
       <div class="milestone-toolbar-title">Settings</div>
-      <div class="milestone-toolbar-sub">App preferences and public page options. Build management lives in Garage.</div>
+      <div class="milestone-toolbar-sub">Your builder profile is global across all builds. Manage individual vehicles in <button type="button" class="inline-link-btn" onclick="showPanel('vehicle',true)">Garage</button>.</div>
     </div>
   </div>
-  <div class="subpanel-placeholder"><i class="ti ti-settings"></i><strong>Settings page is coming soon.</strong><span>Public page controls and app preferences will live here. Manage builds in <button type="button" class="inline-link-btn" onclick="showPanel('vehicle',true)">Garage</button>.</span></div>
+  <div class="settings-page" id="settings-page">
+    <section class="settings-card" id="settings-profile-card">
+      <div class="settings-card-hdr">
+        <div class="settings-card-title"><i class="ti ti-user-circle"></i> Builder profile</div>
+        <div class="settings-card-sub">Shown on your public build pages when enabled. One profile for every build in your garage.</div>
+      </div>
+      <div class="settings-card-body">
+        <form class="settings-form" id="settings-profile-form" onsubmit="return false">
+          <div class="settings-field">
+            <label for="profile-display-name">Display name</label>
+            <input class="settings-input" id="profile-display-name" type="text" maxlength="80" placeholder="Your name or brand" autocomplete="name">
+          </div>
+          <div class="settings-field">
+            <label for="profile-tagline">Bio / tagline <span class="settings-optional">(optional)</span></label>
+            <textarea class="settings-textarea" id="profile-tagline" maxlength="240" placeholder="Short intro — what you build, your shop, or your story."></textarea>
+          </div>
+          <div class="settings-row-2">
+            <div class="settings-field">
+              <label for="profile-location">Location <span class="settings-optional">(optional)</span></label>
+              <input class="settings-input" id="profile-location" type="text" maxlength="80" placeholder="City, State" autocomplete="address-level2">
+            </div>
+            <div class="settings-field">
+              <label for="profile-email">Public email</label>
+              <input class="settings-input" id="profile-email" type="email" maxlength="120" placeholder="hello@example.com" autocomplete="email">
+            </div>
+          </div>
+          <div class="settings-field">
+            <label for="profile-website">Website</label>
+            <input class="settings-input" id="profile-website" type="url" maxlength="200" placeholder="https://yoursite.com">
+          </div>
+          <div class="settings-social-grid">
+            <div class="settings-field">
+              <label for="profile-instagram">Instagram</label>
+              <input class="settings-input" id="profile-instagram" type="text" maxlength="120" placeholder="@handle or URL">
+            </div>
+            <div class="settings-field">
+              <label for="profile-facebook">Facebook</label>
+              <input class="settings-input" id="profile-facebook" type="text" maxlength="120" placeholder="Page or URL">
+            </div>
+            <div class="settings-field">
+              <label for="profile-youtube">YouTube</label>
+              <input class="settings-input" id="profile-youtube" type="text" maxlength="120" placeholder="@channel or URL">
+            </div>
+            <div class="settings-field">
+              <label for="profile-tiktok">TikTok</label>
+              <input class="settings-input" id="profile-tiktok" type="text" maxlength="120" placeholder="@handle or URL">
+            </div>
+          </div>
+          <label class="settings-check">
+            <input type="checkbox" id="profile-show-public" checked>
+            <span>Show this profile on public build pages</span>
+          </label>
+          <div class="settings-note">Updates apply the next time you publish or save a public build link. Copy Public Link from the header to refresh live pages.</div>
+          <div class="settings-actions">
+            <button class="ms-btn post" type="button" onclick="saveBuilderProfile()"><i class="ti ti-device-floppy"></i>Save profile</button>
+          </div>
+        </form>
+      </div>
+    </section>
+    <section class="settings-card">
+      <div class="settings-card-hdr">
+        <div class="settings-card-title"><i class="ti ti-palette"></i> Appearance</div>
+        <div class="settings-card-sub">Choose how the private tracker looks on this device.</div>
+      </div>
+      <div class="settings-card-body">
+        <div class="settings-theme-row">
+          <button class="settings-theme-opt active" type="button" data-theme="dark" onclick="setAppTheme('dark')"><i class="ti ti-moon"></i>Dark</button>
+          <button class="settings-theme-opt" type="button" data-theme="light" onclick="setAppTheme('light')"><i class="ti ti-sun"></i>Light</button>
+        </div>
+      </div>
+    </section>
+    <section class="settings-card">
+      <div class="settings-card-hdr">
+        <div class="settings-card-title"><i class="ti ti-user"></i> Account</div>
+        <div class="settings-card-sub">Signed-in account for cloud sync and your garage.</div>
+      </div>
+      <div class="settings-card-body">
+        <div class="settings-account-line" id="settings-account-email">Loading account…</div>
+        <div class="settings-actions">
+          <button class="ms-btn" type="button" onclick="showPanel('vehicle',true)"><i class="ti ti-car-garage"></i>Open garage</button>
+          <button class="ms-btn danger" type="button" onclick="logoutUser()"><i class="ti ti-logout"></i>Sign out</button>
+        </div>
+      </div>
+    </section>
+    <section class="settings-card">
+      <div class="settings-card-hdr">
+        <div class="settings-card-title"><i class="ti ti-world"></i> Public pages</div>
+        <div class="settings-card-sub">Quick links for sharing and engagement.</div>
+      </div>
+      <div class="settings-card-body">
+        <div class="settings-actions" style="justify-content:flex-start">
+          <button class="ms-btn" type="button" onclick="sharePublicBuild()"><i class="ti ti-copy"></i>Copy public link</button>
+          <button class="ms-btn" type="button" onclick="showMorePanel('notifications')"><i class="ti ti-bell"></i>Notifications</button>
+        </div>
+        <p class="settings-coming">Notification preferences and default public page options — coming soon.</p>
+      </div>
+    </section>
+    <section class="settings-card">
+      <div class="settings-card-hdr">
+        <div class="settings-card-title"><i class="ti ti-database"></i> Data</div>
+      </div>
+      <div class="settings-card-body">
+        <p class="settings-coming">Export and backup tools — see Export Data in the More menu (coming soon).</p>
+      </div>
+    </section>
+  </div>
 </div>
 <div id="panel-billing" class="panel">
   <div class="milestone-toolbar">
@@ -6473,7 +6727,8 @@ const FIREBASE_CONFIG={
 /*
  * FIRESTORE GARAGE STRUCTURE (multi-build)
  * --------------------------------------
- * users/{uid}/meta/app          — activeBuildId, legacyMigrated, migrationVersion
+ * users/{uid}/meta/app          — activeBuildId, theme, legacyMigrated, migrationVersion
+ * users/{uid}/meta/profile      — global builder profile (all builds)
  * users/{uid}/builds/{buildId}  — full private tracker state + build metadata
  * users/{uid}/buildMedia/{buildId}-vehicle
  * users/{uid}/buildMedia/{buildId}-ms-{n}
@@ -6619,6 +6874,132 @@ function getUserMediaCol(){
 function getUserMetaRef(){
   const root=getUserRootRef();
   return root?root.collection(USER_META_SUB).doc('app'):null;
+}
+function getUserProfileRef(){
+  const root=getUserRootRef();
+  return root?root.collection(USER_META_SUB).doc('profile'):null;
+}
+const DEFAULT_BUILDER_PROFILE={
+  displayName:'',tagline:'',location:'',email:'',website:'',
+  instagram:'',facebook:'',youtube:'',tiktok:'',showOnPublic:true
+};
+let builderProfile=Object.assign({},DEFAULT_BUILDER_PROFILE);
+let appPreferences={theme:'dark'};
+function normalizeBuilderProfile(data){
+  data=data||{};
+  return {
+    displayName:String(data.displayName||'').trim().slice(0,80),
+    tagline:String(data.tagline||'').trim().slice(0,240),
+    location:String(data.location||'').trim().slice(0,80),
+    email:String(data.email||'').trim().slice(0,120),
+    website:String(data.website||'').trim().slice(0,200),
+    instagram:String(data.instagram||'').trim().slice(0,120),
+    facebook:String(data.facebook||'').trim().slice(0,120),
+    youtube:String(data.youtube||'').trim().slice(0,120),
+    tiktok:String(data.tiktok||'').trim().slice(0,120),
+    showOnPublic:data.showOnPublic!==false
+  };
+}
+function publicBuilderProfilePayload(){
+  if(!builderProfile||builderProfile.showOnPublic===false)return null;
+  const p=normalizeBuilderProfile(builderProfile);
+  if(!p.displayName&&!p.tagline&&!p.location&&!p.website&&!p.email&&!p.instagram&&!p.facebook&&!p.youtube&&!p.tiktok)return null;
+  return p;
+}
+function applyTheme(theme){
+  const t=theme==='light'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  document.querySelectorAll('.settings-theme-opt').forEach(btn=>{
+    btn.classList.toggle('active',btn.dataset.theme===t);
+  });
+  const metaTheme=document.querySelector('meta[name="theme-color"]');
+  if(metaTheme)metaTheme.setAttribute('content',t==='light'?'#f3efe6':'#0b0b0c');
+}
+function applyUserMetaPreferences(meta){
+  meta=meta||{};
+  const theme=meta.theme==='light'?'light':'dark';
+  appPreferences.theme=theme;
+  applyTheme(theme);
+  try{localStorage.setItem('gsTheme',theme);}catch(e){}
+}
+function setAppTheme(theme){
+  if(theme!=='light'&&theme!=='dark')theme='dark';
+  appPreferences.theme=theme;
+  try{localStorage.setItem('gsTheme',theme);}catch(e){}
+  applyTheme(theme);
+  saveUserGarageMeta({theme}).catch(e=>console.warn('Theme save failed:',e));
+}
+async function loadUserProfile(){
+  const ref=getUserProfileRef();
+  if(!ref)return;
+  try{
+    const snap=await ref.get();
+    if(snap.exists){
+      builderProfile=normalizeBuilderProfile(snap.data());
+      return;
+    }
+    if(currentUser&&currentUser.email&&!builderProfile.email){
+      builderProfile.email=String(currentUser.email).trim();
+    }
+  }catch(e){console.warn('Profile load failed:',e);}
+}
+function syncSettingsProfileForm(){
+  const p=builderProfile||DEFAULT_BUILDER_PROFILE;
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v!=null?String(v):'';};
+  set('profile-display-name',p.displayName);
+  set('profile-tagline',p.tagline);
+  set('profile-location',p.location);
+  set('profile-email',p.email||(currentUser&&currentUser.email)||'');
+  set('profile-website',p.website);
+  set('profile-instagram',p.instagram);
+  set('profile-facebook',p.facebook);
+  set('profile-youtube',p.youtube);
+  set('profile-tiktok',p.tiktok);
+  const showEl=document.getElementById('profile-show-public');
+  if(showEl)showEl.checked=p.showOnPublic!==false;
+  const acct=document.getElementById('settings-account-email');
+  if(acct){
+    acct.innerHTML=currentUser&&currentUser.email
+      ?'Signed in as <strong>'+esc(currentUser.email)+'</strong>'
+      :'Not signed in — profile saves when you log in.';
+  }
+  applyTheme(appPreferences.theme||'dark');
+}
+function collectBuilderProfileFromForm(){
+  const val=id=>String((document.getElementById(id)||{}).value||'').trim();
+  const showEl=document.getElementById('profile-show-public');
+  return normalizeBuilderProfile({
+    displayName:val('profile-display-name'),
+    tagline:val('profile-tagline'),
+    location:val('profile-location'),
+    email:val('profile-email'),
+    website:val('profile-website'),
+    instagram:val('profile-instagram'),
+    facebook:val('profile-facebook'),
+    youtube:val('profile-youtube'),
+    tiktok:val('profile-tiktok'),
+    showOnPublic:!(showEl&&!showEl.checked)
+  });
+}
+async function saveBuilderProfile(){
+  if(!currentUser){showGarageToast('Sign in to save your profile.');return;}
+  builderProfile=collectBuilderProfileFromForm();
+  const ref=getUserProfileRef();
+  if(!ref){showGarageToast('Profile storage unavailable.');return;}
+  try{
+    await ref.set(sanitizeForFirestore(Object.assign({},builderProfile,{
+      ownerUid:currentUser.uid,updatedAt:new Date().toISOString()
+    })),{merge:true});
+    showGarageToast('Builder profile saved.');
+    scheduleSave();
+  }catch(e){
+    console.warn(e);
+    showGarageToast('Could not save profile.');
+  }
+}
+function renderSettingsPanel(){
+  syncSettingsProfileForm();
+  loadUserProfile().then(()=>syncSettingsProfileForm()).catch(()=>{});
 }
 function slugifyBuildId(name,fallback){
   const base=String(name||fallback||'build').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,48);
@@ -7042,6 +7423,7 @@ function runInitBackgroundTasks(meta,buildId){
     try{
       if(!garageBuilds.length)await loadGarageBuildList();
       if(!meta||meta.activeBuildId!==buildId)await saveUserGarageMeta({activeBuildId:buildId});
+      await loadUserProfile();
       startEngagementInboxListener();
       const thumbGen=++garageThumbGen;
       loadGarageBuildThumbnails(true).then(()=>{
@@ -8109,8 +8491,9 @@ function publicPayload(){
     milestones:publicMilestonesPayload(),
     workLog:publicWorkLogPayload(),
     sponsors:publicSponsorsPayload(),
+    builderProfile:publicBuilderProfilePayload(),
     updatedAt:new Date().toISOString(),
-    publicVersion:'v6-partners-tab'
+    publicVersion:'v7-builder-profile'
   };
 }
 function publicSponsorsPayload(){
@@ -8909,6 +9292,7 @@ async function initData(){
           meta=await migrateLegacyBuildIfNeeded();
         }
         initMeta=meta;
+        applyUserMetaPreferences(meta);
         const buildId=(meta&&meta.activeBuildId)||LEGACY_BUILD_ID;
         initBuildId=buildId;
         localStorage.setItem(LAST_BUILD_KEY,buildId);
@@ -11910,6 +12294,7 @@ function showPanel(name,pushRoute=false){
   if(name==='notifications')renderNotifications();
   if(name==='worklog')renderWorkLog();
   if(name==='vehicle')renderVehiclePanel();
+  if(name==='settings')renderSettingsPanel();
   if(name==='sponsorships')renderSponsors();
   if(name==='decisions')renderResearch();
   if(pushRoute)updateRoute(name,false);
@@ -11936,7 +12321,7 @@ async function bootTracker(){
   if(trackerBooted) return;
   trackerBooted=true;
 
-  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,markAllNotificationsRead,markNotificationRead,openNotificationOnBuild,toggleNotifExpand,toggleNotifReplyForm,toggleMilestoneComments,ownerLikeComment,ownerReplyToComment,toggleReplyForm,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
+  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,setAppTheme,saveBuilderProfile,renderSettingsPanel,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,markAllNotificationsRead,markNotificationRead,openNotificationOnBuild,toggleNotifExpand,toggleNotifReplyForm,toggleMilestoneComments,ownerLikeComment,ownerReplyToComment,toggleReplyForm,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
   document.addEventListener('click',e=>{
     if(!e.target.closest('.tracker-nav-more-wrap'))closeMoreMenu();
     if(!e.target.closest('.tracker-nav-mobile-wrap'))closeMobileNavMenu();
