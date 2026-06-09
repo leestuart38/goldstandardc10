@@ -5146,6 +5146,50 @@ html[data-theme="light"] .admin-stat,
 html[data-theme="light"] .admin-role-legend-item{background:rgba(255,255,255,.72)}
 html[data-theme="light"] .admin-user-row.is-owner{background:linear-gradient(180deg,rgba(241,209,122,.22),rgba(255,255,255,.88))}
 html[data-theme="light"] .admin-coming-soon-note{background:rgba(255,255,255,.65)}
+.data-tools-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.data-tool-card{
+  border-radius:14px;border:1px solid rgba(241,209,122,.16);background:rgba(0,0,0,.22);
+  padding:14px;display:grid;gap:10px;align-content:start;
+}
+.data-tool-card-icon{
+  width:36px;height:36px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;
+  background:rgba(185,138,39,.16);border:1px solid rgba(241,209,122,.22);color:var(--gs-gold-light);font-size:18px;
+}
+.data-tool-card-title{font-family:var(--gs-display);font-size:14px;font-weight:700;color:var(--gs-cream);letter-spacing:.03em}
+.data-tool-card-desc{font-size:12px;line-height:1.45;color:var(--gs-muted)}
+.data-import-zone{
+  border-radius:14px;border:1px dashed rgba(241,209,122,.34);background:rgba(0,0,0,.18);
+  padding:22px 16px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;
+}
+.data-import-zone:hover,.data-import-zone.is-dragover{border-color:rgba(241,209,122,.55);background:rgba(185,138,39,.1)}
+.data-import-zone-title{font-family:var(--gs-display);font-size:13px;font-weight:700;color:var(--gs-cream);margin-bottom:4px}
+.data-import-zone-sub{font-size:12px;color:var(--gs-muted);line-height:1.45}
+.data-import-meta{
+  display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:12px;font-weight:700;color:var(--gs-muted);
+}
+.data-import-meta strong{color:var(--gs-gold-light)}
+.data-import-preview-wrap{
+  border-radius:12px;border:1px solid rgba(241,209,122,.14);background:rgba(0,0,0,.24);overflow:auto;max-height:280px;
+}
+.data-import-preview{
+  width:100%;border-collapse:collapse;font-size:11px;min-width:640px;
+}
+.data-import-preview th{
+  position:sticky;top:0;padding:8px 10px;text-align:left;font-size:9px;font-weight:900;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--gs-muted);
+  background:rgba(20,18,14,.96);border-bottom:1px solid rgba(241,209,122,.14);white-space:nowrap;
+}
+.data-import-preview td{
+  padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.06);color:var(--gs-cream);vertical-align:top;
+  max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.data-import-preview tr:last-child td{border-bottom:none}
+.data-import-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;justify-content:space-between}
+.data-import-actions .settings-field{flex:1 1 220px;margin:0}
+html[data-theme="light"] .data-tool-card,
+html[data-theme="light"] .data-import-preview-wrap{background:rgba(255,255,255,.72)}
+html[data-theme="light"] .data-import-zone{background:rgba(255,255,255,.55)}
+html[data-theme="light"] .data-import-preview th{background:rgba(247,242,232,.98)}
 @media(min-width:901px){
   .tracker-nav-inner{
     justify-content:center;
@@ -6749,7 +6793,7 @@ html[data-theme="light"] #panel-dashboard .completion-track{background:rgba(111,
         <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="showMorePanel('settings')"><i class="ti ti-settings"></i><span>Settings</span></button>
         <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="showMorePanel('billing')"><i class="ti ti-credit-card"></i><span>Billing</span></button>
         <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="showMorePanel('users')"><i class="ti ti-users"></i><span>Users</span></button>
-        <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="showMorePanel('export')"><i class="ti ti-download"></i><span>Export Data</span></button>
+        <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="showMorePanel('export')"><i class="ti ti-database-export"></i><span>Data Tools</span></button>
         <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="showMorePanel('help')"><i class="ti ti-help"></i><span>Help</span></button>
       </div>
     </div>
@@ -6780,7 +6824,7 @@ html[data-theme="light"] #panel-dashboard .completion-track{background:rgba(111,
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('settings')"><i class="ti ti-settings"></i><span>Settings</span></button>
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('billing')"><i class="ti ti-credit-card"></i><span>Billing</span></button>
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('users')"><i class="ti ti-users"></i><span>Users</span></button>
-          <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('export')"><i class="ti ti-download"></i><span>Export Data</span></button>
+          <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('export')"><i class="ti ti-database-export"></i><span>Data Tools</span></button>
           <button class="tracker-nav-dropdown-item" type="button" role="menuitem" onclick="pickMobileNav('help')"><i class="ti ti-help"></i><span>Help</span></button>
         </div>
       </div>
@@ -7155,11 +7199,11 @@ html[data-theme="light"] #panel-dashboard .completion-track{background:rgba(111,
 <div id="panel-export" class="panel">
   <div class="milestone-toolbar">
     <div>
-      <div class="milestone-toolbar-title">Export Data</div>
-      <div class="milestone-toolbar-sub">Download a backup of your build data.</div>
+      <div class="milestone-toolbar-title">Data Tools</div>
+      <div class="milestone-toolbar-sub">Export spreadsheets, import parts, and generate reports for the active build.</div>
     </div>
   </div>
-  <div class="subpanel-placeholder"><i class="ti ti-download"></i><strong>Export tools are coming soon.</strong><span>You'll be able to download your full build as a backup file.</span></div>
+  <div class="admin-page" id="data-tools-page"></div>
 </div>
 <div id="panel-help" class="panel">
   <div class="milestone-toolbar">
@@ -8190,6 +8234,382 @@ function renderBillingPanel(){
 function placeholderUpgradePlan(){
   showGarageToast('Plan upgrades are coming soon. Payment processing is not connected yet.');
 }
+
+const PARTS_CSV_HEADERS=['Section','Name','Priority','Vendor','Budget','Actual','Sponsored','Status','Link','Notes'];
+const SPONSORS_CSV_HEADERS=['Name','Status','Value','Tier','Contact Name','Email','Website','Deliverables','Notes','Public Visible'];
+let partsImportDraft=null;
+
+function dataToolsFileSlug(){
+  const base=String(BUILD_NAME||activeBuildId||'build').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,48)||'build';
+  return base;
+}
+function csvEscapeCell(v){
+  const s=String(v??'');
+  if(/[",\n\r]/.test(s))return '"'+s.replace(/"/g,'""')+'"';
+  return s;
+}
+function downloadTextFile(filename,content,mime){
+  const blob=new Blob([content],{type:mime||'text/plain;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),4000);
+}
+function downloadCsvFile(filename,headers,rows){
+  const lines=[headers.map(csvEscapeCell).join(',')].concat(
+    rows.map(r=>headers.map(h=>csvEscapeCell(r[h]!=null?r[h]:'')).join(','))
+  );
+  downloadTextFile(filename,lines.join('\n'),'text/csv;charset=utf-8');
+}
+function exportPartsCsv(){
+  const rows=[];
+  activeSections().forEach(sec=>{
+    (sec.parts||[]).forEach(p=>{
+      rows.push({
+        Section:sec.name||sec.key,
+        Name:p.name||'',
+        Priority:p.priority||'Medium',
+        Vendor:p.vendor||'',
+        Budget:parseFloat(p.budget)||0,
+        Actual:parseFloat(p.actual)||0,
+        Sponsored:parseFloat(p.sponsored)||0,
+        Status:p.status||'Need to Buy',
+        Link:p.link||'',
+        Notes:p.notes||''
+      });
+    });
+  });
+  downloadCsvFile(dataToolsFileSlug()+'-parts.csv',PARTS_CSV_HEADERS,rows);
+  showGarageToast(rows.length?'Exported '+rows.length+' part'+(rows.length===1?'':'s')+'.':'Exported empty parts sheet.');
+}
+function exportSponsorsCsv(){
+  const rows=(sponsors||[]).map(s=>{
+    const n=normalizeSponsor(s)||{};
+    return {
+      Name:sponsorName(n),
+      Status:n.status||'Prospect',
+      Value:sponsorValue(n),
+      Tier:n.tier||'',
+      'Contact Name':n.contactName||'',
+      Email:n.email||'',
+      Website:n.website||'',
+      Deliverables:n.deliverables||'',
+      Notes:n.notes||'',
+      'Public Visible':n.publicVisible?'Yes':'No'
+    };
+  });
+  downloadCsvFile(dataToolsFileSlug()+'-sponsors.csv',SPONSORS_CSV_HEADERS,rows);
+  showGarageToast(rows.length?'Exported '+rows.length+' partner'+(rows.length===1?'':'s')+'.':'Exported empty partners sheet.');
+}
+function exportPublicBuildReportPdf(){
+  const slug=publicSlug||activeBuildId||'';
+  const pubUrl=slug?buildPublicPageUrl(slug):'';
+  const vehicle=formatVehicleLabel(vehicleYear,vehicleMake,vehicleModel)||'—';
+  const completion=publicMasterCompletion();
+  const sectionRows=activeSections().map(sec=>{
+    const trackable=(sec.parts||[]).filter(p=>p.status!=='N/A');
+    const installed=trackable.filter(p=>p.status==='Installed').length;
+    return `<tr><td>${esc(sec.name)}</td><td>${sectionCompletion(sec)}%</td><td>${installed}</td><td>${trackable.length}</td></tr>`;
+  }).join('');
+  const partnerCount=(sponsors||[]).filter(s=>s&&s.status==='Confirmed').length;
+  const html=`<!doctype html><html><head><meta charset="utf-8"><title>${esc(BUILD_NAME||'Build')} — Public Report</title>
+<style>
+  body{font-family:Inter,system-ui,sans-serif;color:#1c1916;padding:32px;max-width:820px;margin:0 auto}
+  h1{font-family:Oswald,sans-serif;font-size:28px;margin:0 0 6px;text-transform:uppercase}
+  .sub{color:#6b6358;font-size:13px;margin-bottom:22px}
+  h2{font-family:Oswald,sans-serif;font-size:16px;margin:24px 0 8px;text-transform:uppercase;color:#6f4f12}
+  table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+  th,td{border:1px solid #e7dfd2;padding:8px 10px;text-align:left}
+  th{background:#f7f2e8;font-size:10px;text-transform:uppercase;letter-spacing:.05em}
+  .kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+  .kpi div{border:1px solid #e7dfd2;border-radius:10px;padding:12px;background:#faf7f0}
+  .kpi label{display:block;font-size:10px;text-transform:uppercase;color:#6b6358;margin-bottom:4px}
+  .kpi strong{font-family:Oswald,sans-serif;font-size:22px}
+  .foot{margin-top:28px;font-size:11px;color:#6b6358}
+</style></head><body>
+  <h1>${esc(BUILD_NAME||'Build Report')}</h1>
+  <div class="sub">${esc(vehicle)} · Generated ${esc(new Date().toLocaleString())}</div>
+  <div class="kpi">
+    <div><label>Build completion</label><strong>${completion}%</strong></div>
+    <div><label>Active sections</label><strong>${activeSections().length}</strong></div>
+    <div><label>Confirmed partners</label><strong>${partnerCount}</strong></div>
+  </div>
+  <h2>Section progress</h2>
+  <table><thead><tr><th>Section</th><th>Complete</th><th>Installed</th><th>Parts</th></tr></thead><tbody>${sectionRows||'<tr><td colspan="4">No sections yet</td></tr>'}</tbody></table>
+  ${pubUrl?`<h2>Public page</h2><p style="font-size:13px;word-break:break-all">${esc(pubUrl)}</p>`:''}
+  <p class="foot">Use your browser print dialog and choose Save as PDF.</p>
+  <script>window.onload=function(){setTimeout(function(){window.print();},350);};<\/script>
+</body></html>`;
+  const win=window.open('','_blank');
+  if(!win){
+    showGarageToast('Allow pop-ups to open the printable report, then Save as PDF.');
+    return;
+  }
+  win.document.open();
+  win.document.write(html);
+  win.document.close();
+  showGarageToast('Print dialog opened — choose Save as PDF to download your report.');
+}
+function parseCsvLine(line){
+  const out=[];
+  let cur='',inQ=false;
+  const s=String(line||'');
+  for(let i=0;i<s.length;i++){
+    const c=s[i];
+    if(inQ){
+      if(c==='"'){
+        if(s[i+1]==='"'){cur+='"';i++;}
+        else inQ=false;
+      }else cur+=c;
+    }else if(c==='"')inQ=true;
+    else if(c===','){out.push(cur);cur='';}
+    else cur+=c;
+  }
+  out.push(cur);
+  return out;
+}
+function parseCsvText(text){
+  const raw=String(text||'').replace(/^\uFEFF/,'');
+  const lines=raw.split(/\r?\n/).filter(l=>l.trim().length);
+  if(!lines.length)return {headers:[],rows:[]};
+  const headers=parseCsvLine(lines[0]).map(h=>String(h||'').trim());
+  const rows=lines.slice(1).map(line=>{
+    const cells=parseCsvLine(line);
+    const obj={};
+    headers.forEach((h,idx)=>{obj[h]=cells[idx]!=null?String(cells[idx]).trim():'';});
+    return obj;
+  }).filter(r=>Object.values(r).some(v=>String(v).trim()));
+  return {headers,rows};
+}
+function importCsvPickField(raw,...aliases){
+  const keys=Object.keys(raw||{});
+  for(const alias of aliases){
+    const norm=String(alias).toLowerCase().replace(/[^a-z0-9]/g,'');
+    const hit=keys.find(k=>String(k).toLowerCase().replace(/[^a-z0-9]/g,'')===norm);
+    if(hit&&String(raw[hit]).trim())return String(raw[hit]).trim();
+  }
+  return '';
+}
+function normalizeImportPartRow(raw){
+  const name=importCsvPickField(raw,'name','part','partname');
+  if(!name)return null;
+  let priority=importCsvPickField(raw,'priority')||'Medium';
+  if(!PK.includes(priority))priority='Medium';
+  let status=importCsvPickField(raw,'status')||'Need to Buy';
+  if(!SK.includes(status))status='Need to Buy';
+  return {
+    id:'cx-'+(++partCtr),
+    name,
+    priority,
+    vendor:importCsvPickField(raw,'vendor','manufacturer')||'TBD',
+    budget:parseFloat(importCsvPickField(raw,'budget'))||0,
+    actual:parseFloat(importCsvPickField(raw,'actual'))||0,
+    sponsored:parseFloat(importCsvPickField(raw,'sponsored'))||0,
+    status,
+    link:importCsvPickField(raw,'link','url')||'',
+    notes:importCsvPickField(raw,'notes','note')||''
+  };
+}
+function partsImportPreviewHeaders(rows){
+  const set=new Set(['name','priority','vendor','budget','actual','sponsored','status','link','notes','section']);
+  rows.slice(0,20).forEach(r=>{
+    Object.keys(r).forEach(k=>set.add(k));
+  });
+  const preferred=['Name','Priority','Vendor','Budget','Status','Notes'];
+  const all=[...set].map(k=>{
+    const orig=Object.keys(rows[0]||{}).find(h=>h.toLowerCase()===k)||k;
+    return orig;
+  });
+  const ordered=[];
+  preferred.forEach(p=>{
+    const hit=all.find(h=>h.toLowerCase()===p.toLowerCase());
+    if(hit&&!ordered.includes(hit))ordered.push(hit);
+  });
+  all.forEach(h=>{if(!ordered.includes(h))ordered.push(h);});
+  return ordered.slice(0,8);
+}
+function renderPartsImportPreview(){
+  const wrap=document.getElementById('data-import-preview-wrap');
+  const meta=document.getElementById('data-import-meta');
+  const confirmBtn=document.getElementById('data-import-confirm-btn');
+  const clearBtn=document.getElementById('data-import-clear-btn');
+  if(!wrap)return;
+  if(!partsImportDraft||!partsImportDraft.rows.length){
+    wrap.innerHTML='';
+    wrap.hidden=true;
+    if(meta)meta.innerHTML='';
+    if(confirmBtn)confirmBtn.disabled=true;
+    if(clearBtn)clearBtn.disabled=true;
+    return;
+  }
+  const valid=partsImportDraft.rows.map(normalizeImportPartRow).filter(Boolean);
+  partsImportDraft.validCount=valid.length;
+  partsImportDraft.skipped=partsImportDraft.rows.length-valid.length;
+  const headers=partsImportPreviewHeaders(partsImportDraft.rows);
+  const previewRows=partsImportDraft.rows.slice(0,12);
+  wrap.hidden=false;
+  wrap.innerHTML=`<table class="data-import-preview"><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${previewRows.map(r=>`<tr>${headers.map(h=>`<td title="${esc(r[h]||'')}">${esc(r[h]||'')}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  if(meta){
+    meta.innerHTML=`<span><strong>${esc(partsImportDraft.fileName)}</strong></span>
+      <span>${partsImportDraft.rows.length} row${partsImportDraft.rows.length===1?'':'s'} detected</span>
+      <span><strong>${valid.length}</strong> ready to import</span>
+      ${partsImportDraft.skipped?`<span>${partsImportDraft.skipped} skipped (missing name)</span>`:''}
+      ${partsImportDraft.rows.length>12?'<span>Showing first 12 rows</span>':''}`;
+  }
+  if(confirmBtn)confirmBtn.disabled=!valid.length;
+  if(clearBtn)clearBtn.disabled=false;
+}
+function resetPartsImportDraft(){
+  partsImportDraft=null;
+  const input=document.getElementById('data-import-file-input');
+  if(input)input.value='';
+  renderPartsImportPreview();
+}
+function handlePartsCsvSelected(file){
+  if(!file)return;
+  if(!/\.csv$/i.test(file.name)&&file.type&&file.type!=='text/csv'&&file.type!=='application/vnd.ms-excel'){
+    showGarageToast('Please choose a .csv file.');
+    return;
+  }
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const parsed=parseCsvText(reader.result||'');
+    if(!parsed.rows.length){
+      showGarageToast('No import rows found in that file.');
+      resetPartsImportDraft();
+      return;
+    }
+    partsImportDraft={fileName:file.name,headers:parsed.headers,rows:parsed.rows,validCount:0,skipped:0};
+    renderPartsImportPreview();
+    showGarageToast('CSV loaded — review the preview, pick a section, then confirm import.');
+  };
+  reader.onerror=()=>showGarageToast('Could not read that file.');
+  reader.readAsText(file);
+}
+function onPartsCsvInputChange(e){
+  const file=e&&e.target&&e.target.files&&e.target.files[0];
+  if(file)handlePartsCsvSelected(file);
+}
+function triggerPartsCsvPicker(){
+  const input=document.getElementById('data-import-file-input');
+  if(input)input.click();
+}
+function partsImportZoneDragOver(e){
+  e.preventDefault();
+  e.currentTarget.classList.add('is-dragover');
+}
+function partsImportZoneDragLeave(e){
+  e.currentTarget.classList.remove('is-dragover');
+}
+function partsImportZoneDrop(e){
+  e.preventDefault();
+  e.currentTarget.classList.remove('is-dragover');
+  const file=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];
+  if(file)handlePartsCsvSelected(file);
+}
+function dataImportSectionOptions(selected){
+  const active=activeSections();
+  if(!active.length)return '<option value="">No active sections</option>';
+  return active.map(s=>`<option value="${esc(s.key)}"${s.key===selected?' selected':''}>${esc(s.name)}</option>`).join('');
+}
+async function confirmPartsCsvImport(){
+  if(!partsImportDraft||!partsImportDraft.rows.length){
+    showGarageToast('Upload a CSV file first.');
+    return;
+  }
+  const sel=document.getElementById('data-import-section');
+  const secKey=sel?sel.value:'';
+  const sec=sections.find(s=>s.key===secKey&&!s.archived);
+  if(!sec){
+    showGarageToast('Choose a destination section.');
+    return;
+  }
+  const parts=partsImportDraft.rows.map(normalizeImportPartRow).filter(Boolean);
+  if(!parts.length){
+    showGarageToast('No valid parts found. Each row needs a Name column.');
+    return;
+  }
+  const existing=sec.parts.length;
+  parts.forEach(p=>sec.parts.push(p));
+  if(!document.getElementById('sec-'+sec.key))buildSection(sec);
+  else renderRows(sec);
+  updateSecHeader(sec);
+  updateDashboard();
+  scheduleSave();
+  try{
+    await doSave();
+    showGarageToast('Imported '+parts.length+' part'+(parts.length===1?'':'s')+' into '+sec.name+'. Existing '+existing+' part'+(existing===1?' was':'s were')+' preserved.');
+    resetPartsImportDraft();
+    renderDataToolsPanel();
+  }catch(e){
+    showGarageToast('Parts imported locally, but cloud save failed. Try again from the header sync.');
+  }
+}
+function renderDataToolsPanel(){
+  const el=document.getElementById('data-tools-page');
+  if(!el)return;
+  const sectionOptions=dataImportSectionOptions(activeSections()[0]?.key||'');
+  const partCount=activeSections().reduce((n,s)=>n+(s.parts||[]).length,0);
+  const sponsorCount=(sponsors||[]).length;
+  el.innerHTML=`<section class="settings-card">
+    <div class="settings-card-hdr">
+      <div class="settings-card-title"><i class="ti ti-download"></i> Export</div>
+      <div class="settings-card-sub">Download spreadsheets and reports for <strong>${esc(BUILD_NAME||'this build')}</strong>.</div>
+    </div>
+    <div class="settings-card-body">
+      <div class="data-tools-grid">
+        <div class="data-tool-card">
+          <div class="data-tool-card-icon"><i class="ti ti-list-details"></i></div>
+          <div class="data-tool-card-title">Export Parts CSV</div>
+          <div class="data-tool-card-desc">${partCount} part${partCount===1?'':'s'} across active sections. Includes section, costs, status, and notes.</div>
+          <button type="button" class="ms-btn" onclick="exportPartsCsv()"><i class="ti ti-download"></i> Download CSV</button>
+        </div>
+        <div class="data-tool-card">
+          <div class="data-tool-card-icon"><i class="ti ti-users-group"></i></div>
+          <div class="data-tool-card-title">Export Sponsors CSV</div>
+          <div class="data-tool-card-desc">${sponsorCount} build partner${sponsorCount===1?'':'s'} with status, value, contact, and notes.</div>
+          <button type="button" class="ms-btn" onclick="exportSponsorsCsv()"><i class="ti ti-download"></i> Download CSV</button>
+        </div>
+        <div class="data-tool-card">
+          <div class="data-tool-card-icon"><i class="ti ti-file-type-pdf"></i></div>
+          <div class="data-tool-card-title">Export Public Build Report PDF</div>
+          <div class="data-tool-card-desc">Opens a printable build summary. Save as PDF from your browser print dialog.</div>
+          <button type="button" class="ms-btn post" onclick="exportPublicBuildReportPdf()"><i class="ti ti-printer"></i> Open report</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="settings-card">
+    <div class="settings-card-hdr">
+      <div class="settings-card-title"><i class="ti ti-upload"></i> Import Parts CSV</div>
+      <div class="settings-card-sub">Add parts from a spreadsheet into one section. Existing parts are never removed or replaced.</div>
+    </div>
+    <div class="settings-card-body">
+      <input id="data-import-file-input" type="file" accept=".csv,text/csv" hidden onchange="onPartsCsvInputChange(event)"/>
+      <div class="data-import-zone" id="data-import-zone" onclick="triggerPartsCsvPicker()" ondragover="partsImportZoneDragOver(event)" ondragleave="partsImportZoneDragLeave(event)" ondrop="partsImportZoneDrop(event)">
+        <div class="data-import-zone-title"><i class="ti ti-file-spreadsheet"></i> Upload CSV</div>
+        <div class="data-import-zone-sub">Click to browse or drag a .csv file here. Use the same columns as Export Parts CSV when possible.</div>
+      </div>
+      <div class="data-import-meta" id="data-import-meta"></div>
+      <div class="data-import-preview-wrap" id="data-import-preview-wrap" hidden></div>
+      <div class="data-import-actions">
+        <div class="settings-field">
+          <label for="data-import-section">Destination section</label>
+          <select class="veh-editor-input" id="data-import-section">${sectionOptions}</select>
+        </div>
+        <button type="button" class="ms-btn" id="data-import-clear-btn" onclick="resetPartsImportDraft()" disabled><i class="ti ti-x"></i> Clear</button>
+        <button type="button" class="ms-btn post" id="data-import-confirm-btn" onclick="confirmPartsCsvImport()" disabled><i class="ti ti-check"></i> Confirm import</button>
+      </div>
+      <div class="admin-coming-soon-note"><i class="ti ti-info-circle" style="margin-right:4px"></i> Imported parts are appended to the selected section, then saved to the cloud. Review the preview before confirming.</div>
+    </div>
+  </section>`;
+  renderPartsImportPreview();
+}
+
 function slugifyBuildId(name,fallback){
   const base=String(name||fallback||'build').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,48);
   return base||'build';
@@ -14328,7 +14748,7 @@ const NAV_LABELS={
   settings:'Settings',
   billing:'Billing',
   users:'Users',
-  export:'Export Data',
+  export:'Data Tools',
   help:'Help'
 };
 
