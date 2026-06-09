@@ -2733,6 +2733,13 @@ button,.tab,.section-hdr,.chip,.chip-opt,.ss-card{touch-action:manipulation;-web
 .settings-coming{
   font-size:12px;color:var(--gs-muted);font-style:italic;
 }
+.settings-photo-wrap{max-width:220px}
+.settings-photo-wrap .image-drop-single .image-drop-preview{
+  border-radius:16px;overflow:hidden;aspect-ratio:1;max-height:180px;
+}
+.settings-photo-wrap .image-drop-single .image-drop-preview img{
+  width:100%;height:100%;object-fit:cover;display:block;
+}
 @media(max-width:700px){
   .settings-row-2,.settings-social-grid{grid-template-columns:1fr}
 }
@@ -2810,8 +2817,132 @@ html[data-theme="light"] .vehicle-create-btn{
   background:rgba(255,255,255,.88)!important;color:var(--gs-cream)!important;
 }
 html[data-theme="light"] .subpanel-placeholder{background:rgba(255,255,255,.65)!important}
-html[data-theme="light"] .tracker-nav-dropdown,
-html[data-theme="light"] .chip-dd{background:#fff!important;border-color:rgba(111,79,18,.2)!important}
+html[data-theme="light"] .tracker-nav{
+  background:linear-gradient(180deg,#faf6ef,#f0ebe2)!important;
+  border-top-color:rgba(111,79,18,.14)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9)!important;
+}
+html[data-theme="light"] .tracker-nav .tab{
+  background:#fff!important;
+  color:#1c1916!important;
+  border-color:rgba(111,79,18,.18)!important;
+  box-shadow:0 2px 8px rgba(111,79,18,.05)!important;
+}
+html[data-theme="light"] .tracker-nav .tab .tab-label,
+html[data-theme="light"] .tracker-nav .tab i{color:#1c1916!important}
+html[data-theme="light"] .tracker-nav .tab:hover{
+  background:#fff!important;
+  border-color:rgba(185,138,39,.42)!important;
+  color:#1c1916!important;
+  box-shadow:0 4px 14px rgba(111,79,18,.1)!important;
+}
+html[data-theme="light"] .tracker-nav .tabs .tab.active{
+  background:linear-gradient(180deg,rgba(197,155,53,.32),rgba(241,209,122,.18))!important;
+  color:#1a1408!important;
+  border-color:rgba(111,79,18,.34)!important;
+  box-shadow:0 4px 14px rgba(185,138,39,.16)!important;
+}
+html[data-theme="light"] .tracker-nav .tab.active .tab-label,
+html[data-theme="light"] .tracker-nav .tab.active i{color:#1a1408!important}
+html[data-theme="light"] .tracker-nav-more{
+  background:#fff!important;
+  color:#1c1916!important;
+  border-color:rgba(111,79,18,.18)!important;
+  box-shadow:0 2px 8px rgba(111,79,18,.05)!important;
+}
+html[data-theme="light"] .tracker-nav-more:hover,
+html[data-theme="light"] .tracker-nav-more-wrap.open .tracker-nav-more,
+html[data-theme="light"] .tracker-nav-more.active{
+  background:linear-gradient(180deg,rgba(197,155,53,.26),#fff)!important;
+  color:#1a1408!important;
+  border-color:rgba(111,79,18,.32)!important;
+  box-shadow:0 4px 14px rgba(185,138,39,.12)!important;
+}
+html[data-theme="light"] .tracker-nav-dropdown{
+  background:#fff!important;
+  border-color:rgba(111,79,18,.18)!important;
+  box-shadow:0 14px 36px rgba(0,0,0,.1)!important;
+}
+html[data-theme="light"] .tracker-nav-dropdown-item{color:#1c1916!important}
+html[data-theme="light"] .tracker-nav-dropdown-item:hover{
+  background:rgba(185,138,39,.12)!important;color:#1a1408!important;
+}
+html[data-theme="light"] .tab:hover{
+  background:linear-gradient(180deg,#fff,#f8f0dc)!important;
+  border-color:rgba(111,79,18,.26)!important;
+  color:#1c1916!important;
+}
+html[data-theme="light"] .ss-card:hover{
+  background:linear-gradient(180deg,#fff,#f6edd6)!important;
+  border-color:rgba(111,79,18,.26)!important;
+}
+html[data-theme="light"] .p-critical{background:#fecaca!important;color:#7f1d1d!important;border:1px solid #ef4444!important}
+html[data-theme="light"] .p-high{background:#fde68a!important;color:#78350f!important;border:1px solid #f59e0b!important}
+html[data-theme="light"] .p-medium{background:#bbf7d0!important;color:#14532d!important;border:1px solid #22c55e!important}
+html[data-theme="light"] .p-low{background:#bfdbfe!important;color:#1e3a8a!important;border:1px solid #3b82f6!important}
+html[data-theme="light"] .prio-dd,
+html[data-theme="light"] .chip-dd{
+  background:#fff!important;
+  border-color:rgba(111,79,18,.2)!important;
+  box-shadow:0 14px 36px rgba(0,0,0,.1)!important;
+}
+html[data-theme="light"] .prio-opt,
+html[data-theme="light"] .chip-opt{color:#1c1916!important}
+html[data-theme="light"] .prio-opt:hover,
+html[data-theme="light"] .chip-opt:hover{background:rgba(185,138,39,.12)!important}
+html[data-theme="light"] .s-need{background:#dc2626!important;color:#fff!important;border-color:#b91c1c!important}
+html[data-theme="light"] .s-ordered{background:#d97706!important;color:#fff!important;border-color:#b45309!important}
+html[data-theme="light"] .s-received{background:#2563eb!important;color:#fff!important;border-color:#1d4ed8!important}
+html[data-theme="light"] .s-installed{background:#16a34a!important;color:#fff!important;border-color:#15803d!important}
+html[data-theme="light"] .s-na{background:#4b5563!important;color:#fff!important;border-color:#374151!important}
+html[data-theme="light"] .worklog-col.wl-col-backlog{
+  background:linear-gradient(180deg,#f4f4f5,#eaeaec)!important;
+  border-color:#a1a1aa!important;
+}
+html[data-theme="light"] .worklog-col.wl-col-backlog .worklog-col-title{color:#3f3f46!important}
+html[data-theme="light"] .worklog-col.wl-col-ready{
+  background:linear-gradient(180deg,#dbeafe,#bfdbfe)!important;
+  border-color:#60a5fa!important;
+}
+html[data-theme="light"] .worklog-col.wl-col-ready .worklog-col-title{color:#1d4ed8!important}
+html[data-theme="light"] .worklog-col.wl-col-progress{
+  background:linear-gradient(180deg,#fef3c7,#fde68a)!important;
+  border-color:#fbbf24!important;
+}
+html[data-theme="light"] .worklog-col.wl-col-progress .worklog-col-title{color:#92400e!important}
+html[data-theme="light"] .worklog-col.wl-col-hold{
+  background:linear-gradient(180deg,#fee2e2,#fecaca)!important;
+  border-color:#f87171!important;
+}
+html[data-theme="light"] .worklog-col.wl-col-hold .worklog-col-title{color:#991b1b!important}
+html[data-theme="light"] .worklog-col.wl-col-done{
+  background:linear-gradient(180deg,#dcfce7,#bbf7d0)!important;
+  border-color:#4ade80!important;
+}
+html[data-theme="light"] .worklog-col.wl-col-done .worklog-col-title{color:#166534!important}
+html[data-theme="light"] .worklog-card{
+  background:#fff!important;
+  border-color:rgba(111,79,18,.18)!important;
+  box-shadow:0 4px 14px rgba(0,0,0,.06)!important;
+}
+html[data-theme="light"] .worklog-card.open{border-color:rgba(111,79,18,.3)!important}
+html[data-theme="light"] .wl-section-badge{
+  background:#f5f0e7!important;color:#5c5348!important;border-color:rgba(111,79,18,.16)!important;
+}
+html[data-theme="light"] .wk-backlog{background:#f4f4f5!important;color:#3f3f46!important;border-color:#d4d4d8!important}
+html[data-theme="light"] .wk-ready{background:#dbeafe!important;color:#1d4ed8!important;border-color:#93c5fd!important}
+html[data-theme="light"] .wk-progress{background:#fef3c7!important;color:#92400e!important;border-color:#fcd34d!important}
+html[data-theme="light"] .wk-hold{background:#fee2e2!important;color:#991b1b!important;border-color:#fca5a5!important}
+html[data-theme="light"] .wk-done{background:#dcfce7!important;color:#166534!important;border-color:#86efac!important}
+html[data-theme="light"] .worklog-col-empty{
+  border-color:rgba(111,79,18,.2)!important;color:#6b6358!important;background:rgba(255,255,255,.5)!important;
+}
+html[data-theme="light"] .wl-title-input{color:#1c1916!important}
+html[data-theme="light"] .wl-title-input::placeholder{color:#9ca3af!important}
+html[data-theme="light"] .stat .val{color:#1c1916!important}
+html[data-theme="light"] .parts-table td,
+html[data-theme="light"] .spon-tbl td,
+html[data-theme="light"] .dec-tbl td{color:#1c1916!important}
 html[data-theme="light"] .parts-table th,
 html[data-theme="light"] .spon-tbl th{background:rgba(240,235,225,.9)!important}
 
@@ -6138,6 +6269,10 @@ body{margin:0}
       <div class="settings-card-body">
         <form class="settings-form" id="settings-profile-form" onsubmit="return false">
           <div class="settings-field">
+            <label>Photo or logo <span class="settings-optional">(optional)</span></label>
+            <div class="settings-photo-wrap" id="profile-photo-host"></div>
+          </div>
+          <div class="settings-field">
             <label for="profile-display-name">Display name</label>
             <input class="settings-input" id="profile-display-name" type="text" maxlength="80" placeholder="Your name or brand" autocomplete="name">
           </div>
@@ -6881,8 +7016,9 @@ function getUserProfileRef(){
 }
 const DEFAULT_BUILDER_PROFILE={
   displayName:'',tagline:'',location:'',email:'',website:'',
-  instagram:'',facebook:'',youtube:'',tiktok:'',showOnPublic:true
+  instagram:'',facebook:'',youtube:'',tiktok:'',photo:'',showOnPublic:true
 };
+const IMAGE_TARGET_PROFILE=280000;
 let builderProfile=Object.assign({},DEFAULT_BUILDER_PROFILE);
 let appPreferences={theme:'dark'};
 function normalizeBuilderProfile(data){
@@ -6897,14 +7033,60 @@ function normalizeBuilderProfile(data){
     facebook:String(data.facebook||'').trim().slice(0,120),
     youtube:String(data.youtube||'').trim().slice(0,120),
     tiktok:String(data.tiktok||'').trim().slice(0,120),
+    photo:(typeof data.photo==='string'&&data.photo.startsWith('data:image'))?data.photo:'',
     showOnPublic:data.showOnPublic!==false
   };
 }
 function publicBuilderProfilePayload(){
   if(!builderProfile||builderProfile.showOnPublic===false)return null;
-  const p=normalizeBuilderProfile(builderProfile);
-  if(!p.displayName&&!p.tagline&&!p.location&&!p.website&&!p.email&&!p.instagram&&!p.facebook&&!p.youtube&&!p.tiktok)return null;
+  const photo=(builderProfile.photo&&String(builderProfile.photo).startsWith('data:image'))?builderProfile.photo:'';
+  const p=Object.assign({},normalizeBuilderProfile(builderProfile),{photo});
+  if(!p.displayName&&!p.tagline&&!p.location&&!p.website&&!p.email&&!p.photo&&!p.instagram&&!p.facebook&&!p.youtube&&!p.tiktok)return null;
   return p;
+}
+function compressProfilePhoto(file){
+  return compressImageFile(file,{
+    maxW:512,maxH:512,targetBytes:IMAGE_TARGET_PROFILE,minW:120,minH:120,
+    startQuality:0.9,minQuality:0.78
+  });
+}
+function renderProfilePhotoDropZone(){
+  const host=document.getElementById('profile-photo-host');
+  if(!host)return;
+  const photo=builderProfile&&builderProfile.photo?builderProfile.photo:'';
+  host.innerHTML=`<input id="profile-photo-input" type="file" accept="image/*" style="display:none" onchange="handleProfilePhotoUpload(event)">${singleImageDropZoneHtml({
+    inputId:'profile-photo-input',
+    imageSrc:photo,
+    btnLabel:photo?'Replace photo':'Add photo or logo',
+    dropHandler:'profilePhotoDrop(event)',
+    removeHandler:photo?'removeProfilePhoto()':'',
+    altText:(builderProfile&&builderProfile.displayName)||'Builder photo'
+  })}`;
+}
+async function handleProfilePhotoFile(file){
+  if(!file||!file.type||!file.type.startsWith('image/'))return;
+  try{
+    setSaveInd('saving','Compressing photo...');
+    builderProfile.photo=await compressProfilePhoto(file);
+    renderProfilePhotoDropZone();
+    setSaveInd('saved','Photo ready — save profile');
+    setTimeout(()=>setSaveInd('idle','Cloud sync on'),1600);
+  }catch(err){
+    console.warn(err);
+    setSaveInd('idle','Photo upload failed');
+    showGarageToast('Could not process photo.');
+  }
+}
+async function handleProfilePhotoUpload(e){
+  const file=e&&e.target&&e.target.files?e.target.files[0]:null;
+  try{await handleProfilePhotoFile(file);}finally{if(e&&e.target)e.target.value='';}
+}
+function profilePhotoDrop(e){
+  singleImageFileDrop(e,(file)=>handleProfilePhotoFile(file));
+}
+function removeProfilePhoto(){
+  builderProfile.photo='';
+  renderProfilePhotoDropZone();
 }
 function applyTheme(theme){
   const t=theme==='light'?'light':'dark';
@@ -6957,6 +7139,7 @@ function syncSettingsProfileForm(){
   set('profile-tiktok',p.tiktok);
   const showEl=document.getElementById('profile-show-public');
   if(showEl)showEl.checked=p.showOnPublic!==false;
+  renderProfilePhotoDropZone();
   const acct=document.getElementById('settings-account-email');
   if(acct){
     acct.innerHTML=currentUser&&currentUser.email
@@ -6978,12 +7161,13 @@ function collectBuilderProfileFromForm(){
     facebook:val('profile-facebook'),
     youtube:val('profile-youtube'),
     tiktok:val('profile-tiktok'),
+    photo:builderProfile.photo||'',
     showOnPublic:!(showEl&&!showEl.checked)
   });
 }
 async function saveBuilderProfile(){
   if(!currentUser){showGarageToast('Sign in to save your profile.');return;}
-  builderProfile=collectBuilderProfileFromForm();
+  builderProfile=Object.assign({},builderProfile,collectBuilderProfileFromForm());
   const ref=getUserProfileRef();
   if(!ref){showGarageToast('Profile storage unavailable.');return;}
   try{
@@ -12321,7 +12505,7 @@ async function bootTracker(){
   if(trackerBooted) return;
   trackerBooted=true;
 
-  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,setAppTheme,saveBuilderProfile,renderSettingsPanel,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,markAllNotificationsRead,markNotificationRead,openNotificationOnBuild,toggleNotifExpand,toggleNotifReplyForm,toggleMilestoneComments,ownerLikeComment,ownerReplyToComment,toggleReplyForm,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
+  Object.assign(window,{showPanel,showMorePanel,pickMobileNav,toggleMoreMenu,closeMoreMenu,toggleMobileNavMenu,closeMobileNavMenu,panelFromRoute,updateRoute,loginWithEmail,logoutUser,sharePublicBuild,setAppTheme,saveBuilderProfile,renderSettingsPanel,handleProfilePhotoUpload,profilePhotoDrop,removeProfilePhoto,switchGarageBuild,requestSwitchGarageBuild,closeGarageSwitchModal,confirmGarageSwitch,openDeleteBuildModal,closeDeleteBuildModal,confirmDeleteActiveBuild,openGarageCreateModal,closeGarageCreateModal,confirmGarageCreateBuild,cancelGarageOp,markAllNotificationsRead,markNotificationRead,openNotificationOnBuild,toggleNotifExpand,toggleNotifReplyForm,toggleMilestoneComments,ownerLikeComment,ownerReplyToComment,toggleReplyForm,toggleSec,toggleChip,pickStatus,updatePart,updateSecBudget,updateTargetBudget,updateTruckCost,updateBuildName,syncBuildMetaUI,fmtMoneyInput,parseMoneyInput,handleVehicleImageUpload,removeVehicleImage,openVehicleEditorModal,closeVehicleEditorModal,handleVehicleEditorImageUpload,handleVehicleEditorImageFile,vehEditorImageDrop,clearVehicleEditorImage,saveVehicleEditor,renderVehiclePanel,addMilestone,updateMilestone,deleteMilestone,postMilestone,editMilestone,openMilestoneLightbox,closeMilestoneLightbox,handleMilestonePhotos,handleMilestonePhotoFiles,milestonePhotoDragOver,milestonePhotoDragLeave,milestonePhotoDrop,triggerPhotoInput,photoDropZoneClick,imageDropDragOver,imageDropDragLeave,singleImageFileDrop,removeMilestonePhoto,addPart,delPart,clearLink,updSpon,addSponsor,delSpon,renderSponsors,toggleSponsorRow,openSponsorRow,handleSponsorLogoUpload,handleSponsorLogoFile,sponsorLogoDrop,removeSponsorLogo,toggleSponsorPublicVisible,updDec,addDecision,delDec,updResearch,addResearch,delResearch,renderResearch,setResearchFilters,toggleResearchRow,openResearchRow,addResearchLink,updResearchLink,delResearchLink,handleResearchPhotos,handleResearchPhotoFiles,researchPhotoDragOver,researchPhotoDragLeave,researchPhotoDrop,removeResearchPhoto,openResearchDecidedModal,openResearchToPartModal,closeResearchDecidedModal,researchDecidedPromptAdd,confirmResearchToPart,addWorkTask,finalizeWorkTask,cancelWorkTaskDraft,updateWorkTask,setWorkTaskStatus,setWorkTaskPriority,toggleWorkTaskPriorityDd,pickWorkTaskPriority,toggleWorkTask,openWorkPartsModal,closeWorkPartsModal,toggleWorkPartLink,setWorkPartsPickerFilter,addWorkHour,removeWorkHour,deleteWorkTask,setWorkLogFilters,renderWorkLog,build,initData});
   document.addEventListener('click',e=>{
     if(!e.target.closest('.tracker-nav-more-wrap'))closeMoreMenu();
     if(!e.target.closest('.tracker-nav-mobile-wrap'))closeMobileNavMenu();
