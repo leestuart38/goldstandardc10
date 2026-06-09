@@ -112,10 +112,11 @@ body{font-family:var(--font-sans)}
 .dot-received{background:#1D4ED8}
 .dot-installed{background:#15803D}
 .dot-na{background:#111827}
-.del-btn{font-size:13px;color:var(--color-text-secondary);cursor:pointer;padding:2px 5px;border:none;background:none;border-radius:3px}
+.del-btn{font-size:13px;color:var(--color-text-secondary);cursor:pointer;padding:2px 5px;border:none;background:none;border-radius:3px;line-height:1}
 .del-btn:hover{color:#DC2626}
-.part-actions-cell{display:flex;gap:2px;align-items:center;white-space:nowrap}
-.move-btn{font-size:13px;color:var(--color-text-secondary);cursor:pointer;padding:2px 5px;border:none;background:none;border-radius:3px}
+.part-actions-head,.part-actions-cell{width:56px;min-width:56px;white-space:nowrap;vertical-align:middle;text-align:center}
+.part-actions-wrap{display:inline-flex;gap:2px;align-items:center;vertical-align:middle}
+.move-btn{font-size:13px;color:var(--color-text-secondary);cursor:pointer;padding:2px 5px;border:none;background:none;border-radius:3px;line-height:1;vertical-align:middle}
 .move-btn:hover{color:var(--gs-gold-light)}
 .part-move-summary{
   font-size:12px;line-height:1.5;color:var(--gs-muted);margin:0 0 14px;
@@ -12699,7 +12700,7 @@ function buildSection(sec){
           <thead><tr>
             <th style="min-width:160px">Part</th><th>Priority</th><th style="min-width:90px">Vendor</th>
             <th>Budget</th><th>Actual</th><th>Sponsored</th><th>Net</th>
-            <th>Status</th><th>Link</th><th style="min-width:110px">Notes</th><th></th>
+            <th>Status</th><th>Link</th><th style="min-width:110px">Notes</th><th class="part-actions-head"></th>
           </tr></thead>
           <tbody id="tb-${sec.key}"></tbody>
         </table>
@@ -12730,10 +12731,10 @@ function renderRows(sec){
       <td>${buildChip(sec.key,p.id,p.status)}</td>
       <td>${linkCell}</td>
       <td><input class="note-inp" value="${esc(p.notes||'')}" placeholder="Notes..." onchange="updatePart('${sec.key}','${p.id}','notes',this.value)"/></td>
-      <td class="part-actions-cell">
+      <td class="part-actions-cell"><div class="part-actions-wrap">
         <button class="move-btn" type="button" onclick="openMovePartModal('${sec.key}','${p.id}',event)" title="Move to another section"><i class="ti ti-arrows-right-left" aria-hidden="true"></i></button>
         <button class="del-btn" type="button" onclick="delPart('${sec.key}','${p.id}')" title="Delete part"><i class="ti ti-trash" aria-hidden="true"></i></button>
-      </td>`;
+      </div></td>`;
     tb.appendChild(tr);
   });
   if(!visibleParts.length){
