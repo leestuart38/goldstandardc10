@@ -2061,11 +2061,33 @@ function render(data){
 }
 
 function showError(msg){document.getElementById('updated-at').textContent=msg}
+async function probePublicMilestoneShardCount(slug,maxProbe){
+  if(!db||!slug)return 0;
+  const mediaIds=publicMediaDocIds(slug);
+  const col=db.collection(PUBLIC_COLLECTION);
+  const limit=maxProbe==null?48:maxProbe;
+  let count=0;
+  for(let i=0;i<limit;i++){
+    try{
+      const snap=await col.doc(mediaIds.msPrefix+i).get();
+      if(snap.exists)count=i+1;
+      else if(i>0)break;
+    }catch(e){break;}
+  }
+  return count;
+}
 async function mergePublicMedia(data,slug){
   if(!data||!db||!slug)return data||{};
   const mediaIds=publicMediaDocIds(slug);
-  const shardCount=Number(data.mediaMsShardCount)||0;
+  let shardCount=Number(data.mediaMsShardCount)||0;
   const hasInlinePhotos=Array.isArray(data.milestones)&&data.milestones.some(m=>Array.isArray(m.photos)&&m.photos.length);
+  if(!shardCount&&!hasInlinePhotos){
+    const probed=await probePublicMilestoneShardCount(slug,48);
+    if(probed>0){
+      shardCount=probed;
+      data.mediaMsShardCount=probed;
+    }
+  }
   if(!shardCount&&(data.vehicleImage||hasInlinePhotos))return data;
   try{
     const vSnap=await db.collection(PUBLIC_COLLECTION).doc(mediaIds.vehicle).get();

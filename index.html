@@ -8775,12 +8775,43 @@ function bindActiveBuildRefs(buildId,publicSlug){
   mediaDocRef=null;
   FIRESTORE_MEDIA_LEGACY_DOC='';
   FIRESTORE_MEDIA_VEHICLE_DOC=buildId+'-vehicle';
-  cachedMediaMsShardCount=0;
-  cachedPublicMediaMsShardCount=0;
   cachedPrivateVehicleFingerprint='';
   cachedPublicVehicleFingerprint='';
   cachedPrivateMediaPlanFingerprint='';
   cachedPublicMediaPlanFingerprint='';
+}
+async function syncMediaShardCachesFromBuildData(data){
+  const storedPrivate=Number(data&&data.meta&&data.meta.mediaMsShardCount)||0;
+  cachedMediaMsShardCount=storedPrivate;
+  if(!cachedMediaMsShardCount&&privateMediaMsPrefix){
+    const mediaCol=getUserMediaCol();
+    if(mediaCol){
+      const probed=await probeMilestoneShardCount(mediaCol,privateMediaMsPrefix,48);
+      if(probed>0){
+        cachedMediaMsShardCount=probed;
+        if(firestoreDocRef&&!storedPrivate){
+          firestoreDocRef.set({meta:{mediaMsShardCount:probed}},{merge:true}).catch(e=>console.warn('Shard meta repair failed:',e));
+        }
+      }
+    }
+  }
+  if(!publicDocRef)return;
+  try{
+    const snap=await withTimeout(publicDocRef.get(),4000,'Public shard meta');
+    const storedPublic=snap.exists?Number(snap.data().mediaMsShardCount)||0:0;
+    cachedPublicMediaMsShardCount=storedPublic;
+    if(!cachedPublicMediaMsShardCount&&publicMediaMsPrefix){
+      const probed=await probeMilestoneShardCount(firebaseDb.collection(PUBLIC_COLLECTION),publicMediaMsPrefix,48);
+      if(probed>0){
+        cachedPublicMediaMsShardCount=probed;
+        if(!storedPublic){
+          publicDocRef.set({mediaMsShardCount:probed},{merge:true}).catch(e=>console.warn('Public shard meta repair failed:',e));
+        }
+      }
+    }
+  }catch(e){
+    console.warn('Public shard meta load failed:',e);
+  }
 }
 function buildMetaFromDoc(data){
   if(!data)return null;
@@ -9127,16 +9158,15 @@ async function hydrateBuildMedia(state,fastLoad){
   if(activeBuildId&&vehicleImage)garageBuildThumbs[activeBuildId]=vehicleImage;
   const list=document.querySelector('.garage-page-list');
   if(list)list.innerHTML=renderGarageBuildListHtml();
-  loadPrivateMedia(state,fastLoad,{milestonesOnly:true}).then(()=>{
-    if(Array.isArray(state.milestones))milestones=state.milestones;
-    saveLocalStateNow();
-    cachedQuickMediaFingerprint=quickMediaFingerprint({
-      vehicleImage,vehicleImageOriginal,
-      milestones:milestones.map(m=>({id:m.id,photos:m.photos||[]}))
-    });
-    renderMilestones();
-    if(list)list.innerHTML=renderGarageBuildListHtml();
-  }).catch(e=>console.warn('Milestone media hydrate failed:',e));
+  await loadPrivateMedia(state,fastLoad,{milestonesOnly:true});
+  if(Array.isArray(state.milestones))milestones=state.milestones;
+  saveLocalStateNow();
+  cachedQuickMediaFingerprint=quickMediaFingerprint({
+    vehicleImage,vehicleImageOriginal,
+    milestones:milestones.map(m=>({id:m.id,photos:m.photos||[]}))
+  });
+  renderMilestones();
+  if(list)list.innerHTML=renderGarageBuildListHtml();
 }
 function tryInstantLocalBoot(buildId){
   if(!accountStorageUid()||!buildId)return false;
@@ -9330,6 +9360,7 @@ async function loadBuildById(buildId,options){
   throwIfGarageOpCancelled();
   const slug=data.publicSlug||data.meta?.publicSlug||buildId;
   bindActiveBuildRefs(buildId,slug);
+  await syncMediaShardCachesFromBuildData(data);
   resetBuildSessionState();
   const mediaState=Object.assign({},data);
   if(!deferMedia){
@@ -9367,6 +9398,7 @@ async function loadBuildById(buildId,options){
     const hydrateGen=++garageThumbGen;
     hydrateBuildMedia(mediaState,fastLoad).then(()=>{
       if(hydrateGen!==garageThumbGen)return;
+      renderMilestones();
     }).catch(e=>console.warn('Deferred media hydrate failed:',e));
   }
 }
@@ -9937,27 +9969,36 @@ async function loadPrivateMedia(state,fastLoad,mediaOpts){
   const mediaCol=getUserMediaCol();
   const msCollection=mediaCol||LEGACY_TRACKER_COLLECTION;
   const msPrefix=privateMediaMsPrefix||FIRESTORE_MEDIA_MS_PREFIX;
+  let effectiveCount=shardCount;
+  if(!effectiveCount){
+    const probed=await probeMilestoneShardCount(resolveMediaCollection(msCollection),msPrefix,48);
+    if(probed>0){
+      effectiveCount=probed;
+      state.meta=Object.assign({},state.meta||{},{mediaMsShardCount:probed});
+      cachedMediaMsShardCount=probed;
+    }
+  }
   if(fastLoad){
-    if(shardCount>0){
-      const photoMap=await loadMilestonePhotoShards(msCollection,msPrefix,shardCount);
+    if(effectiveCount>0){
+      const photoMap=await loadMilestonePhotoShards(msCollection,msPrefix,effectiveCount);
       if(photoMap.size){
         applyMilestonePhotoMap(state,photoMap);
         loaded=true;
       }
-      cachedMediaMsShardCount=shardCount;
+      cachedMediaMsShardCount=effectiveCount;
     }
   }else{
     const userProbed=await probeMilestoneShards(msCollection,msPrefix,state,true);
     if(userProbed>0){
       loaded=true;
       cachedMediaMsShardCount=Number(state.meta&&state.meta.mediaMsShardCount)||userProbed;
-    }else if(shardCount>0){
-      const photoMap=await loadMilestonePhotoShards(msCollection,msPrefix,shardCount);
+    }else if(effectiveCount>0){
+      const photoMap=await loadMilestonePhotoShards(msCollection,msPrefix,effectiveCount);
       if(photoMap.size){
         applyMilestonePhotoMap(state,photoMap);
         loaded=true;
       }
-      cachedMediaMsShardCount=shardCount;
+      cachedMediaMsShardCount=effectiveCount;
     }
   }
   if(!fastLoad&&activeBuildId===LEGACY_BUILD_ID){
@@ -10295,18 +10336,23 @@ async function savePublicState(){
     throw new Error('Public slug "'+slug+'" is already in use by another account.');
   }
   const {core,media}=splitPublicPayload(publicPayload());
+  const cloudMedia=await prepareMediaForCloudSave(media);
+  const plan=planMediaWrites(cloudMedia);
   const corePayload=sanitizeForFirestore(core);
-  corePayload.mediaMsShardCount=0;
+  corePayload.mediaMsShardCount=plan.shardPayloads.length;
   corePayload.ownerUid=currentUser?currentUser.uid:'';
   corePayload.savedAt=firebase.firestore.FieldValue.serverTimestamp();
   const coreBytes=estimatePayloadBytes(corePayload);
   if(coreBytes>CLOUD_DOC_BYTE_LIMIT)throw new Error('Public build data is too large ('+coreBytes+' bytes).');
   await publicDocRef.set(corePayload);
-  const mediaMsShardCount=await savePublicMedia(media);
-  corePayload.mediaMsShardCount=mediaMsShardCount;
-  if(mediaMsShardCount)await publicDocRef.set({mediaMsShardCount:mediaMsShardCount},{merge:true});
-  cachedPublicMediaMsShardCount=mediaMsShardCount;
-  console.log('Published public build data','shards='+mediaMsShardCount);
+  const pubMsPrefix=publicMediaMsPrefix||PUBLIC_MEDIA_MS_PREFIX;
+  await Promise.all([
+    writeVehicleMediaDoc(publicMediaVehicleDocRef,plan.vehiclePayload,'public'),
+    writeMediaShards(PUBLIC_COLLECTION,pubMsPrefix,plan.shardPayloads,cachedPublicMediaMsShardCount)
+  ]);
+  cachedPublicMediaMsShardCount=plan.shardPayloads.length;
+  cachedPublicMediaPlanFingerprint=mediaPlanFingerprint(plan);
+  console.log('Published public build data','shards='+plan.shardPayloads.length);
   return true;
 }
 
@@ -10370,8 +10416,8 @@ async function saveCloudState(options){
     privateMediaFp=mediaPlanFingerprint(privatePlan);
     corePayload.meta=Object.assign({},corePayload.meta||{},{mediaMsShardCount:privatePlan.shardPayloads.length});
   }else{
-    corePayload.meta=Object.assign({},corePayload.meta||{},{mediaMsShardCount:refs.cachedMediaMsShardCount||0});
     privateMediaFp=refs.cachedPrivateMediaPlanFingerprint;
+    if(corePayload.meta)delete corePayload.meta.mediaMsShardCount;
   }
   const pubPayload=publicPayloadFromState(full);
   const {core:pubCore,media:pubMedia}=splitPublicPayload(pubPayload);
@@ -10384,8 +10430,8 @@ async function saveCloudState(options){
     publicMediaFp=mediaPlanFingerprint(publicPlan);
     pubCorePayload.mediaMsShardCount=publicPlan.shardPayloads.length;
   }else{
-    pubCorePayload.mediaMsShardCount=refs.cachedPublicMediaMsShardCount||0;
     publicMediaFp=refs.cachedPublicMediaPlanFingerprint;
+    delete pubCorePayload.mediaMsShardCount;
   }
   const pubCoreBytes=estimatePayloadBytes(pubCorePayload);
   if(pubCoreBytes>CLOUD_DOC_BYTE_LIMIT)throw new Error('Public build data is too large ('+pubCoreBytes+' bytes).');
@@ -10406,13 +10452,16 @@ async function saveCloudState(options){
     );
   }
   await Promise.all(privateOps);
-  await refs.publicDocRef.set(pubCorePayload);
   if(publicMediaChanged&&publicPlan){
+    const pubWrite=Object.assign({},pubCorePayload,{mediaMsShardCount:publicPlan.shardPayloads.length});
+    await refs.publicDocRef.set(pubWrite);
     const pubMsPrefix=refs.publicMediaMsPrefix||PUBLIC_MEDIA_MS_PREFIX;
     await Promise.all([
       writeVehicleMediaDoc(refs.publicMediaVehicleDocRef,publicPlan.vehiclePayload,'public'),
       writeMediaShards(PUBLIC_COLLECTION,pubMsPrefix,publicPlan.shardPayloads,refs.cachedPublicMediaMsShardCount)
     ]);
+  }else{
+    await refs.publicDocRef.set(pubCorePayload,{merge:true});
   }
   if(!opts.refs){
     if(privateMediaChanged&&privatePlan){
